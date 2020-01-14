@@ -27,13 +27,15 @@ import io.grpc.examples.helloworld.HelloWorldProto
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
 
 @RunWith(JUnit4::class)
 class CoroutineServerImplGeneratorTest {
   private val serviceDescriptor =
     HelloWorldProto.getDescriptor().findServiceByName("Greeter")
-  private val config = GeneratorConfig(JavaPackagePolicy.GOOGLE_INTERNAL, false)
+  private val config = GeneratorConfig(JavaPackagePolicy.OPEN_SOURCE, false)
   private val generator = GrpcCoroutineServerGenerator(config)
   private val unarySayHelloDescriptor: MethodDescriptor =
     serviceDescriptor.findMethodByName("SayHello")
@@ -59,9 +61,7 @@ class CoroutineServerImplGeneratorTest {
        *
        * @param request The request from the client.
        */
-      open suspend fun sayHello(request: io.grpc.examples.helloworld.HelloRequest): io.grpc.examples.helloworld.HelloReply {
-        throw io.grpc.StatusException(io.grpc.Status.UNIMPLEMENTED.withDescription("Method helloworld.Greeter.SayHello is unimplemented"))
-      }
+      open suspend fun sayHello(request: io.grpc.examples.helloworld.HelloRequest): io.grpc.examples.helloworld.HelloReply = throw io.grpc.StatusException(io.grpc.Status.UNIMPLEMENTED.withDescription("Method helloworld.Greeter.SayHello is unimplemented"))
     """.trimIndent())
     assertThat(stub.serverMethodDef.toString()).isEqualTo("""
       io.grpc.kotlin.ServerCalls.unaryServerMethodDefinition(
@@ -88,9 +88,7 @@ class CoroutineServerImplGeneratorTest {
        *        collected only once and throws [java.lang.IllegalStateException] on attempts to collect
        *        it more than once.
        */
-      open suspend fun clientStreamSayHello(requests: kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloRequest>): io.grpc.examples.helloworld.HelloReply {
-        throw io.grpc.StatusException(io.grpc.Status.UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ClientStreamSayHello is unimplemented"))
-      }
+      open suspend fun clientStreamSayHello(requests: kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloRequest>): io.grpc.examples.helloworld.HelloReply = throw io.grpc.StatusException(io.grpc.Status.UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ClientStreamSayHello is unimplemented"))
     """.trimIndent())
     assertThat(stub.serverMethodDef.toString()).isEqualTo("""
       io.grpc.kotlin.ServerCalls.clientStreamingServerMethodDefinition(
@@ -116,9 +114,7 @@ class CoroutineServerImplGeneratorTest {
        *
        * @param request The request from the client.
        */
-      open fun serverStreamSayHello(request: io.grpc.examples.helloworld.MultiHelloRequest): kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloReply> {
-        throw io.grpc.StatusException(io.grpc.Status.UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ServerStreamSayHello is unimplemented"))
-      }
+      open fun serverStreamSayHello(request: io.grpc.examples.helloworld.MultiHelloRequest): kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloReply> = throw io.grpc.StatusException(io.grpc.Status.UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ServerStreamSayHello is unimplemented"))
     """.trimIndent())
     assertThat(stub.serverMethodDef.toString()).isEqualTo("""
       io.grpc.kotlin.ServerCalls.serverStreamingServerMethodDefinition(
@@ -146,9 +142,7 @@ class CoroutineServerImplGeneratorTest {
        *        collected only once and throws [java.lang.IllegalStateException] on attempts to collect
        *        it more than once.
        */
-      open fun bidiStreamSayHello(requests: kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloRequest>): kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloReply> {
-        throw io.grpc.StatusException(io.grpc.Status.UNIMPLEMENTED.withDescription("Method helloworld.Greeter.BidiStreamSayHello is unimplemented"))
-      }
+      open fun bidiStreamSayHello(requests: kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloRequest>): kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloReply> = throw io.grpc.StatusException(io.grpc.Status.UNIMPLEMENTED.withDescription("Method helloworld.Greeter.BidiStreamSayHello is unimplemented"))
     """.trimIndent())
     assertThat(stub.serverMethodDef.toString()).isEqualTo("""
       io.grpc.kotlin.ServerCalls.bidiStreamingServerMethodDefinition(
@@ -162,11 +156,15 @@ class CoroutineServerImplGeneratorTest {
   @Test
   fun fullImpl() {
     val type = generator.generate(serviceDescriptor)
+    val expectedFileContents = Files.readAllLines(
+      Paths.get(
+        "src/test/java/io/grpc/kotlin/generator",
+        "GreeterCoroutineImplBase.expected"
+      ),
+      StandardCharsets.UTF_8
+    )
     assertThat(type).generatesEnclosed(
-      Resources.toString(
-        Resources.getResource("io/grpc/kotlin/generator/GreeterCoroutineImplBase.expected"),
-        Charsets.UTF_8
-      )
+      expectedFileContents.joinToString("\n") + "\n"
     )
   }
 }

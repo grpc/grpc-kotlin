@@ -26,12 +26,15 @@ import io.grpc.examples.helloworld.HelloWorldProto
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
 
 @RunWith(JUnit4::class)
 class GrpcClientStubGeneratorTest {
   companion object {
     private val generator =
-      GrpcClientStubGenerator(GeneratorConfig(JavaPackagePolicy.GOOGLE_INTERNAL, false))
+      GrpcClientStubGenerator(GeneratorConfig(JavaPackagePolicy.OPEN_SOURCE, false))
     private val greeterServiceDescriptor: ServiceDescriptor =
       HelloWorldProto.getDescriptor().findServiceByName("Greeter")
     private val unaryMethodDescriptor: MethodDescriptor =
@@ -100,11 +103,16 @@ class GrpcClientStubGeneratorTest {
 
   @Test
   fun generateServiceStub() {
+    val expectedFileContents = Files.readAllLines(
+      Paths.get(
+        "src/test/java/io/grpc/kotlin/generator",
+        "GreeterCoroutineStub.expected"
+      ),
+      StandardCharsets.UTF_8
+    )
+
     assertThat(generator.generate(greeterServiceDescriptor)).generatesEnclosed(
-      Resources.toString(
-        Resources.getResource("io/grpc/kotlin/generator/GreeterCoroutineStub.expected"),
-        Charsets.UTF_8
-      )
+      expectedFileContents.joinToString("\n") + "\n"
     )
   }
 }

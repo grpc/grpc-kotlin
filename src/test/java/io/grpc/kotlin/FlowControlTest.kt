@@ -17,8 +17,6 @@
 package io.grpc.kotlin
 
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.testsize.MediumTest
-import com.google.testing.testsize.MediumTestAttribute
 import io.grpc.examples.helloworld.HelloRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,7 +39,6 @@ import org.junit.runners.JUnit4
 
 /** Tests for the flow control of the Kotlin gRPC APIs. */
 @RunWith(JUnit4::class)
-@MediumTest(MediumTestAttribute.THREADS)
 class FlowControlTest : AbstractCallsTest() {
   private fun <T> Flow<T>.produceUnbuffered(scope: CoroutineScope): ReceiveChannel<T> {
     return scope.produce<T> {

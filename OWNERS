@@ -1,5 +1,6 @@
-lowasser
-jbolinger
-kmb
-file://depot/google3/third_party/java/grpc/OWNERS
+# Top level ownership
+@lowasser **/OWNERS
+@jbolinger **/OWNERS
+@kevin1e100 **/OWNERS
+@bshaffer **/OWNERS
 

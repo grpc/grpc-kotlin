@@ -17,8 +17,6 @@
 package io.grpc.kotlin
 
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.testsize.MediumTest
-import com.google.testing.testsize.MediumTestAttribute
 import io.grpc.ServerServiceDefinition
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -34,7 +32,6 @@ import org.junit.runners.JUnit4
 import kotlin.coroutines.CoroutineContext
 
 @RunWith(JUnit4::class)
-@MediumTest(MediumTestAttribute.THREADS)
 class AbstractCoroutineServerImplTest {
   @get:Rule
   val timeout = CoroutinesTimeout.seconds(10)

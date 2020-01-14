@@ -18,8 +18,6 @@ package io.grpc.kotlin
 
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
-import com.google.testing.testsize.MediumTest
-import com.google.testing.testsize.MediumTestAttribute
 import io.grpc.Status
 import io.grpc.StatusException
 import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineImplBase
@@ -54,7 +52,6 @@ import org.junit.runners.JUnit4
 import java.util.concurrent.TimeUnit
 
 @RunWith(JUnit4::class)
-@MediumTest(MediumTestAttribute.THREADS)
 class GeneratedCodeTest : AbstractCallsTest() {
   @Test
   fun simpleUnary() {

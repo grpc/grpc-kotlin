@@ -19,8 +19,6 @@ package io.grpc.kotlin
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
-import com.google.testing.testsize.MediumTest
-import com.google.testing.testsize.MediumTestAttribute
 import io.grpc.CallOptions
 import io.grpc.Context
 import io.grpc.Status
@@ -54,8 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 /** Tests for [ClientCalls]. */
 @RunWith(JUnit4::class)
-@MediumTest(MediumTestAttribute.THREADS)
-class ClientCallsTest : AbstractCallsTest() {
+class ClientCallsTest: AbstractCallsTest() {
 
   /**
    * Verifies that a simple unary RPC successfully returns results to a suspend function.

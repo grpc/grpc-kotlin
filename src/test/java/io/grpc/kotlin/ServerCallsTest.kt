@@ -18,8 +18,6 @@ package io.grpc.kotlin
 
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
-import com.google.testing.testsize.MediumTest
-import com.google.testing.testsize.MediumTestAttribute
 import io.grpc.CallOptions
 import io.grpc.ClientCall
 import io.grpc.Context
@@ -67,7 +65,6 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 @RunWith(JUnit4::class)
-@MediumTest(MediumTestAttribute.THREADS)
 class ServerCallsTest : AbstractCallsTest() {
   @Test
   fun simpleUnaryMethod() = runBlocking {

@@ -27,7 +27,7 @@ object GeneratorRunner: AbstractGeneratorRunner() {
   @JvmStatic
   fun main(args: Array<String>) = super.doMain(args)
 
-  private val config = GeneratorConfig(JavaPackagePolicy.GOOGLE_INTERNAL, false)
+  private val config = GeneratorConfig(JavaPackagePolicy.OPEN_SOURCE, false)
 
   val generator = ProtoFileCodeGenerator(
     generators = listOf(::GrpcClientStubGenerator, ::GrpcCoroutineServerGenerator),

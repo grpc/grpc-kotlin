@@ -22,13 +22,15 @@ import com.google.common.jimfs.Jimfs
 import com.google.common.truth.Truth.assertThat
 import com.google.protobuf.ByteString
 import com.google.protobuf.DescriptorProtos.FileDescriptorSet
-import com.google.protos.proto2.compiler.Plugin.CodeGeneratorRequest
-import com.google.protos.proto2.compiler.Plugin.CodeGeneratorResponse
+import com.google.protobuf.compiler.PluginProtos.CodeGeneratorRequest
+import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse
 import io.grpc.examples.helloworld.HelloWorldProto
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.nio.file.Paths
 
 @RunWith(JUnit4::class)
 class GeneratorRunnerTest {
@@ -61,17 +63,20 @@ class GeneratorRunnerTest {
       fileSystem
     )
 
+    val expectedFileContents = Files.readAllLines(
+      Paths.get(
+        "src/test/java/io/grpc/kotlin/generator",
+        "HelloWorldProtoGrpcKt.expected"
+      ),
+      StandardCharsets.UTF_8
+    )
+
     val outputFile =
       fileSystem
         .getPath(OUTPUT_DIR_NAME, "io/grpc/examples/helloworld")
         .resolve("HelloWorldProtoGrpcKt.kt")
     assertThat(MoreFiles.asCharSource(outputFile, Charsets.UTF_8).read().removeTrailingWhitespace())
-      .isEqualTo(
-        Resources.toString(
-          Resources.getResource("io/grpc/kotlin/generator/HelloWorldProtoGrpcKt.expected"),
-          Charsets.UTF_8
-        )
-      )
+      .isEqualTo(expectedFileContents.joinToString("\n") + "\n")
   }
 
   @Test
@@ -86,15 +91,16 @@ class GeneratorRunnerTest {
         .newInput(),
       output
     )
-
-    val expectedFileContents =
-      Resources.toString(
-        Resources.getResource("io/grpc/kotlin/generator/HelloWorldProtoGrpcKt.expected"),
-        Charsets.UTF_8
-      )
+    val expectedFileContents = Files.readAllLines(
+      Paths.get(
+        "src/test/java/io/grpc/kotlin/generator",
+        "HelloWorldProtoGrpcKt.expected"
+      ),
+      StandardCharsets.UTF_8
+    )
 
     val result = CodeGeneratorResponse.parseFrom(output.toByteString())
     assertThat(result.fileList.single().content.removeTrailingWhitespace())
-      .isEqualTo(expectedFileContents)
+      .isEqualTo(expectedFileContents.joinToString("\n") + "\n")
   }
 }
