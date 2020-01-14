@@ -1,0 +1,168 @@
+import io.grpc.ServerServiceDefinition
+import io.grpc.ServerServiceDefinition.builder
+import io.grpc.Status
+import io.grpc.Status.UNIMPLEMENTED
+import io.grpc.StatusException
+import io.grpc.examples.helloworld.GreeterGrpc
+import io.grpc.examples.helloworld.GreeterGrpc.getServiceDescriptor
+import io.grpc.examples.helloworld.HelloReply
+import io.grpc.examples.helloworld.HelloRequest
+import io.grpc.examples.helloworld.MultiHelloRequest
+import io.grpc.kotlin.AbstractCoroutineServerImpl
+import io.grpc.kotlin.ServerCalls.bidiStreamingServerMethodDefinition
+import io.grpc.kotlin.ServerCalls.clientStreamingServerMethodDefinition
+import io.grpc.kotlin.ServerCalls.serverStreamingServerMethodDefinition
+import io.grpc.kotlin.ServerCalls.unaryServerMethodDefinition
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.SendChannel
+
+/**
+ * Skeletal implementation of the helloworld.Greeter service based on Kotlin coroutines.
+ */
+abstract class GreeterCoroutineImplBase(coroutineContext: CoroutineContext = EmptyCoroutineContext)
+    : AbstractCoroutineServerImpl(coroutineContext) {
+  /**
+   * Implements helloworld.Greeter.SayHello as a coroutine.
+   *
+   * When gRPC receives a helloworld.Greeter.SayHello RPC, gRPC will invoke this method within the
+   * [CoroutineContext] used to create this `GreeterCoroutineImplBase`.
+   *
+   * If this method returns a response successfully, gRPC will send the response to the client
+   *  and close the RPC with [Status.OK].
+   *
+   * If this method throws an exception, the server will not send any responses and close the
+   * RPC with a [Status] [inferred][io.grpc.Status.fromThrowable] from the thrown exception.  Other
+   * RPCs will not be affected.
+   *
+   * @param request The request sent by the client.
+   *
+   * @return The response to send to the client.
+   */
+  open suspend fun sayHello(request: HelloRequest): HelloReply {
+    throw
+        StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.SayHello is unimplemented"))
+  }
+
+  /**
+   * Implements helloworld.Greeter.ClientStreamSayHello as a coroutine.
+   *
+   * When gRPC receives a helloworld.Greeter.ClientStreamSayHello RPC, gRPC will invoke this method
+   * within the
+   * [CoroutineContext] used to create this `GreeterCoroutineImplBase`.
+   *
+   * If this method returns a response successfully, gRPC will send the response to the client
+   *  and close the RPC with [Status.OK].
+   *
+   * If this method throws an exception, the server will not send any responses and close the
+   * RPC with a [Status] [inferred][io.grpc.Status.fromThrowable] from the thrown exception.  Other
+   * RPCs will not be affected.
+   *
+   * @param requests A [ReceiveChannel] where client requests can be read.
+   *       [Cancelling][ReceiveChannel.cancel] this channel can be used to indicate that
+   *       further client requests should be discarded.
+   *
+   * @return The response to send to the client.
+   */
+  open suspend fun clientStreamSayHello(requests: ReceiveChannel<HelloRequest>): HelloReply {
+    throw
+        StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ClientStreamSayHello is unimplemented"))
+  }
+
+  /**
+   * Implements helloworld.Greeter.ServerStreamSayHello as a coroutine.
+   *
+   * When gRPC receives a helloworld.Greeter.ServerStreamSayHello RPC, gRPC will invoke this method
+   * within the
+   * [CoroutineContext] used to create this `GreeterCoroutineImplBase`.
+   *
+   * If this method completes without throwing an exception, gRPC will close the
+   * `responses` channel (if it is not already closed), finish sending any messages
+   * remaining in it, and close the RPC with [Status.OK].  Note that if other coroutines
+   * are still writing to `responses`, they may get a
+   * [kotlinx.coroutines.channels.ClosedSendChannelException].  Make
+   * sure all responses are sent before this method completes, e.g. by wrapping your
+   * implementation in [kotlinx.coroutines.coroutineScope] or explicitly
+   * [joining][kotlinx.coroutines.Job.join] the jobs
+   * that are sending responses.
+   *
+   * If this method throws an exception, the server will abort sending responses and close the
+   * RPC with a [Status] [inferred][io.grpc.Status.fromThrowable] from the thrown exception. Other
+   * RPCs will not be affected.
+   *
+   * @param request The request sent by the client.
+   *
+   * @param responses A [SendChannel] to send responses to.  Explicitly closing this
+   * channel when the RPC is done is optional.  If this channel is closed with a nonnull cause,
+   * the RPC will be closed with a [Status] [inferred][Status.fromException] from that
+   * cause.  [Sending][kotlinx.coroutines.channels.SendChannel.send] to this channel may suspend if
+   * additional responses
+   * cannot be sent without excess buffering; see [io.grpc.ServerCall.Listener.onReady] for details.
+   */
+  open suspend fun serverStreamSayHello(request: MultiHelloRequest,
+      responses: SendChannel<HelloReply>) {
+    throw
+        StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ServerStreamSayHello is unimplemented"))
+  }
+
+  /**
+   * Implements helloworld.Greeter.BidiStreamSayHello as a coroutine.
+   *
+   * When gRPC receives a helloworld.Greeter.BidiStreamSayHello RPC, gRPC will invoke this method
+   * within the
+   * [CoroutineContext] used to create this `GreeterCoroutineImplBase`.
+   *
+   * If this method completes without throwing an exception, gRPC will close the
+   * `responses` channel (if it is not already closed), finish sending any messages
+   * remaining in it, and close the RPC with [Status.OK].  Note that if other coroutines
+   * are still writing to `responses`, they may get a
+   * [kotlinx.coroutines.channels.ClosedSendChannelException].  Make
+   * sure all responses are sent before this method completes, e.g. by wrapping your
+   * implementation in [kotlinx.coroutines.coroutineScope] or explicitly
+   * [joining][kotlinx.coroutines.Job.join] the jobs
+   * that are sending responses.
+   *
+   * If this method throws an exception, the server will abort sending responses and close the
+   * RPC with a [Status] [inferred][io.grpc.Status.fromThrowable] from the thrown exception. Other
+   * RPCs will not be affected.
+   *
+   * @param requests A [ReceiveChannel] where client requests can be read.
+   *       [Cancelling][ReceiveChannel.cancel] this channel can be used to indicate that
+   *       further client requests should be discarded.
+   *
+   * @param responses A [SendChannel] to send responses to.  Explicitly closing this
+   * channel when the RPC is done is optional.  If this channel is closed with a nonnull cause,
+   * the RPC will be closed with a [Status] [inferred][Status.fromException] from that
+   * cause.  [Sending][kotlinx.coroutines.channels.SendChannel.send] to this channel may suspend if
+   * additional responses
+   * cannot be sent without excess buffering; see [io.grpc.ServerCall.Listener.onReady] for details.
+   */
+  open suspend fun bidiStreamSayHello(requests: ReceiveChannel<HelloRequest>,
+      responses: SendChannel<HelloReply>) {
+    throw
+        StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.BidiStreamSayHello is unimplemented"))
+  }
+
+  final override fun bindService(): ServerServiceDefinition = builder(getServiceDescriptor())
+    .addMethod(unaryServerMethodDefinition(
+    scope = this,
+    descriptor = GreeterGrpc.getSayHelloMethod(),
+    implementation = ::sayHello
+  ))
+    .addMethod(clientStreamingServerMethodDefinition(
+    scope = this,
+    descriptor = GreeterGrpc.getClientStreamSayHelloMethod(),
+    implementation = ::clientStreamSayHello
+  ))
+    .addMethod(serverStreamingServerMethodDefinition(
+    scope = this,
+    descriptor = GreeterGrpc.getServerStreamSayHelloMethod(),
+    implementation = ::serverStreamSayHello
+  ))
+    .addMethod(bidiStreamingServerMethodDefinition(
+    scope = this,
+    descriptor = GreeterGrpc.getBidiStreamSayHelloMethod(),
+    implementation = ::bidiStreamSayHello
+  )).build()
+}
