@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 gRPC authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.grpc.kotlin.generator
 
 import com.google.common.io.Resources
@@ -56,12 +72,12 @@ class GrpcClientStubGeneratorTest {
       /**
        * Returns a [kotlinx.coroutines.flow.Flow] that, when collected, executes this RPC and emits responses from the
        * server as they arrive.  That flow finishes normally if the server closes its response with
-       * [`Status.OK`][io.grpc.Status], and fails by throwing a [io.grpc.StatusException] otherwise.  If 
+       * [`Status.OK`][io.grpc.Status], and fails by throwing a [io.grpc.StatusException] otherwise.  If
        * collecting the flow downstream fails exceptionally (including via cancellation), the RPC
        * is cancelled with that exception as a cause.
        *
-       * The [kotlinx.coroutines.flow.Flow] of requests is collected once each time the [kotlinx.coroutines.flow.Flow] of responses is 
-       * collected. If collection of the [kotlinx.coroutines.flow.Flow] of responses completes normally or 
+       * The [kotlinx.coroutines.flow.Flow] of requests is collected once each time the [kotlinx.coroutines.flow.Flow] of responses is
+       * collected. If collection of the [kotlinx.coroutines.flow.Flow] of responses completes normally or
        * exceptionally before collection of `requests` completes, the collection of
        * `requests` is cancelled.  If the collection of `requests` completes
        * exceptionally for any other reason, then the collection of the [kotlinx.coroutines.flow.Flow] of responses

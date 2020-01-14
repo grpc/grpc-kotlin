@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 gRPC authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.grpc.kotlin.generator
 
 import com.google.common.annotations.VisibleForTesting
@@ -209,7 +225,7 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
         """
         Returns a [%flow:T] that, when collected, executes this RPC and emits responses from the
         server as they arrive.  That flow finishes normally if the server closes its response with
-        [`Status.OK`][%status:T], and fails by throwing a [%statusException:T] otherwise.  If 
+        [`Status.OK`][%status:T], and fails by throwing a [%statusException:T] otherwise.  If
         collecting the flow downstream fails exceptionally (including via cancellation), the RPC
         is cancelled with that exception as a cause.
         """.trimIndent()
@@ -227,8 +243,8 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
       MethodType.BIDI_STREAMING -> {
         kDocComponents.add(
           """
-          The [%flow:T] of requests is collected once each time the [%flow:T] of responses is 
-          collected. If collection of the [%flow:T] of responses completes normally or 
+          The [%flow:T] of requests is collected once each time the [%flow:T] of responses is
+          collected. If collection of the [%flow:T] of responses completes normally or
           exceptionally before collection of `%parameter:N` completes, the collection of
           `%parameter:N` is cancelled.  If the collection of `%parameter:N` completes
           exceptionally for any other reason, then the collection of the [%flow:T] of responses
