@@ -2,7 +2,10 @@ load("//third_party/java/grpc:build_defs.bzl", "java_grpc_library")
 
 licenses(["notice"])
 
-package(default_visibility = ["//third_party/kotlin/grpc_kotlin/src/test:__subpackages__"])
+package(default_visibility = [
+    "//javatests/com/google/net/rpc3/kotlin:__pkg__",
+    "//third_party/kotlin/grpc_kotlin/src/test:__subpackages__",
+])
 
 proto_library(
     name = "helloworld_proto",

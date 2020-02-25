@@ -3,7 +3,6 @@ package io.grpc.kotlin.generator
 import com.google.common.annotations.VisibleForTesting
 import com.google.protobuf.Descriptors.MethodDescriptor
 import com.google.protobuf.Descriptors.ServiceDescriptor
-import com.google.protobuf.kotlin.protoc.ClassSimpleName
 import com.google.protobuf.kotlin.protoc.Declarations
 import com.google.protobuf.kotlin.protoc.GeneratorConfig
 import com.google.protobuf.kotlin.protoc.MemberSimpleName
@@ -23,16 +22,13 @@ import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asClassName
-import io.grpc.ServerCall
 import io.grpc.ServerServiceDefinition
 import io.grpc.Status
 import io.grpc.StatusException
 import io.grpc.kotlin.AbstractCoroutineServerImpl
 import io.grpc.kotlin.ServerCalls
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.ClosedSendChannelException
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.Flow
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -43,11 +39,9 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
   companion object {
     private const val IMPL_BASE_SUFFIX = "CoroutineImplBase"
 
-    private val RECEIVE_CHANNEL: ClassName = ReceiveChannel::class.asClassName()
-    private val SEND_CHANNEL: ClassName = SendChannel::class.asClassName()
+    private val FLOW: ClassName = Flow::class.asClassName()
     private val UNARY_REQUEST_NAME: MemberSimpleName = MemberSimpleName("request")
     private val STREAMING_REQUEST_NAME: MemberSimpleName = MemberSimpleName("requests")
-    private val STREAMING_RESPONSE_NAME: MemberSimpleName = MemberSimpleName("responses")
 
     private val coroutineContextParameter: ParameterSpec =
       ParameterSpec
@@ -75,10 +69,9 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
   }
 
   fun implClass(service: ServiceDescriptor): TypeSpec {
-
     val serviceImplClassName = service.serviceName.toClassSimpleName().withSuffix(IMPL_BASE_SUFFIX)
 
-    val stubs: List<MethodImplStub> = service.methods.map { serviceMethodStub(it, serviceImplClassName) }
+    val stubs: List<MethodImplStub> = service.methods.map { serviceMethodStub(it) }
     val implBuilder = TypeSpec
       .classBuilder(serviceImplClassName)
       .addModifiers(KModifier.ABSTRACT)
@@ -133,19 +126,16 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
   )
 
   @VisibleForTesting
-  fun serviceMethodStub(
-    method: MethodDescriptor,
-    serviceImplClassName: ClassSimpleName
-  ): MethodImplStub = with(config) {
+  fun serviceMethodStub(method: MethodDescriptor): MethodImplStub = with(config) {
     val requestType = method.inputType.messageClass()
     val requestParam = if (method.isClientStreaming) {
-      ParameterSpec.of(STREAMING_REQUEST_NAME, RECEIVE_CHANNEL.parameterizedBy(requestType))
+      ParameterSpec.of(STREAMING_REQUEST_NAME, FLOW.parameterizedBy(requestType))
     } else {
       ParameterSpec.of(UNARY_REQUEST_NAME, requestType)
     }
 
     val methodSpecBuilder = FunSpec.builder(method.methodName.toMemberSimpleName())
-      .addModifiers(KModifier.SUSPEND, KModifier.OPEN)
+      .addModifiers(KModifier.OPEN)
       .addParameter(requestParam)
       .addStatement(
         "throw %T(%M.withDescription(%S))",
@@ -156,15 +146,13 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
 
     val responseType = method.outputType.messageClass()
     if (method.isServerStreaming) {
-      val responsesParam =
-        ParameterSpec.of(STREAMING_RESPONSE_NAME, SEND_CHANNEL.parameterizedBy(responseType))
-      methodSpecBuilder.addParameter(responsesParam)
-      methodSpecBuilder.returns(Unit::class)
+      methodSpecBuilder.returns(FLOW.parameterizedBy(responseType))
     } else {
       methodSpecBuilder.returns(responseType)
+      methodSpecBuilder.addModifiers(KModifier.SUSPEND)
     }
 
-    methodSpecBuilder.addKdoc(stubKDoc(method, requestParam, serviceImplClassName))
+    methodSpecBuilder.addKdoc(stubKDoc(method, requestParam))
 
     val methodSpec = methodSpecBuilder.build()
 
@@ -193,64 +181,40 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
 
   private fun stubKDoc(
     method: MethodDescriptor,
-    requestParam: ParameterSpec,
-    serviceImplClassName: ClassSimpleName
+    requestParam: ParameterSpec
   ): CodeBlock {
     val kDocBindings = mapOf(
       "requestParam" to requestParam,
       "methodName" to method.fullName,
-      "receiveChannel" to ReceiveChannel::class,
-      "sendChannel" to SendChannel::class,
+      "flow" to FLOW,
       "status" to Status::class,
-      "statusFromException" to Status::class.member("fromThrowable"),
-      "responsesParam" to STREAMING_RESPONSE_NAME,
-      "coroutineContext" to CoroutineContext::class,
-      "serviceImplClassName" to serviceImplClassName,
-      "closedSendChannelEx" to ClosedSendChannelException::class,
-      "coroutineScopeBuilder" to MemberName("kotlinx.coroutines", "coroutineScope"),
-      "join" to Job::class.member("join"),
-      "serverCall" to ServerCall::class,
-      "sendChannelSend" to SendChannel::class.member("send")
-    )
-    val kDocSections = mutableListOf(
-      "Implements %methodName:L as a coroutine.",
-      """
-        When gRPC receives a %methodName:L RPC, gRPC will invoke this method within the
-        [%coroutineContext:T] used to create this `%serviceImplClassName:L`.
-      """.trimIndent()
+      "statusException" to StatusException::class,
+      "cancellationException" to CancellationException::class,
+      "illegalStateException" to IllegalStateException::class
     )
 
+
+    val kDocSections = mutableListOf<String>()
+
     if (method.isServerStreaming) {
+      kDocSections.add("Returns a [%flow:T] of responses to an RPC for %methodName:L.")
       kDocSections.add(
         """
-          If this method completes without throwing an exception, gRPC will close the 
-          `%responsesParam:L` channel (if it is not already closed), finish sending any messages 
-          remaining in it, and close the RPC with [%status:T.OK].  Note that if other coroutines
-          are still writing to `%responsesParam:L`, they may get a [%closedSendChannelEx:T].  Make
-          sure all responses are sent before this method completes, e.g. by wrapping your
-          implementation in [%coroutineScopeBuilder:M] or explicitly [joining][%join:M] the jobs
-          that are sending responses.
-        """.trimIndent()
-      )
-      kDocSections.add(
-        """
-          If this method throws an exception, the server will abort sending responses and close the
-          RPC with a [%status:T] [inferred][%statusFromException:M] from the thrown exception. Other
-          RPCs will not be affected.
+          If creating or collecting the returned flow fails with a [%statusException:T], the RPC
+          will fail with the corresponding [%status:T].  If it fails with a
+          [%cancellationException:T], the RPC will fail with status `Status.CANCELLED`.  If creating
+          or collecting the returned flow fails for any other reason, the RPC will fail with 
+          `Status.UNKNOWN` with the exception as a cause.
         """.trimIndent()
       )
     } else {
+      kDocSections.add("Returns the response to an RPC for %methodName:L.")
       kDocSections.add(
         """
-          If this method returns a response successfully, gRPC will send the response to the client
-           and close the RPC with [%status:T.OK].
-        """.trimIndent()
-      )
-      kDocSections.add(
-        """
-          If this method throws an exception, the server will not send any responses and close the
-          RPC with a [%status:T] [inferred][%statusFromException:M] from the thrown exception.  Other
-          RPCs will not be affected.
+          If this method fails with a [%statusException:T], the RPC will fail with the corresponding
+          [%status:T].  If this method fails with a [%cancellationException:T], the RPC will fail
+          with status `Status.CANCELLED`.  If this method fails for any other reason, the RPC will
+          fail with `Status.UNKNOWN` with the exception as a cause.
         """.trimIndent()
       )
     }
@@ -258,32 +222,15 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
     if (method.isClientStreaming) {
       kDocSections.add(
         """
-          @param %requestParam:N A [%receiveChannel:T] where client requests can be read.
-                [Cancelling][%receiveChannel:T.cancel] this channel can be used to indicate that
-                further client requests should be discarded.
-        """.trimIndent())
-    } else {
-      kDocSections.add(
-        """
-          @param %requestParam:N The request sent by the client.
-        """.trimIndent()
-      )
-    }
-
-    if (method.isServerStreaming) {
-      kDocSections.add(
-        """
-          @param %responsesParam:L A [%sendChannel:T] to send responses to.  Explicitly closing this
-          channel when the RPC is done is optional.  If this channel is closed with a nonnull cause,
-          the RPC will be closed with a [%status:T] [inferred][%status:T.fromException] from that
-          cause.  [Sending][%sendChannelSend:M] to this channel may suspend if additional responses
-          cannot be sent without excess buffering; see [%serverCall:T.Listener.onReady] for details.
+          @param %requestParam:N A [%flow:T] of requests from the client.  This flow can be
+                 collected only once and throws [%illegalStateException:T] on attempts to collect
+                 it more than once.
         """.trimIndent()
       )
     } else {
       kDocSections.add(
         """
-          @return The response to send to the client.
+          @param %requestParam:N The request from the client.
         """.trimIndent()
       )
     }

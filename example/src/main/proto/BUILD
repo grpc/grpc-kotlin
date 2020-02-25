@@ -1,4 +1,4 @@
-load("//tools/build_defs/kotlin:rules.bzl", "kt_jvm_grpc_library", "kt_jvm_proto_library")
+load("//tools/build_defs/kotlin:rules.bzl", "kt_jvm_grpc_library")
 
 package(
     default_visibility = ["//third_party/kotlin/grpc_kotlin:__subpackages__"],
@@ -13,8 +13,8 @@ proto_library(
     deps = ["//google/protobuf:duration"],
 )
 
-kt_jvm_proto_library(
-    name = "route_guide_proto_kotlin",
+java_proto_library(
+    name = "route_guide_proto_java",
     deps = [":route_guide_proto"],
 )
 

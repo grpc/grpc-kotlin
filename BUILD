@@ -22,7 +22,13 @@ package_group(
 
 package_group(
     name = "approved_clients",
-    packages = [],
+    packages = [
+        "//java/com/google/apps/framework/server/kotlin/...",
+        "//java/com/google/apps/tiktok/rpc/...",
+        "//java/com/google/corp/accessibility/tracker/...",
+        "//javatests/com/google/apps/tiktok/rpc/...",
+        "//javatests/com/google/corp/accessibility/tracker/...",
+    ],
 )
 
 alias(

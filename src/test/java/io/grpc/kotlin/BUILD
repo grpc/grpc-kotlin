@@ -31,7 +31,6 @@ kt_jvm_library(
     name = "tests",
     srcs = [
         "AbstractCoroutineServerImplTest.kt",
-        "AbstractCoroutineStubTest.kt",
         "ClientCallsTest.kt",
         "FlowControlTest.kt",
         "GrpcContextElementTest.kt",
@@ -65,7 +64,6 @@ junit_test_suites(
     name = "junit",
     timeout = {"medium": "short"},
     sizes = [
-        "small",
         "medium",
     ],
     deps = [":tests"],

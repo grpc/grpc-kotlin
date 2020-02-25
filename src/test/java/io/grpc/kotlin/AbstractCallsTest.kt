@@ -19,8 +19,11 @@ import io.grpc.examples.helloworld.MultiHelloRequest
 import io.grpc.inprocess.InProcessChannelBuilder
 import io.grpc.inprocess.InProcessServerBuilder
 import io.grpc.testing.GrpcCleanupRule
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -32,10 +35,6 @@ import kotlinx.coroutines.launch
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import kotlin.coroutines.CoroutineContext
 
 abstract class AbstractCallsTest {
   companion object {
@@ -46,7 +45,7 @@ abstract class AbstractCallsTest {
 
     val sayHelloMethod: MethodDescriptor<HelloRequest, HelloReply> =
       GreeterGrpc.getSayHelloMethod()
-    val clientStreamingSayHelloMethod: MethodDescriptor<HelloRequest, HelloReply>  =
+    val clientStreamingSayHelloMethod: MethodDescriptor<HelloRequest, HelloReply> =
       GreeterGrpc.getClientStreamSayHelloMethod()
     val serverStreamingSayHelloMethod: MethodDescriptor<MultiHelloRequest, HelloReply> =
       GreeterGrpc.getServerStreamSayHelloMethod()
@@ -54,8 +53,7 @@ abstract class AbstractCallsTest {
       GreeterGrpc.getBidiStreamSayHelloMethod()
     val greeterService: ServiceDescriptor = GreeterGrpc.getServiceDescriptor()
 
-    @Suppress("SuspendFunctionOnCoroutineScope")
-    suspend fun <E> CoroutineScope.produce(
+    fun <E> CoroutineScope.produce(
       block: suspend SendChannel<E>.() -> Unit
     ): ReceiveChannel<E> {
       val channel = Channel<E>()
@@ -107,7 +105,7 @@ abstract class AbstractCallsTest {
 
   @Before
   fun setUp() {
-    executor = Executors.newFixedThreadPool(4)
+    executor = Executors.newFixedThreadPool(10)
   }
 
   @After

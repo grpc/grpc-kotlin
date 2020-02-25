@@ -1,81 +1,77 @@
 package io.grpc.kotlin
 
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
+import io.grpc.Status
+import io.grpc.StatusException
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
 
 /**
  * Extracts the value of a [Deferred] known to be completed, or throws its exception if it was
- * not completed successfully.  (`getDone` is equivalent, but experimental.)
+ * not completed successfully.  (Non-experimental variant of `getDone`.)
  */
 val <T> Deferred<T>.doneValue: T
   get() {
     check(isCompleted) { "doneValue should only be called on completed Deferred values" }
-    return runBlocking {
+    return runBlocking(Dispatchers.Unconfined) {
       await()
     }
   }
 
 /**
- * Copies data from the input to the output, including closure state.  After an element is
- * successfully sent to the output, calls `onReadyForMore`.
+ * Cancels a [Job] with a cause and suspends until the job completes/is finished cancelling.
  */
-private suspend fun <T> copyFromBuffer(
-  input: ReceiveChannel<T>,
-  output: SendChannel<T>,
-  onReadyForMore: () -> Unit
-) {
-  val bufferIterator = input.iterator()
-  var keepGoing = true
-  var exception: Throwable? = null
-  while (keepGoing) {
-    keepGoing = try {
-      bufferIterator.hasNext()
-    } catch (t: Throwable) {
-      exception = t
-      false
-    }
-    if (keepGoing) {
-      output.send(bufferIterator.next())
-      onReadyForMore()
-    }
-  }
-  output.close(exception)
+suspend fun Job.cancelAndJoin(message: String, cause: Exception? = null) {
+  cancel(message, cause)
+  join()
+}
+
+suspend fun <T> FlowCollector<T>.emitAll(flow: Flow<T>) {
+  flow.collect { emit(it) }
 }
 
 /**
- * Creates a SendChannel/ReceiveChannel pair such that sending to the SendChannel never suspends
- * if it is used in a strict alternating sequence of send/wait for requestMore/send/wait for
- * requestMore..., and the ReceiveChannel receives elements from the SendChannel.
+ * Extracts the one and only element of this flow, throwing an appropriate [StatusException] if
+ * there is not exactly one element.  (Otherwise this is fully equivalent to `Flow.single()`.)
  */
-fun <T> CoroutineScope.bufferedChannel(
-  bufferCapacity: Int,
-  requestMore: () -> Unit,
-  onCancel: () -> Unit
-): Pair<SendChannel<T>, ReceiveChannel<T>> {
-  require(bufferCapacity > 0) { "bufferCapacity must be positive but was $bufferCapacity" }
-  val buffer = Channel<T>(bufferCapacity)
-  val output = Channel<T>(Channel.RENDEZVOUS)
-  val bufferJob = launch {
-    copyFromBuffer(buffer, output, requestMore)
-  }
-  bufferJob.invokeOnCompletion { t ->
-    if (bufferJob.isCancelled) {
-      val cause = CancellationException("Job running bufferedChannel was cancelled", t)
-      buffer.cancel(cause)
-      output.cancel(cause)
-      onCancel()
+suspend fun <T> Flow<T>.singleOrStatus(
+  expected: String,
+  descriptor: Any
+): T {
+  // We could call Flow.single() and catch exceptions, but if the underlying flow throws
+  // IllegalStateException or NoSuchElementException for its own reasons, we'd swallow those
+  // and give misleading errors.  Instead, we reimplement single() ourselves.
+  var result: T? = null
+  var found = false
+  collect {
+    if (!found) {
+      found = true
+      result = it
+    } else {
+      throw StatusException(
+        Status.INTERNAL.withDescription("Expected one $expected for $descriptor but received two")
+      )
     }
   }
-  val receiveChannel = object : ReceiveChannel<T> by output {
-    override fun cancel(cause: CancellationException?) {
-      bufferJob.cancel(cause)
-    }
+  @Suppress("UNCHECKED_CAST")
+  if (!found) {
+    throw StatusException(
+      Status.INTERNAL.withDescription("Expected one $expected for $descriptor but received none")
+    )
+  } else {
+    return result as T
   }
-  return Pair(buffer as SendChannel<T>, receiveChannel)
+}
+
+/** Runs [block] and returns any exception it throws, or `null` if it does not throw. */
+inline fun thrownOrNull(block: () -> Unit): Throwable? = try {
+  block()
+  null
+} catch (thrown: Throwable) {
+  thrown
 }

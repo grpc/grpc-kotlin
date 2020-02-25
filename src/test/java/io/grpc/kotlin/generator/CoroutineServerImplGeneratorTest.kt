@@ -31,24 +31,17 @@ class CoroutineServerImplGeneratorTest {
 
   @Test
   fun unaryImplStub() {
-    val stub = generator.serviceMethodStub(unarySayHelloDescriptor, stubSimpleName)
+    val stub = generator.serviceMethodStub(unarySayHelloDescriptor)
     assertThat(stub.methodSpec).generates("""
       /**
-       * Implements helloworld.Greeter.SayHello as a coroutine.
+       * Returns the response to an RPC for helloworld.Greeter.SayHello.
        *
-       * When gRPC receives a helloworld.Greeter.SayHello RPC, gRPC will invoke this method within the
-       * [kotlin.coroutines.CoroutineContext] used to create this `ThisImpl`.
+       * If this method fails with a [io.grpc.StatusException], the RPC will fail with the corresponding
+       * [io.grpc.Status].  If this method fails with a [java.util.concurrent.CancellationException], the RPC will fail
+       * with status `Status.CANCELLED`.  If this method fails for any other reason, the RPC will
+       * fail with `Status.UNKNOWN` with the exception as a cause.
        *
-       * If this method returns a response successfully, gRPC will send the response to the client
-       *  and close the RPC with [io.grpc.Status.OK].
-       *
-       * If this method throws an exception, the server will not send any responses and close the
-       * RPC with a [io.grpc.Status] [inferred][io.grpc.Status.fromThrowable] from the thrown exception.  Other
-       * RPCs will not be affected.
-       *
-       * @param request The request sent by the client.
-       *
-       * @return The response to send to the client.
+       * @param request The request from the client.
        */
       open suspend fun sayHello(request: io.grpc.examples.helloworld.HelloRequest): io.grpc.examples.helloworld.HelloReply {
         throw io.grpc.StatusException(io.grpc.Status.UNIMPLEMENTED.withDescription("Method helloworld.Greeter.SayHello is unimplemented"))
@@ -65,28 +58,21 @@ class CoroutineServerImplGeneratorTest {
 
   @Test
   fun clientStreamingImplStub() {
-    val stub = generator.serviceMethodStub(clientStreamingSayHelloDescriptor, stubSimpleName)
+    val stub = generator.serviceMethodStub(clientStreamingSayHelloDescriptor)
     assertThat(stub.methodSpec).generates("""
       /**
-       * Implements helloworld.Greeter.ClientStreamSayHello as a coroutine.
+       * Returns the response to an RPC for helloworld.Greeter.ClientStreamSayHello.
        *
-       * When gRPC receives a helloworld.Greeter.ClientStreamSayHello RPC, gRPC will invoke this method within the
-       * [kotlin.coroutines.CoroutineContext] used to create this `ThisImpl`.
+       * If this method fails with a [io.grpc.StatusException], the RPC will fail with the corresponding
+       * [io.grpc.Status].  If this method fails with a [java.util.concurrent.CancellationException], the RPC will fail
+       * with status `Status.CANCELLED`.  If this method fails for any other reason, the RPC will
+       * fail with `Status.UNKNOWN` with the exception as a cause.
        *
-       * If this method returns a response successfully, gRPC will send the response to the client
-       *  and close the RPC with [io.grpc.Status.OK].
-       *
-       * If this method throws an exception, the server will not send any responses and close the
-       * RPC with a [io.grpc.Status] [inferred][io.grpc.Status.fromThrowable] from the thrown exception.  Other
-       * RPCs will not be affected.
-       *
-       * @param requests A [kotlinx.coroutines.channels.ReceiveChannel] where client requests can be read.
-       *       [Cancelling][kotlinx.coroutines.channels.ReceiveChannel.cancel] this channel can be used to indicate that
-       *       further client requests should be discarded.
-       *
-       * @return The response to send to the client.
+       * @param requests A [kotlinx.coroutines.flow.Flow] of requests from the client.  This flow can be
+       *        collected only once and throws [java.lang.IllegalStateException] on attempts to collect
+       *        it more than once.
        */
-      open suspend fun clientStreamSayHello(requests: kotlinx.coroutines.channels.ReceiveChannel<io.grpc.examples.helloworld.HelloRequest>): io.grpc.examples.helloworld.HelloReply {
+      open suspend fun clientStreamSayHello(requests: kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloRequest>): io.grpc.examples.helloworld.HelloReply {
         throw io.grpc.StatusException(io.grpc.Status.UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ClientStreamSayHello is unimplemented"))
       }
     """.trimIndent())
@@ -101,35 +87,20 @@ class CoroutineServerImplGeneratorTest {
 
   @Test
   fun serverStreamingImplStub() {
-    val stub = generator.serviceMethodStub(serverStreamingSayHelloDescriptor, stubSimpleName)
+    val stub = generator.serviceMethodStub(serverStreamingSayHelloDescriptor)
     assertThat(stub.methodSpec).generates("""
       /**
-       * Implements helloworld.Greeter.ServerStreamSayHello as a coroutine.
+       * Returns a [kotlinx.coroutines.flow.Flow] of responses to an RPC for helloworld.Greeter.ServerStreamSayHello.
        *
-       * When gRPC receives a helloworld.Greeter.ServerStreamSayHello RPC, gRPC will invoke this method within the
-       * [kotlin.coroutines.CoroutineContext] used to create this `ThisImpl`.
+       * If creating or collecting the returned flow fails with a [io.grpc.StatusException], the RPC
+       * will fail with the corresponding [io.grpc.Status].  If it fails with a
+       * [java.util.concurrent.CancellationException], the RPC will fail with status `Status.CANCELLED`.  If creating
+       * or collecting the returned flow fails for any other reason, the RPC will fail with 
+       * `Status.UNKNOWN` with the exception as a cause.
        *
-       * If this method completes without throwing an exception, gRPC will close the 
-       * `responses` channel (if it is not already closed), finish sending any messages 
-       * remaining in it, and close the RPC with [io.grpc.Status.OK].  Note that if other coroutines
-       * are still writing to `responses`, they may get a [kotlinx.coroutines.channels.ClosedSendChannelException].  Make
-       * sure all responses are sent before this method completes, e.g. by wrapping your
-       * implementation in [kotlinx.coroutines.coroutineScope] or explicitly [joining][kotlinx.coroutines.Job.join] the jobs
-       * that are sending responses.
-       *
-       * If this method throws an exception, the server will abort sending responses and close the
-       * RPC with a [io.grpc.Status] [inferred][io.grpc.Status.fromThrowable] from the thrown exception. Other
-       * RPCs will not be affected.
-       *
-       * @param request The request sent by the client.
-       *
-       * @param responses A [kotlinx.coroutines.channels.SendChannel] to send responses to.  Explicitly closing this
-       * channel when the RPC is done is optional.  If this channel is closed with a nonnull cause,
-       * the RPC will be closed with a [io.grpc.Status] [inferred][io.grpc.Status.fromException] from that
-       * cause.  [Sending][kotlinx.coroutines.channels.SendChannel.send] to this channel may suspend if additional responses
-       * cannot be sent without excess buffering; see [io.grpc.ServerCall.Listener.onReady] for details.
+       * @param request The request from the client.
        */
-      open suspend fun serverStreamSayHello(request: io.grpc.examples.helloworld.MultiHelloRequest, responses: kotlinx.coroutines.channels.SendChannel<io.grpc.examples.helloworld.HelloReply>) {
+      open fun serverStreamSayHello(request: io.grpc.examples.helloworld.MultiHelloRequest): kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloReply> {
         throw io.grpc.StatusException(io.grpc.Status.UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ServerStreamSayHello is unimplemented"))
       }
     """.trimIndent())
@@ -144,37 +115,22 @@ class CoroutineServerImplGeneratorTest {
 
   @Test
   fun bidiStreamingImplStub() {
-    val stub = generator.serviceMethodStub(bidiStreamingSayHelloDescriptor, stubSimpleName)
+    val stub = generator.serviceMethodStub(bidiStreamingSayHelloDescriptor)
     assertThat(stub.methodSpec).generates("""
       /**
-       * Implements helloworld.Greeter.BidiStreamSayHello as a coroutine.
+       * Returns a [kotlinx.coroutines.flow.Flow] of responses to an RPC for helloworld.Greeter.BidiStreamSayHello.
        *
-       * When gRPC receives a helloworld.Greeter.BidiStreamSayHello RPC, gRPC will invoke this method within the
-       * [kotlin.coroutines.CoroutineContext] used to create this `ThisImpl`.
+       * If creating or collecting the returned flow fails with a [io.grpc.StatusException], the RPC
+       * will fail with the corresponding [io.grpc.Status].  If it fails with a
+       * [java.util.concurrent.CancellationException], the RPC will fail with status `Status.CANCELLED`.  If creating
+       * or collecting the returned flow fails for any other reason, the RPC will fail with 
+       * `Status.UNKNOWN` with the exception as a cause.
        *
-       * If this method completes without throwing an exception, gRPC will close the 
-       * `responses` channel (if it is not already closed), finish sending any messages 
-       * remaining in it, and close the RPC with [io.grpc.Status.OK].  Note that if other coroutines
-       * are still writing to `responses`, they may get a [kotlinx.coroutines.channels.ClosedSendChannelException].  Make
-       * sure all responses are sent before this method completes, e.g. by wrapping your
-       * implementation in [kotlinx.coroutines.coroutineScope] or explicitly [joining][kotlinx.coroutines.Job.join] the jobs
-       * that are sending responses.
-       *
-       * If this method throws an exception, the server will abort sending responses and close the
-       * RPC with a [io.grpc.Status] [inferred][io.grpc.Status.fromThrowable] from the thrown exception. Other
-       * RPCs will not be affected.
-       *
-       * @param requests A [kotlinx.coroutines.channels.ReceiveChannel] where client requests can be read.
-       *       [Cancelling][kotlinx.coroutines.channels.ReceiveChannel.cancel] this channel can be used to indicate that
-       *       further client requests should be discarded.
-       *
-       * @param responses A [kotlinx.coroutines.channels.SendChannel] to send responses to.  Explicitly closing this
-       * channel when the RPC is done is optional.  If this channel is closed with a nonnull cause,
-       * the RPC will be closed with a [io.grpc.Status] [inferred][io.grpc.Status.fromException] from that
-       * cause.  [Sending][kotlinx.coroutines.channels.SendChannel.send] to this channel may suspend if additional responses
-       * cannot be sent without excess buffering; see [io.grpc.ServerCall.Listener.onReady] for details.
+       * @param requests A [kotlinx.coroutines.flow.Flow] of requests from the client.  This flow can be
+       *        collected only once and throws [java.lang.IllegalStateException] on attempts to collect
+       *        it more than once.
        */
-      open suspend fun bidiStreamSayHello(requests: kotlinx.coroutines.channels.ReceiveChannel<io.grpc.examples.helloworld.HelloRequest>, responses: kotlinx.coroutines.channels.SendChannel<io.grpc.examples.helloworld.HelloReply>) {
+      open fun bidiStreamSayHello(requests: kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloRequest>): kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloReply> {
         throw io.grpc.StatusException(io.grpc.Status.UNIMPLEMENTED.withDescription("Method helloworld.Greeter.BidiStreamSayHello is unimplemented"))
       }
     """.trimIndent())

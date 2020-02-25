@@ -14,18 +14,5 @@ import kotlin.coroutines.EmptyCoroutineContext
  */
 abstract class AbstractCoroutineStub<S: AbstractCoroutineStub<S>>(
   channel: Channel,
-  val coroutineContext: CoroutineContext = EmptyCoroutineContext,
   callOptions: CallOptions = CallOptions.DEFAULT
-): AbstractStub<S>(channel, callOptions) {
-  final override fun build(channel: Channel, callOptions: CallOptions): S =
-    build(channel, this.coroutineContext, callOptions)
-
-  abstract fun build(
-    channel: Channel,
-    coroutineContext: CoroutineContext,
-    callOptions: CallOptions
-  ): S
-
-  fun addCoroutineContext(context: CoroutineContext): S =
-    build(channel, this.coroutineContext + context, callOptions)
-}
+): AbstractStub<S>(channel, callOptions)

@@ -20,13 +20,11 @@ import io.grpc.kotlin.ServerCalls.bidiStreamingServerMethodDefinition
 import io.grpc.kotlin.ServerCalls.clientStreamingServerMethodDefinition
 import io.grpc.kotlin.ServerCalls.serverStreamingServerMethodDefinition
 import io.grpc.kotlin.ServerCalls.unaryServerMethodDefinition
+import io.grpc.kotlin.StubFor
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.jvm.JvmOverloads
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Holder for Kotlin coroutine-based client and server APIs for helloworld.Greeter.
@@ -35,90 +33,67 @@ object GreeterGrpcKt {
   /**
    * A stub for issuing RPCs to a(n) helloworld.Greeter service as suspending coroutines.
    */
-  class GreeterCoroutineStub @JvmOverloads constructor(
-    channel: Channel,
-    coroutineContext: CoroutineContext = EmptyCoroutineContext,
-    callOptions: CallOptions = DEFAULT
-  ) : AbstractCoroutineStub<GreeterCoroutineStub>(channel, coroutineContext, callOptions) {
-    override fun build(
-      channel: Channel,
-      coroutineContext: CoroutineContext,
-      callOptions: CallOptions
-    ): GreeterCoroutineStub = GreeterCoroutineStub(channel, coroutineContext, callOptions)
+  @StubFor(GreeterGrpc::class)
+  class GreeterCoroutineStub @JvmOverloads constructor(channel: Channel, callOptions: CallOptions =
+      DEFAULT) : AbstractCoroutineStub<GreeterCoroutineStub>(channel, callOptions) {
+    override fun build(channel: Channel, callOptions: CallOptions): GreeterCoroutineStub =
+        GreeterCoroutineStub(channel, callOptions)
 
     /**
-     * Issues a unary helloworld.Greeter.SayHello RPC on this stub's [Channel].
+     * Executes this RPC and returns the response message, suspending until the RPC completes
+     * with [`Status.OK`][Status].  If the RPC completes with another status, a corresponding
+     * [StatusException] is thrown.  If this coroutine is cancelled, the RPC is also cancelled
+     * with the corresponding exception as a cause.
      *
-     * The implementation may launch further coroutines, which are run as if by
-     * [`withContext(coroutineContext)`][withContext].  (Some work may also be done in the
-     * [java.util.concurrent.Executor] associated with the `Channel`.)
+     * @param request The request message to send to the server.
      *
-     * @param request The single argument to the RPC, sent to the server.
-     *
-     * @return The single response from the server.  This coroutine suspends until the server
-     * returns it and closes with [Status.OK], at which point this coroutine resumes with the
-     * result. If the RPC fails (closes with another [Status]), this will fail with a
-     * corresponding [StatusException].
+     * @return The single response from the server.
      */
     suspend fun sayHello(request: HelloRequest, headers: Metadata = Metadata()): HelloReply =
-        withContext(coroutineContext) {
-      unaryRpc(
-        this,
-        channel,
-        GreeterGrpc.getSayHelloMethod(),
-        request,
-        callOptions,
-        headers
-      )
-    }
+        unaryRpc(
+      channel,
+      GreeterGrpc.getSayHelloMethod(),
+      request,
+      callOptions,
+      headers
+    )
     /**
-     * Issues a client streaming helloworld.Greeter.ClientStreamSayHello RPC on this stub's
-     * [Channel].
+     * Executes this RPC and returns the response message, suspending until the RPC completes
+     * with [`Status.OK`][Status].  If the RPC completes with another status, a corresponding
+     * [StatusException] is thrown.  If this coroutine is cancelled, the RPC is also cancelled
+     * with the corresponding exception as a cause.
      *
-     * The implementation may launch further coroutines, which are run as if by
-     * [`withContext(coroutineContext)`][withContext].  (Some work may also be done in the
-     * [java.util.concurrent.Executor] associated with the `Channel`.)
+     * This function collects the [Flow] of requests.  If the server terminates the RPC
+     * for any reason before collection of requests is complete, the collection of requests
+     * will be cancelled.  If the collection of requests completes exceptionally for any other
+     * reason, the RPC will be cancelled for that reason and this method will throw that
+     * exception.
      *
-     * @param requests A [ReceiveChannel] of requests to be sent to the server;
-     * expected to be provided, populated, and closed by the client.  When requests is closed,
-     * the RPC stream will be closed; if it is closed with a nonnull cause, the RPC is cancelled
-     * and the cause is sent to the server as the reason for cancellation.
+     * @param requests A [Flow] of request messages.
      *
-     * @return The single response from the server.  This coroutine suspends until the server
-     * returns it and closes with [Status.OK], at which point this coroutine resumes with the
-     * result. If the RPC fails (closes with another [Status]), this will fail with a
-     * corresponding [StatusException].
+     * @return The single response from the server.
      */
-    suspend fun clientStreamSayHello(requests: ReceiveChannel<HelloRequest>, headers: Metadata =
-        Metadata()): HelloReply = withContext(coroutineContext) {
-      clientStreamingRpc(
-        this,
-        channel,
-        GreeterGrpc.getClientStreamSayHelloMethod(),
-        requests,
-        callOptions,
-        headers
-      )
-    }
+    suspend fun clientStreamSayHello(requests: Flow<HelloRequest>, headers: Metadata = Metadata()):
+        HelloReply = clientStreamingRpc(
+      channel,
+      GreeterGrpc.getClientStreamSayHelloMethod(),
+      requests,
+      callOptions,
+      headers
+    )
     /**
-     * Issues a server streaming helloworld.Greeter.ServerStreamSayHello RPC on this stub's
-     * [Channel].
+     * Returns a [Flow] that, when collected, executes this RPC and emits responses from the
+     * server as they arrive.  That flow finishes normally if the server closes its response with
+     * [`Status.OK`][Status], and fails by throwing a [StatusException] otherwise.  If
+     * collecting the flow downstream fails exceptionally (including via cancellation), the RPC
+     * is cancelled with that exception as a cause.
      *
-     * The implementation may launch further coroutines, which are run as if by
-     * [`withContext(coroutineContext)`][withContext].  (Some work may also be done in the
-     * [java.util.concurrent.Executor] associated with the `Channel`.)
+     * @param request The request message to send to the server.
      *
-     * @param request The single argument to the RPC, sent to the server.
-     *
-     * @return A [`ReceiveChannel<HelloReply>`][ReceiveChannel] for responses from the server.  If
-     * cancelled, the RPC is shut down and a cancellation with that cause is sent to the server.
-     * Alternately, if the RPC fails (closes with a [Status] other than `Status.OK`), the
-     * returned channel is [closed][kotlinx.coroutines.channels.SendChannel.close] with a
-     * corresponding [StatusException].
+     * @return A flow that, when collected, emits the responses from the server.
      */
     fun serverStreamSayHello(request: MultiHelloRequest, headers: Metadata = Metadata()):
-        ReceiveChannel<HelloReply> = serverStreamingRpc(
-      CoroutineScope(coroutineContext),
+        Flow<HelloReply> = serverStreamingRpc(
       channel,
       GreeterGrpc.getServerStreamSayHelloMethod(),
       request,
@@ -126,27 +101,25 @@ object GreeterGrpcKt {
       headers
     )
     /**
-     * Issues a bidirectional streaming helloworld.Greeter.BidiStreamSayHello RPC on this stub's
-     * [Channel].
+     * Returns a [Flow] that, when collected, executes this RPC and emits responses from the
+     * server as they arrive.  That flow finishes normally if the server closes its response with
+     * [`Status.OK`][Status], and fails by throwing a [StatusException] otherwise.  If
+     * collecting the flow downstream fails exceptionally (including via cancellation), the RPC
+     * is cancelled with that exception as a cause.
      *
-     * The implementation may launch further coroutines, which are run as if by
-     * [`withContext(coroutineContext)`][withContext].  (Some work may also be done in the
-     * [java.util.concurrent.Executor] associated with the `Channel`.)
+     * The [Flow] of requests is collected once each time the [Flow] of responses is
+     * collected. If collection of the [Flow] of responses completes normally or
+     * exceptionally before collection of `requests` completes, the collection of
+     * `requests` is cancelled.  If the collection of `requests` completes
+     * exceptionally for any other reason, then the collection of the [Flow] of responses
+     * completes exceptionally for the same reason and the RPC is cancelled with that reason.
      *
-     * @param requests A [ReceiveChannel] of requests to be sent to the server;
-     * expected to be provided, populated, and closed by the client.  When requests is closed,
-     * the RPC stream will be closed; if it is closed with a nonnull cause, the RPC is cancelled
-     * and the cause is sent to the server as the reason for cancellation.
+     * @param requests A [Flow] of request messages.
      *
-     * @return A [`ReceiveChannel<HelloReply>`][ReceiveChannel] for responses from the server.  If
-     * cancelled, the RPC is shut down and a cancellation with that cause is sent to the server.
-     * Alternately, if the RPC fails (closes with a [Status] other than `Status.OK`), the
-     * returned channel is [closed][kotlinx.coroutines.channels.SendChannel.close] with a
-     * corresponding [StatusException].
+     * @return A flow that, when collected, emits the responses from the server.
      */
-    fun bidiStreamSayHello(requests: ReceiveChannel<HelloRequest>, headers: Metadata = Metadata()):
-        ReceiveChannel<HelloReply> = bidiStreamingRpc(
-      CoroutineScope(coroutineContext),
+    fun bidiStreamSayHello(requests: Flow<HelloRequest>, headers: Metadata = Metadata()):
+        Flow<HelloReply> = bidiStreamingRpc(
       channel,
       GreeterGrpc.getBidiStreamSayHelloMethod(),
       requests,
@@ -160,22 +133,15 @@ object GreeterGrpcKt {
   abstract class GreeterCoroutineImplBase(coroutineContext: CoroutineContext =
       EmptyCoroutineContext) : AbstractCoroutineServerImpl(coroutineContext) {
     /**
-     * Implements helloworld.Greeter.SayHello as a coroutine.
+     * Returns the response to an RPC for helloworld.Greeter.SayHello.
      *
-     * When gRPC receives a helloworld.Greeter.SayHello RPC, gRPC will invoke this method within the
-     * [CoroutineContext] used to create this `GreeterCoroutineImplBase`.
+     * If this method fails with a [StatusException], the RPC will fail with the corresponding
+     * [Status].  If this method fails with a [java.util.concurrent.CancellationException], the RPC
+     * will fail
+     * with status `Status.CANCELLED`.  If this method fails for any other reason, the RPC will
+     * fail with `Status.UNKNOWN` with the exception as a cause.
      *
-     * If this method returns a response successfully, gRPC will send the response to the client
-     *  and close the RPC with [Status.OK].
-     *
-     * If this method throws an exception, the server will not send any responses and close the
-     * RPC with a [Status] [inferred][io.grpc.Status.fromThrowable] from the thrown exception.
-     * Other
-     * RPCs will not be affected.
-     *
-     * @param request The request sent by the client.
-     *
-     * @return The response to send to the client.
+     * @param request The request from the client.
      */
     open suspend fun sayHello(request: HelloRequest): HelloReply {
       throw
@@ -183,103 +149,57 @@ object GreeterGrpcKt {
     }
 
     /**
-     * Implements helloworld.Greeter.ClientStreamSayHello as a coroutine.
+     * Returns the response to an RPC for helloworld.Greeter.ClientStreamSayHello.
      *
-     * When gRPC receives a helloworld.Greeter.ClientStreamSayHello RPC, gRPC will invoke this
-     * method within the
-     * [CoroutineContext] used to create this `GreeterCoroutineImplBase`.
+     * If this method fails with a [StatusException], the RPC will fail with the corresponding
+     * [Status].  If this method fails with a [java.util.concurrent.CancellationException], the RPC
+     * will fail
+     * with status `Status.CANCELLED`.  If this method fails for any other reason, the RPC will
+     * fail with `Status.UNKNOWN` with the exception as a cause.
      *
-     * If this method returns a response successfully, gRPC will send the response to the client
-     *  and close the RPC with [Status.OK].
-     *
-     * If this method throws an exception, the server will not send any responses and close the
-     * RPC with a [Status] [inferred][io.grpc.Status.fromThrowable] from the thrown exception.
-     * Other
-     * RPCs will not be affected.
-     *
-     * @param requests A [ReceiveChannel] where client requests can be read.
-     *       [Cancelling][ReceiveChannel.cancel] this channel can be used to indicate that
-     *       further client requests should be discarded.
-     *
-     * @return The response to send to the client.
+     * @param requests A [Flow] of requests from the client.  This flow can be
+     *        collected only once and throws [java.lang.IllegalStateException] on attempts to
+     * collect
+     *        it more than once.
      */
-    open suspend fun clientStreamSayHello(requests: ReceiveChannel<HelloRequest>): HelloReply {
+    open suspend fun clientStreamSayHello(requests: Flow<HelloRequest>): HelloReply {
       throw
           StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ClientStreamSayHello is unimplemented"))
     }
 
     /**
-     * Implements helloworld.Greeter.ServerStreamSayHello as a coroutine.
+     * Returns a [Flow] of responses to an RPC for helloworld.Greeter.ServerStreamSayHello.
      *
-     * When gRPC receives a helloworld.Greeter.ServerStreamSayHello RPC, gRPC will invoke this
-     * method within the
-     * [CoroutineContext] used to create this `GreeterCoroutineImplBase`.
+     * If creating or collecting the returned flow fails with a [StatusException], the RPC
+     * will fail with the corresponding [Status].  If it fails with a
+     * [java.util.concurrent.CancellationException], the RPC will fail with status
+     * `Status.CANCELLED`.  If creating
+     * or collecting the returned flow fails for any other reason, the RPC will fail with
+     * `Status.UNKNOWN` with the exception as a cause.
      *
-     * If this method completes without throwing an exception, gRPC will close the
-     * `responses` channel (if it is not already closed), finish sending any messages
-     * remaining in it, and close the RPC with [Status.OK].  Note that if other coroutines
-     * are still writing to `responses`, they may get a
-     * [kotlinx.coroutines.channels.ClosedSendChannelException].  Make
-     * sure all responses are sent before this method completes, e.g. by wrapping your
-     * implementation in [kotlinx.coroutines.coroutineScope] or explicitly
-     * [joining][kotlinx.coroutines.Job.join] the jobs
-     * that are sending responses.
-     *
-     * If this method throws an exception, the server will abort sending responses and close the
-     * RPC with a [Status] [inferred][io.grpc.Status.fromThrowable] from the thrown exception. Other
-     * RPCs will not be affected.
-     *
-     * @param request The request sent by the client.
-     *
-     * @param responses A [SendChannel] to send responses to.  Explicitly closing this
-     * channel when the RPC is done is optional.  If this channel is closed with a nonnull cause,
-     * the RPC will be closed with a [Status] [inferred][Status.fromException] from that
-     * cause.  [Sending][kotlinx.coroutines.channels.SendChannel.send] to this channel may suspend
-     * if additional responses
-     * cannot be sent without excess buffering; see [io.grpc.ServerCall.Listener.onReady] for
-     * details.
+     * @param request The request from the client.
      */
-    open suspend fun serverStreamSayHello(request: MultiHelloRequest,
-        responses: SendChannel<HelloReply>) {
+    open fun serverStreamSayHello(request: MultiHelloRequest): Flow<HelloReply> {
       throw
           StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ServerStreamSayHello is unimplemented"))
     }
 
     /**
-     * Implements helloworld.Greeter.BidiStreamSayHello as a coroutine.
+     * Returns a [Flow] of responses to an RPC for helloworld.Greeter.BidiStreamSayHello.
      *
-     * When gRPC receives a helloworld.Greeter.BidiStreamSayHello RPC, gRPC will invoke this method
-     * within the
-     * [CoroutineContext] used to create this `GreeterCoroutineImplBase`.
+     * If creating or collecting the returned flow fails with a [StatusException], the RPC
+     * will fail with the corresponding [Status].  If it fails with a
+     * [java.util.concurrent.CancellationException], the RPC will fail with status
+     * `Status.CANCELLED`.  If creating
+     * or collecting the returned flow fails for any other reason, the RPC will fail with
+     * `Status.UNKNOWN` with the exception as a cause.
      *
-     * If this method completes without throwing an exception, gRPC will close the
-     * `responses` channel (if it is not already closed), finish sending any messages
-     * remaining in it, and close the RPC with [Status.OK].  Note that if other coroutines
-     * are still writing to `responses`, they may get a
-     * [kotlinx.coroutines.channels.ClosedSendChannelException].  Make
-     * sure all responses are sent before this method completes, e.g. by wrapping your
-     * implementation in [kotlinx.coroutines.coroutineScope] or explicitly
-     * [joining][kotlinx.coroutines.Job.join] the jobs
-     * that are sending responses.
-     *
-     * If this method throws an exception, the server will abort sending responses and close the
-     * RPC with a [Status] [inferred][io.grpc.Status.fromThrowable] from the thrown exception. Other
-     * RPCs will not be affected.
-     *
-     * @param requests A [ReceiveChannel] where client requests can be read.
-     *       [Cancelling][ReceiveChannel.cancel] this channel can be used to indicate that
-     *       further client requests should be discarded.
-     *
-     * @param responses A [SendChannel] to send responses to.  Explicitly closing this
-     * channel when the RPC is done is optional.  If this channel is closed with a nonnull cause,
-     * the RPC will be closed with a [Status] [inferred][Status.fromException] from that
-     * cause.  [Sending][kotlinx.coroutines.channels.SendChannel.send] to this channel may suspend
-     * if additional responses
-     * cannot be sent without excess buffering; see [io.grpc.ServerCall.Listener.onReady] for
-     * details.
+     * @param requests A [Flow] of requests from the client.  This flow can be
+     *        collected only once and throws [java.lang.IllegalStateException] on attempts to
+     * collect
+     *        it more than once.
      */
-    open suspend fun bidiStreamSayHello(requests: ReceiveChannel<HelloRequest>,
-        responses: SendChannel<HelloReply>) {
+    open fun bidiStreamSayHello(requests: Flow<HelloRequest>): Flow<HelloReply> {
       throw
           StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.BidiStreamSayHello is unimplemented"))
     }

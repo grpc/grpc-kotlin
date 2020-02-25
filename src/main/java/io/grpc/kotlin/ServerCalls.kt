@@ -1,5 +1,6 @@
 package io.grpc.kotlin
 
+import io.grpc.Metadata as GrpcMetadata
 import io.grpc.MethodDescriptor
 import io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING
 import io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING
@@ -9,18 +10,18 @@ import io.grpc.ServerCall
 import io.grpc.ServerCallHandler
 import io.grpc.ServerMethodDefinition
 import io.grpc.Status
+import io.grpc.StatusException
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.sendBlocking
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.plus
-import io.grpc.Metadata as GrpcMetadata
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Helpers for implementing a gRPC server based on a Kotlin coroutine implementation.
@@ -30,18 +31,35 @@ object ServerCalls {
    * Creates a [ServerMethodDefinition] that implements the specified unary RPC method by running
    * the specified implementation and associated implementation details within the specified
    * [CoroutineScope] (and/or a subscope).
+   *
+   * When the RPC is received, this method definition will pass the request from the client
+   * to [implementation], and send the response back to the client when it is returned.
+   *
+   * If [implementation] fails with a [StatusException], the RPC will fail with the corresponding
+   * [Status].  If [implementation] fails with a [CancellationException], the RPC will fail
+   * with [Status.CANCELLED].  If [implementation] fails for any other reason, the RPC will
+   * fail with [Status.UNKNOWN] with the exception as a cause.  If a cancellation is received
+   * from the client before [implementation] is complete, the coroutine will be cancelled and the
+   * RPC will fail with [Status.CANCELLED].
+   *
+   * @param scope The scope to run the RPC implementation in
+   * @param descriptor The descriptor of the method being implemented
+   * @param implementation The implementation of the RPC method
    */
   fun <RequestT, ResponseT> unaryServerMethodDefinition(
     scope: CoroutineScope,
     descriptor: MethodDescriptor<RequestT, ResponseT>,
-    bufferCapacity: Int = 1,
-    implementation: suspend (RequestT) -> ResponseT
+    implementation: suspend (request: RequestT) -> ResponseT
   ): ServerMethodDefinition<RequestT, ResponseT> {
     require(descriptor.type == UNARY) {
       "Expected a unary method descriptor but got $descriptor"
     }
-    return serverMethodDefinition(scope, descriptor, bufferCapacity) { requests, responses ->
-      unaryRequestImpl(descriptor, requests) { responses.send(implementation(it)) }
+    return serverMethodDefinition(scope, descriptor) { requests ->
+      flow {
+        val request = requests.singleOrStatus("request", descriptor)
+        val response = implementation(request)
+        emit(response)
+      }
     }
   }
 
@@ -49,38 +67,62 @@ object ServerCalls {
    * Creates a [ServerMethodDefinition] that implements the specified client-streaming RPC method by
    * running the specified implementation and associated implementation details within the specified
    * [CoroutineScope] (and/or a subscope).
+   *
+   * When the RPC is received, this method definition will pass a [Flow] of requests from the client
+   * to [implementation], and send the response back to the client when it is returned.
+   * Exceptions are handled as in [unaryServerMethodDefinition].  Additionally, attempts to collect
+   * the requests flow more than once will throw an [IllegalStateException], and if [implementation]
+   * cancels collection of the requests flow, further requests from the client will be ignored
+   * (and no backpressure will be applied).
+   *
+   * @param scope The scope to run the RPC implementation in
+   * @param descriptor The descriptor of the method being implemented
+   * @param implementation The implementation of the RPC method
    */
   fun <RequestT, ResponseT> clientStreamingServerMethodDefinition(
     scope: CoroutineScope,
     descriptor: MethodDescriptor<RequestT, ResponseT>,
-    bufferCapacity: Int = 1,
-    implementation: suspend (ReceiveChannel<RequestT>) -> ResponseT
+    implementation: suspend (requests: Flow<RequestT>) -> ResponseT
   ): ServerMethodDefinition<RequestT, ResponseT> {
     require(descriptor.type == CLIENT_STREAMING) {
       "Expected a client streaming method descriptor but got $descriptor"
     }
-    return serverMethodDefinition(scope, descriptor, bufferCapacity) { requests, responses ->
-      responses.send(implementation(requests))
-      Status.OK
+    return serverMethodDefinition(scope, descriptor) { requests ->
+      flow {
+        val response = implementation(requests)
+        emit(response)
+      }
     }
   }
 
   /**
    * Creates a [ServerMethodDefinition] that implements the specified server-streaming RPC method by
    * running the specified implementation and associated implementation details within the specified
-   * [CoroutineScope] (and/or a subscope).
+   * [CoroutineScope] (and/or a subscope).  When the RPC is received, this method definition will
+   * collect the flow returned by [implementation] and send the emitted values back to the client.
+   *
+   * When the RPC is received, this method definition will pass the request from the client
+   * to [implementation], and collect the returned [Flow], sending responses to the client as they
+   * are emitted.  Exceptions and cancellation are handled as in [unaryServerMethodDefinition].
+   *
+   * @param scope The scope to run the RPC implementation in
+   * @param descriptor The descriptor of the method being implemented
+   * @param implementation The implementation of the RPC method
    */
   fun <RequestT, ResponseT> serverStreamingServerMethodDefinition(
     scope: CoroutineScope,
     descriptor: MethodDescriptor<RequestT, ResponseT>,
-    bufferCapacity: Int = 1,
-    implementation: suspend (RequestT, SendChannel<ResponseT>) -> Unit
+    implementation: (request: RequestT) -> Flow<ResponseT>
   ): ServerMethodDefinition<RequestT, ResponseT> {
     require(descriptor.type == SERVER_STREAMING) {
       "Expected a server streaming method descriptor but got $descriptor"
     }
-    return serverMethodDefinition(scope, descriptor, bufferCapacity) { requests, responses ->
-      unaryRequestImpl(descriptor, requests) { implementation(it, responses) }
+    return serverMethodDefinition(scope, descriptor) {
+      requests -> flow {
+        val request = requests.singleOrStatus("request", descriptor)
+        val responses = implementation(request)
+        emitAll(responses)
+      }
     }
   }
 
@@ -88,20 +130,27 @@ object ServerCalls {
    * Creates a [ServerMethodDefinition] that implements the specified bidirectional-streaming RPC
    * method by running the specified implementation and associated implementation details within the
    * specified [CoroutineScope] (and/or a subscope).
+   *
+   * When the RPC is received, this method definition will pass a [Flow] of requests from the client
+   * to [implementation], and collect the returned [Flow], sending responses to the client as they
+   * are emitted.
+   *
+   * Exceptions and cancellation are handled as in [clientStreamingServerMethodDefinition] and as
+   * in [serverStreamingServerMethodDefinition].
+   *
+   * @param scope The scope to run the RPC implementation in
+   * @param descriptor The descriptor of the method being implemented
+   * @param implementation The implementation of the RPC method
    */
   fun <RequestT, ResponseT> bidiStreamingServerMethodDefinition(
     scope: CoroutineScope,
     descriptor: MethodDescriptor<RequestT, ResponseT>,
-    bufferCapacity: Int = 1,
-    implementation: suspend (ReceiveChannel<RequestT>, SendChannel<ResponseT>) -> Unit
+    implementation: (requests: Flow<RequestT>) -> Flow<ResponseT>
   ): ServerMethodDefinition<RequestT, ResponseT> {
     require(descriptor.type == BIDI_STREAMING) {
       "Expected a bidi streaming method descriptor but got $descriptor"
     }
-    return serverMethodDefinition(scope, descriptor, bufferCapacity) { requests, responses ->
-      implementation(requests, responses)
-      Status.OK
-    }
+    return serverMethodDefinition(scope, descriptor, implementation)
   }
 
   /**
@@ -112,13 +161,11 @@ object ServerCalls {
   private fun <RequestT, ResponseT> serverMethodDefinition(
     scope: CoroutineScope,
     descriptor: MethodDescriptor<RequestT, ResponseT>,
-    bufferCapacity: Int,
-    implementation:
-      suspend (ReceiveChannel<RequestT>, SendChannel<ResponseT>) -> Status
+    implementation: (Flow<RequestT>) -> Flow<ResponseT>
   ): ServerMethodDefinition<RequestT, ResponseT> =
     ServerMethodDefinition.create(
       descriptor,
-      serverCallHandler(scope, descriptor.fullMethodName, bufferCapacity, implementation)
+      serverCallHandler(scope, implementation)
     )
 
   /**
@@ -127,207 +174,102 @@ object ServerCalls {
    */
   private fun <RequestT, ResponseT> serverCallHandler(
     scope: CoroutineScope,
-    rpcName: String,
-    bufferCapacity: Int,
-    implementation:
-      suspend (ReceiveChannel<RequestT>, SendChannel<ResponseT>) -> Status
+    implementation: (Flow<RequestT>) -> Flow<ResponseT>
   ): ServerCallHandler<RequestT, ResponseT> =
     ServerCallHandler {
-      call, _ ->
-      serverCallListener(
+      call, _ -> serverCallListener(
         scope + GrpcContextElement.current(),
         call,
-        rpcName,
-        bufferCapacity,
         implementation
       )
     }
 
-  private fun Status.withMaybeCause(cause: Throwable?): Status =
-    if (cause == null) this else this.withCause(cause)
-
   private fun <RequestT, ResponseT> serverCallListener(
     scope: CoroutineScope,
     call: ServerCall<RequestT, ResponseT>,
-    rpcName: String,
-    bufferCapacity: Int,
-    implementation:
-      suspend (ReceiveChannel<RequestT>, SendChannel<ResponseT>) -> Status
-  ): ServerCall.Listener<RequestT> = with (scope) {
-
-    /*
-     * Let
-     *
-     * K = bufferCapacity
-     * R = (sum of arguments passed to call.request) - (# of times onMessage has been called)
-     * S = 1 if the buffer coroutine is suspended waiting on requestOutput.send, 0 otherwise
-     * N = number of elements in requestInput
-     *
-     * The Channel API guarantees that N <= K.  The gRPC API guarantees that R >= 0.
-     *
-     * Claim: the invariant N + R + S <= K always holds.  Proof by induction.
-     *
-     * Base case: when this method first returns, R = K, S = 0, N = 0.
-     *
-     * State transitions:
-     * - onMessage is called.  R goes down by 1, and R is never negative, so R must have been >= 1.
-     *   Therefore before onMessage was called, N + S <= K - 1.  In particular, N <= K - 1, so
-     *   the implementation of onMessage -- which offers an element to requestInput -- succeeds,
-     *   and N goes up by one.  Therefore N + R + S stays the same, since R decreased by 1 and N
-     *   increased by 1.
-     * - The buffering coroutine receives an element from requestInput and suspends until it can be
-     *   sent to requestOutput.  This can only happen if N >= 1.  N goes down by 1 and S goes up
-     *   from 0 to 1, so N + R + S stays the same.
-     * - The buffering coroutine successfully sends an element to requestOutput and resumes. (Since
-     *   requestOutput is a rendezvous queue, this happens-after the user implementation receives
-     *   the request from requestOutput).  The buffering coroutine then calls the requestMore
-     *   lambda, which is a call to call.request(1).  This decreases S from 1 to 0 and increases
-     *   R by 1, so N + R + S stays the same.
-     *
-     * Note that in each case, the decrease happens-before the corresponding increase, so even at
-     * intermediate steps N + R + S <= K.
-     *
-     * None of the methods of ServerCall.Listener block.  They may end this loop:
-     * - onCancel and onHalfClose guarantee that onMessage will never be called again
-     * - onReady does not interact with this loop, instead just potentially informing the
-     *   *output* coroutine that it should proceed to send
-     *
-     * (If requestOutput is cancelled, R goes up to ~infinity, but that happens-after the channels
-     * are cancelled.)
-     */
-
-    val (requestInput, requestOutput) = bufferedChannel<RequestT>(
-      bufferCapacity = bufferCapacity,
-      requestMore = { call.request(1) },
-      onCancel = {
-        // we'll never read any more requests, but the client shouldn't experience backpressure
-        // from attempting to send them
-        call.request(Int.MAX_VALUE)
-      }
-    )
-
-    val responseChannel = Channel<ResponseT>()
-
-    val completionStatus = CompletableDeferred<Status>(coroutineContext[Job])
-
-    // NB: the Java API defers the sending of the headers to just before the first response message.
-    // The docs specify that either implementation is valid.  Still, something to keep an eye on.
+    implementation: (Flow<RequestT>) -> Flow<ResponseT>
+  ): ServerCall.Listener<RequestT> {
     call.sendHeaders(GrpcMetadata())
-    call.request(bufferCapacity)
-    val readiness = Readiness()
 
-    val workers = launch {
-      launch(CoroutineName("Implementation job for $rpcName server")) {
-        completionStatus.complete(
-          try {
-            implementation(requestOutput, responseChannel)
-          } catch (c: CancellationException) {
-            Status.CANCELLED.withCause(c)
-          } catch (e: Throwable) {
-            Status.fromThrowable(e)
-          } finally {
-            requestOutput.cancel()
-            responseChannel.close()
-          }
-        )
+    val readiness = Readiness { call.isReady }
+    val requestsChannel = Channel<RequestT>(1)
+
+    val requestsStarted = AtomicBoolean(false) // enforces read-once
+
+    val requests = flow<RequestT> {
+      check(requestsStarted.compareAndSet(false, true)) {
+        "requests flow can only be collected once"
       }
 
-      launch(CoroutineName("SendResponses job for $rpcName server")) {
-        var keepGoing = true
-        val responsesItr = responseChannel.iterator()
-        while (keepGoing) {
+      call.request(1)
+      try {
+        for (request in requestsChannel) {
+          emit(request)
+          call.request(1)
+        }
+      } catch (e: Exception) {
+        requestsChannel.cancel(
+          CancellationException("Exception thrown while collecting requests", e)
+        )
+        call.request(1) // make sure we don't cause backpressure
+        throw e
+      }
+    }
+
+    val rpcJob = scope.async(
+      CoroutineName("${call.methodDescriptor.fullMethodName} implementation")
+    ) {
+      thrownOrNull {
+        implementation(requests).collect {
           readiness.suspendUntilReady()
-          if (completionStatus.isCompleted) {
-            keepGoing = false
-          } else {
-            while (keepGoing && call.isReady) {
-              keepGoing = try {
-                responsesItr.hasNext()
-                // suspends until we have a response to send, or responses is closed
-                // (either successfully, or with a failure throwable)
-              } catch (e: Exception) {
-                completionStatus.complete(Status.fromThrowable(e))
-                false
-              }
-              if (keepGoing) {
-                call.sendMessage(responsesItr.next())
-              }
-            }
-          }
+          call.sendMessage(it)
         }
       }
     }
 
-    completionStatus.invokeOnCompletion {
-      val closeStatus: Status = if (completionStatus.isCancelled) {
-        Status.CANCELLED.withMaybeCause(it)
-      } else {
-        completionStatus.doneValue
+    rpcJob.invokeOnCompletion { cause ->
+      val closeStatus = when (val failure = cause ?: rpcJob.doneValue) {
+        null -> Status.OK
+        is CancellationException -> Status.CANCELLED.withCause(failure)
+        else -> Status.fromThrowable(failure)
       }
-      if (!closeStatus.isOk) {
-        workers.cancel()
-      }
-      requestOutput.cancel()
-      workers.invokeOnCompletion {
-        call.close(closeStatus, GrpcMetadata())
-      }
+      call.close(closeStatus, GrpcMetadata())
     }
 
-    object: ServerCall.Listener<RequestT>() {
+    return object: ServerCall.Listener<RequestT>() {
       var isReceiving = true
 
       override fun onCancel() {
-        completionStatus.complete(Status.CANCELLED)
+        rpcJob.cancel("Cancellation received from client")
       }
 
       override fun onMessage(message: RequestT) {
-        if (!isReceiving) {
-          return
-        }
-        try {
-          if (!requestInput.offer(message)) {
-            throw AssertionError(
-              "onMessage should never be called when requestInput is unready"
-            )
+        if (isReceiving) {
+          try {
+            if (!requestsChannel.offer(message)) {
+              throw Status.INTERNAL
+                .withDescription(
+                  "onMessage should never be called when requestsChannel is unready"
+                )
+                .asException()
+            }
+          } catch (e: CancellationException) {
+            // we don't want any more client input; swallow it
+            isReceiving = false
           }
-        } catch (e: CancellationException) {
-          // we don't want any more client input; swallow it
-          isReceiving = false
+        }
+        if (!isReceiving) {
+          call.request(1) // do not exert backpressure
         }
       }
 
       override fun onHalfClose() {
-        requestInput.close()
+        requestsChannel.close()
       }
 
       override fun onReady() {
         readiness.onReady()
       }
-    }
-  }
-
-  /** Helper that extracts one request and verifies that there is only one request. */
-  private suspend fun <RequestT, ResponseT> unaryRequestImpl(
-    descriptor: MethodDescriptor<RequestT, ResponseT>,
-    requests: ReceiveChannel<RequestT>,
-    implementation: suspend (RequestT) -> Unit
-  ): Status {
-    val requestItr = requests.iterator()
-    if (!requestItr.hasNext()) {
-      return Status.INTERNAL
-        .withDescription(
-          "Expected one request for $descriptor but received none"
-        )
-    }
-    val request = requestItr.next()
-    implementation(request)
-    return if (requestItr.hasNext()) {
-      Status.INTERNAL
-        .withDescription(
-          "Expected one request for method $descriptor but received two"
-        )
-    } else {
-      Status.OK
     }
   }
 }

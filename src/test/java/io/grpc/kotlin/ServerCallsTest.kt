@@ -20,15 +20,27 @@ import io.grpc.examples.helloworld.HelloReply
 import io.grpc.examples.helloworld.HelloRequest
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.toList
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.produceIn
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.junit.Test
@@ -82,11 +94,14 @@ class ServerCallsTest : AbstractCallsTest() {
     val call = channel.newCall(sayHelloMethod, CallOptions.DEFAULT)
     val closeStatus = CompletableDeferred<Status>()
 
-    call.start(object : ClientCall.Listener<HelloReply>() {
-      override fun onClose(status: Status, trailers: Metadata) {
-        closeStatus.complete(status)
-      }
-    }, Metadata())
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
     call.request(1)
     call.sendMessage(helloRequest("Amethyst"))
     call.sendMessage(helloRequest("Pearl"))
@@ -106,11 +121,14 @@ class ServerCallsTest : AbstractCallsTest() {
     val call = channel.newCall(sayHelloMethod, CallOptions.DEFAULT)
     val closeStatus = CompletableDeferred<Status>()
 
-    call.start(object : ClientCall.Listener<HelloReply>() {
-      override fun onClose(status: Status, trailers: Metadata) {
-        closeStatus.complete(status)
-      }
-    }, Metadata())
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
     call.request(1)
     call.halfClose()
     val status = closeStatus.await()
@@ -153,16 +171,12 @@ class ServerCallsTest : AbstractCallsTest() {
   @Test
   fun simpleServerStreaming() = runBlocking {
     val channel = makeChannel(
-      ServerCalls.serverStreamingServerMethodDefinition(this, serverStreamingSayHelloMethod)
-        { request, responses ->
-          for (name in request.nameList) {
-            responses.send(helloReply("Hello, $name"))
-          }
-        }
+      ServerCalls.serverStreamingServerMethodDefinition(this, serverStreamingSayHelloMethod) {
+        it.nameList.asFlow().map { helloReply("Hello, $it") }
+      }
     )
 
     val responses = ClientCalls.serverStreamingRpc(
-      this,
       channel,
       serverStreamingSayHelloMethod,
       multiHelloRequest("Garnet", "Amethyst", "Pearl")
@@ -175,41 +189,6 @@ class ServerCallsTest : AbstractCallsTest() {
       ).inOrder()
   }
 
-  /**
-   * Test that if the implementation launches a worker instead of implementing the worker itself,
-   * that it completes correctly.
-   */
-  @Test
-  fun serverStreamingLaunches() {
-    val channel = makeChannel(
-      ServerCalls.serverStreamingServerMethodDefinition(
-        GlobalScope,
-        serverStreamingSayHelloMethod
-      ) { request, responses -> coroutineScope {
-          launch {
-            for (name in request.nameList) {
-              responses.send(helloReply("Hello, $name"))
-            }
-          }
-        }
-      }
-    )
-    runBlocking {
-      val responses = ClientCalls.serverStreamingRpc(
-        this,
-        channel,
-        serverStreamingSayHelloMethod,
-        multiHelloRequest("Garnet", "Amethyst", "Pearl")
-      )
-      assertThat(responses.toList())
-        .containsExactly(
-          helloReply("Hello, Garnet"),
-          helloReply("Hello, Amethyst"),
-          helloReply("Hello, Pearl")
-        ).inOrder()
-    }
-  }
-
   @Test
   fun serverStreamingCancellationPropagatedToServer() = runBlocking {
     val requestReceived = Job()
@@ -218,20 +197,26 @@ class ServerCallsTest : AbstractCallsTest() {
       ServerCalls.serverStreamingServerMethodDefinition(
         this,
         serverStreamingSayHelloMethod
-      ) { _, _ ->
-        requestReceived.complete()
-        suspendUntilCancelled { cancelled.complete() }
+      ) {
+        flow {
+          requestReceived.complete()
+          suspendUntilCancelled { cancelled.complete() }
+        }
       }
     )
 
     val call = channel.newCall(serverStreamingSayHelloMethod, CallOptions.DEFAULT)
     val closeStatus = CompletableDeferred<Status>()
-    call.start(object : ClientCall.Listener<HelloReply>() {
-      override fun onClose(status: Status, trailers: Metadata) {
-        closeStatus.complete(status)
-      }
-    }, Metadata())
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
     call.sendMessage(multiHelloRequest("Steven"))
+    call.halfClose()
     requestReceived.join()
     call.cancel("Test cancellation", null)
     cancelled.join()
@@ -244,17 +229,23 @@ class ServerCallsTest : AbstractCallsTest() {
       ServerCalls.serverStreamingServerMethodDefinition(
         this,
         serverStreamingSayHelloMethod
-      ) { _, _ -> throw StatusException(Status.OUT_OF_RANGE) }
+      ) { flow { throw StatusException(Status.OUT_OF_RANGE) } }
     )
 
     val call = channel.newCall(serverStreamingSayHelloMethod, CallOptions.DEFAULT)
     val closeStatus = CompletableDeferred<Status>()
-    call.start(object : ClientCall.Listener<HelloReply>() {
-      override fun onClose(status: Status, trailers: Metadata) {
-        closeStatus.complete(status)
-      }
-    }, Metadata())
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
+    // serverStreamingMethodDefinition waits until the client has definitely sent exactly one
+    // message before executing the implementation, so we have to halfClose
     call.sendMessage(multiHelloRequest("Steven"))
+    call.halfClose()
     assertThat(closeStatus.await().code).isEqualTo(Status.Code.OUT_OF_RANGE)
   }
 
@@ -264,17 +255,24 @@ class ServerCallsTest : AbstractCallsTest() {
       ServerCalls.serverStreamingServerMethodDefinition(
         this,
         serverStreamingSayHelloMethod
-      ) { _, _ -> throw MyException() }
+      ) { throw MyException() }
     )
 
     val call = channel.newCall(serverStreamingSayHelloMethod, CallOptions.DEFAULT)
     val closeStatus = CompletableDeferred<Status>()
-    call.start(object : ClientCall.Listener<HelloReply>() {
-      override fun onClose(status: Status, trailers: Metadata) {
-        closeStatus.complete(status)
-      }
-    }, Metadata())
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
+
+    // serverStreamingMethodDefinition waits until the client has definitely sent exactly one
+    // message before executing the implementation, so we have to halfClose
     call.sendMessage(multiHelloRequest("Steven"))
+    call.halfClose()
     assertThat(closeStatus.await().code).isEqualTo(Status.Code.UNKNOWN)
   }
 
@@ -289,13 +287,12 @@ class ServerCallsTest : AbstractCallsTest() {
       }
     )
 
-    val requestChannel = produce<HelloRequest> {
-      send(helloRequest("Ruby"))
-      send(helloRequest("Sapphire"))
-    }
+    val requestChannel = flowOf(
+      helloRequest("Ruby"),
+      helloRequest("Sapphire")
+    )
     assertThat(
       ClientCalls.clientStreamingRpc(
-        this,
         channel,
         clientStreamingSayHelloMethod,
         requestChannel
@@ -303,6 +300,7 @@ class ServerCallsTest : AbstractCallsTest() {
     ).isEqualTo(helloReply("Hello, Ruby, Sapphire"))
   }
 
+  @ExperimentalCoroutinesApi // take
   @Test
   fun clientStreamingDoesntWaitForAllRequests() = runBlocking {
     val channel = makeChannel(
@@ -310,28 +308,28 @@ class ServerCallsTest : AbstractCallsTest() {
         this,
         clientStreamingSayHelloMethod
       ) { requests ->
-        val req1 = requests.receive().name
-        val req2 = requests.receive().name
-        helloReply("Hello, $req1 and $req2")
+        val (req1, req2) = requests.take(2).toList()
+        helloReply("Hello, ${req1.name} and ${req2.name}")
       }
     )
 
-    val requestChannel = produce<HelloRequest> {
-      send(helloRequest("Peridot"))
-      send(helloRequest("Lapis"))
-      send(helloRequest("Jasper"))
-      send(helloRequest("Aquamarine"))
-    }
+    val requests = flowOf(
+      helloRequest("Peridot"),
+      helloRequest("Lapis"),
+      helloRequest("Jasper"),
+      helloRequest("Aquamarine")
+    )
     assertThat(
       ClientCalls.clientStreamingRpc(
-        this,
         channel,
         clientStreamingSayHelloMethod,
-        requestChannel
+        requests
       )
     ).isEqualTo(helloReply("Hello, Peridot and Lapis"))
   }
 
+  @ExperimentalCoroutinesApi // take
+  @FlowPreview
   @Test
   fun clientStreamingWhenRequestsCancelledNoBackpressure() = runBlocking {
     val barrier = Job()
@@ -340,21 +338,18 @@ class ServerCallsTest : AbstractCallsTest() {
         this,
         clientStreamingSayHelloMethod
       ) { requests ->
-        val req1 = requests.receive().name
-        val req2 = requests.receive().name
-        requests.cancel()
+        val (req1, req2) = requests.take(2).toList()
         barrier.join()
-        helloReply("Hello, $req1 and $req2")
+        helloReply("Hello, ${req1.name} and ${req2.name}")
       }
     )
 
     val requestChannel = Channel<HelloRequest>()
     val response = async {
       ClientCalls.clientStreamingRpc(
-        this,
         channel,
         clientStreamingSayHelloMethod,
-        requestChannel
+        requestChannel.consumeAsFlow()
       )
     }
     requestChannel.send(helloRequest("Lapis"))
@@ -375,19 +370,24 @@ class ServerCallsTest : AbstractCallsTest() {
         this,
         clientStreamingSayHelloMethod
       ) {
-        it.receive()
-        requestReceived.complete()
-        suspendUntilCancelled { cancelled.complete() }
+        it.collect {
+          requestReceived.complete()
+          suspendUntilCancelled { cancelled.complete() }
+        }
+        helloReply("Impossible?")
       }
     )
 
     val call = channel.newCall(clientStreamingSayHelloMethod, CallOptions.DEFAULT)
     val closeStatus = CompletableDeferred<Status>()
-    call.start(object : ClientCall.Listener<HelloReply>() {
-      override fun onClose(status: Status, trailers: Metadata) {
-        closeStatus.complete(status)
-      }
-    }, Metadata())
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
     call.sendMessage(helloRequest("Steven"))
     requestReceived.join()
     call.cancel("Test cancellation", null)
@@ -406,11 +406,14 @@ class ServerCallsTest : AbstractCallsTest() {
 
     val call = channel.newCall(clientStreamingSayHelloMethod, CallOptions.DEFAULT)
     val closeStatus = CompletableDeferred<Status>()
-    call.start(object : ClientCall.Listener<HelloReply>() {
-      override fun onClose(status: Status, trailers: Metadata) {
-        closeStatus.complete(status)
-      }
-    }, Metadata())
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
     call.sendMessage(helloRequest("Steven"))
     assertThat(closeStatus.await().code).isEqualTo(Status.Code.INVALID_ARGUMENT)
   }
@@ -421,35 +424,39 @@ class ServerCallsTest : AbstractCallsTest() {
       ServerCalls.clientStreamingServerMethodDefinition(
         this,
         clientStreamingSayHelloMethod
-      ) { throw MyException() }
+      ) {
+        throw MyException()
+      }
     )
 
     val call = channel.newCall(clientStreamingSayHelloMethod, CallOptions.DEFAULT)
     val closeStatus = CompletableDeferred<Status>()
-    call.start(object : ClientCall.Listener<HelloReply>() {
-      override fun onClose(status: Status, trailers: Metadata) {
-        closeStatus.complete(status)
-      }
-    }, Metadata())
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
     call.sendMessage(helloRequest("Steven"))
     assertThat(closeStatus.await().code).isEqualTo(Status.Code.UNKNOWN)
   }
 
+  @ExperimentalCoroutinesApi // onCompletion
+  @FlowPreview
   @Test
   fun simpleBidiStreamingPingPong() = runBlocking {
     val channel = makeChannel(
-      ServerCalls.bidiStreamingServerMethodDefinition(this, bidiStreamingSayHelloMethod)
-      { requests, responses ->
-        for (request in requests) {
-          responses.send(helloReply("Hello, ${request.name}"))
-        }
-        responses.send(helloReply("Goodbye"))
+      ServerCalls.bidiStreamingServerMethodDefinition(this, bidiStreamingSayHelloMethod) {
+        requests -> requests.map { helloReply("Hello, ${it.name}") }.onCompletion { emit(helloReply("Goodbye")) }
       }
     )
 
     val requests = Channel<HelloRequest>()
     val responses =
-      ClientCalls.bidiStreamingRpc(this, channel, bidiStreamingSayHelloMethod, requests)
+      ClientCalls.bidiStreamingRpc(channel, bidiStreamingSayHelloMethod, requests.consumeAsFlow())
+        .produceIn(this)
 
     requests.send(helloRequest("Garnet"))
     assertThat(responses.receive()).isEqualTo(helloReply("Hello, Garnet"))
@@ -468,20 +475,26 @@ class ServerCallsTest : AbstractCallsTest() {
       ServerCalls.bidiStreamingServerMethodDefinition(
         this,
         bidiStreamingSayHelloMethod
-      ) { requests, _ ->
-        requests.receive()
-        requestReceived.complete()
-        suspendUntilCancelled { cancelled.complete() }
+      ) { requests ->
+        flow {
+          requests.collect {
+            requestReceived.complete()
+            suspendUntilCancelled { cancelled.complete() }
+          }
+        }
       }
     )
 
     val call = channel.newCall(bidiStreamingSayHelloMethod, CallOptions.DEFAULT)
     val closeStatus = CompletableDeferred<Status>()
-    call.start(object : ClientCall.Listener<HelloReply>() {
-      override fun onClose(status: Status, trailers: Metadata) {
-        closeStatus.complete(status)
-      }
-    }, Metadata())
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
     call.sendMessage(helloRequest("Steven"))
     requestReceived.join()
     call.cancel("Test cancellation", null)
@@ -495,16 +508,19 @@ class ServerCallsTest : AbstractCallsTest() {
       ServerCalls.bidiStreamingServerMethodDefinition(
         this,
         bidiStreamingSayHelloMethod
-      ) { _, _ -> throw StatusException(Status.INVALID_ARGUMENT) }
+      ) { flow { throw StatusException(Status.INVALID_ARGUMENT) } }
     )
 
     val call = channel.newCall(bidiStreamingSayHelloMethod, CallOptions.DEFAULT)
     val closeStatus = CompletableDeferred<Status>()
-    call.start(object : ClientCall.Listener<HelloReply>() {
-      override fun onClose(status: Status, trailers: Metadata) {
-        closeStatus.complete(status)
-      }
-    }, Metadata())
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
     call.sendMessage(helloRequest("Steven"))
     assertThat(closeStatus.await().code).isEqualTo(Status.Code.INVALID_ARGUMENT)
   }
@@ -515,16 +531,19 @@ class ServerCallsTest : AbstractCallsTest() {
       ServerCalls.bidiStreamingServerMethodDefinition(
         this,
         bidiStreamingSayHelloMethod
-      ) { _, _ -> throw MyException() }
+      ) { throw MyException() }
     )
 
     val call = channel.newCall(bidiStreamingSayHelloMethod, CallOptions.DEFAULT)
     val closeStatus = CompletableDeferred<Status>()
-    call.start(object : ClientCall.Listener<HelloReply>() {
-      override fun onClose(status: Status, trailers: Metadata) {
-        closeStatus.complete(status)
-      }
-    }, Metadata())
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
     call.sendMessage(helloRequest("Steven"))
     assertThat(closeStatus.await().code).isEqualTo(Status.Code.UNKNOWN)
   }
@@ -545,18 +564,18 @@ class ServerCallsTest : AbstractCallsTest() {
   }
 
   @Test
-  fun rejectNonServerStreamingMethod()  = runBlocking {
+  fun rejectNonServerStreamingMethod() = runBlocking {
     assertThrows<IllegalArgumentException> {
       ServerCalls
-        .serverStreamingServerMethodDefinition(this, sayHelloMethod) { _, _ -> TODO() }
+        .serverStreamingServerMethodDefinition(this, sayHelloMethod) { TODO() }
     }
   }
 
   @Test
-  fun rejectNonBidiStreamingMethod()  = runBlocking {
+  fun rejectNonBidiStreamingMethod() = runBlocking {
     assertThrows<IllegalArgumentException> {
       ServerCalls
-        .bidiStreamingServerMethodDefinition(this, sayHelloMethod) { _, _ -> TODO() }
+        .bidiStreamingServerMethodDefinition(this, sayHelloMethod) { TODO() }
     }
   }
 
@@ -567,7 +586,7 @@ class ServerCallsTest : AbstractCallsTest() {
     val contextKey = Context.key<String>("testKey")
     val contextToInject = Context.ROOT.withValue(contextKey, "testValue")
 
-    val interceptor = object: ServerInterceptor {
+    val interceptor = object : ServerInterceptor {
       override fun <RequestT, ResponseT> interceptCall(
         call: ServerCall<RequestT, ResponseT>,
         headers: Metadata,
@@ -611,7 +630,7 @@ class ServerCallsTest : AbstractCallsTest() {
 
     val test = launch {
       val ex = assertThrows<StatusException> {
-        ClientCalls.unaryRpc(this, channel, sayHelloMethod, helloRequest("Greg"))
+        ClientCalls.unaryRpc(channel, sayHelloMethod, helloRequest("Greg"))
       }
       assertThat(ex.status.code).isEqualTo(Status.Code.CANCELLED)
     }
@@ -632,13 +651,15 @@ class ServerCallsTest : AbstractCallsTest() {
     serverScope.cancel()
     val test = launch {
       val ex = assertThrows<StatusException> {
-        ClientCalls.unaryRpc(this, channel, sayHelloMethod, helloRequest("Greg"))
+        ClientCalls.unaryRpc(channel, sayHelloMethod, helloRequest("Greg"))
       }
       assertThat(ex.status.code).isEqualTo(Status.Code.CANCELLED)
     }
     test.join()
   }
 
+  @ExperimentalCoroutinesApi
+  @FlowPreview
   @Test
   fun serverStreamingFlowControl() = runBlocking {
     val receiveFirstMessage = Job()
@@ -647,30 +668,63 @@ class ServerCallsTest : AbstractCallsTest() {
       ServerCalls.serverStreamingServerMethodDefinition(
         this,
         serverStreamingSayHelloMethod
-      ) { _, responses ->
-        coroutineScope {
-          responses.send(helloReply("1st"))
-          val secondSend = launch {
-            responses.send(helloReply("2nd"))
+      ) {
+        channelFlow {
+          send(helloReply("1st"))
+          send(helloReply("2nd"))
+          val thirdSend = launch {
+            send(helloReply("3rd"))
           }
           delay(200)
-          assertThat(secondSend.isCompleted).isFalse()
+          assertThat(thirdSend.isCompleted).isFalse()
           receiveFirstMessage.complete()
           receivedFirstMessage.join()
-          secondSend.join()
-        }
+          thirdSend.join()
+        }.buffer(Channel.RENDEZVOUS)
       }
     )
 
-    val responses = ClientCalls.serverStreamingRpc(
-      this,
-      channel,
-      serverStreamingSayHelloMethod,
-      multiHelloRequest()
-    )
+    val responses = produce<HelloReply> {
+      ClientCalls.serverStreamingRpc(
+        channel,
+        serverStreamingSayHelloMethod,
+        multiHelloRequest()
+      ).collect { send(it) }
+    }
     receiveFirstMessage.join()
     assertThat(responses.receive()).isEqualTo(helloReply("1st"))
     receivedFirstMessage.complete()
-    assertThat(responses.toList()).containsExactly(helloReply("2nd"))
+    assertThat(responses.toList()).containsExactly(helloReply("2nd"), helloReply("3rd"))
+  }
+
+  @Test
+  fun contextPreservation() = runBlocking {
+    val contextKey = Context.key<String>("foo")
+    val channel = makeChannel(
+      ServerCalls.unaryServerMethodDefinition(
+        this,
+        sayHelloMethod
+      ) {
+        assertThat(contextKey.get()).isEqualTo("bar")
+        helloReply("Hello!")
+      },
+      object : ServerInterceptor {
+        override fun <ReqT, RespT> interceptCall(
+          call: ServerCall<ReqT, RespT>,
+          headers: Metadata,
+          next: ServerCallHandler<ReqT, RespT>
+        ): ServerCall.Listener<ReqT> =
+          Contexts.interceptCall(
+            Context.current().withValue(contextKey, "bar"),
+            call,
+            headers,
+            next
+          )
+      }
+    )
+    assertThat(
+      ClientCalls.unaryRpc(channel, sayHelloMethod, helloRequest(""))
+    ).isEqualTo(helloReply("Hello!"))
   }
 }
+

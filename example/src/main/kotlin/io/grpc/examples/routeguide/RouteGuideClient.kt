@@ -1,29 +1,30 @@
 package io.grpc.examples.routeguide
 
-import com.google.protobuf.util.JavaTimeConversions
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.grpc.examples.routeguide.RouteGuideGrpcKt.RouteGuideCoroutineStub
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.asExecutor
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.Closeable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 import kotlin.random.nextLong
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.asExecutor
-import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class RouteGuideClient private constructor(
   val channel: ManagedChannel,
   val stub: RouteGuideCoroutineStub,
   val printer: Printer
 ) : Closeable {
-  val random = Random(314159)
+  private val random = Random(314159)
 
   constructor(
     channelBuilder: ManagedChannelBuilder<*>,
@@ -55,12 +56,17 @@ class RouteGuideClient private constructor(
         }
       }
     }
+
+    private fun point(lat: Int, lon: Int): Point =
+      Point.newBuilder()
+        .setLatitude(lat)
+        .setLongitude(lon)
+        .build()
   }
 
   override fun close() {
     channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
   }
-
 
   interface Printer {
     companion object {
@@ -76,10 +82,10 @@ class RouteGuideClient private constructor(
   fun getFeature(latitude: Int, longitude: Int) = runBlocking {
     printer.println("*** GetFeature: lat=$latitude lon=$longitude")
 
-    val request = point {
-      this.latitude = latitude
-      this.longitude = longitude
-    }
+    val request = Point.newBuilder()
+      .setLatitude(latitude)
+      .setLongitude(longitude)
+      .build()
     val feature = stub.getFeature(request)
 
     if (feature.exists()) {
@@ -92,90 +98,67 @@ class RouteGuideClient private constructor(
   fun listFeatures(lowLat: Int, lowLon: Int, hiLat: Int, hiLon: Int) = runBlocking {
     printer.println("*** ListFeatures: lowLat=$lowLat lowLon=$lowLon hiLat=$hiLat liLon=$hiLon")
 
-    val request = rectangle {
-      lo = point {
-        latitude = lowLat
-        longitude = lowLon
-      }
-      hi = point {
-        latitude = lowLat
-        longitude = lowLon
-      }
-    }
+    val request = Rectangle.newBuilder()
+      .setLo(point(lowLat, lowLon))
+      .setHi(point(hiLat, hiLon))
+      .build()
     var i = 1
-    for (feature in stub.listFeatures(request)) {
-      printer.println("Result #$i: $feature")
-      i++
+    stub.listFeatures(request).collect { feature ->
+      printer.println("Result #${i++}: $feature")
     }
   }
 
   fun recordRoute(features: List<Feature>, numPoints: Int) = runBlocking {
     printer.println("*** RecordRoute")
-    val requests = Channel<Point>()
+    val requests = flow {
+      for (i in 1..numPoints) {
+        val feature = features.random(random)
+        println("Visiting point ${feature.location.toStr()}")
+        emit(feature.location)
+        delay(timeMillis = random.nextLong(500L..1500L))
+      }
+    }
     val finish = launch {
       val summary = stub.recordRoute(requests)
       printer.println("Finished trip with ${summary.pointCount} points.")
       printer.println("Passed ${summary.featureCount} features.")
       printer.println("Travelled ${summary.distance} meters.")
-      val duration = JavaTimeConversions.toJavaDuration(summary.elapsedTime).seconds
+      val duration = summary.elapsedTime.seconds
       printer.println("It took $duration seconds.")
     }
-    for (i in 1..numPoints) {
-      val feature = features.random(random)
-      println("Visiting point ${feature.location.toStr()}")
-      requests.send(feature.location)
-      delay(timeMillis = random.nextLong(500L..1500L))
-    }
-    requests.close()
     finish.join()
   }
 
   fun routeChat() = runBlocking {
     printer.println("*** RouteChat")
-    val requests = Channel<RouteNote>()
+    val requestList = listOf(
+      RouteNote.newBuilder().apply {
+        message = "First message"
+        location = point(0, 0)
+      }.build(),
+      RouteNote.newBuilder().apply {
+        message = "Second message"
+        location = point(0, 0)
+      }.build(),
+      RouteNote.newBuilder().apply {
+        message = "Third message"
+        location = point(1, 0)
+      }.build(),
+      RouteNote.newBuilder().apply {
+        message = "Fourth message"
+        location = point(1, 1)
+      }.build()
+    )
+    val requests = requestList.asFlow().onEach { request ->
+      printer.println("Sending message \"${request.message}\" at ${request.location.toStr()}")
+    }
     val rpc = launch {
-      val responses = stub.routeChat(requests)
-      for (note in responses) {
+      stub.routeChat(requests).collect { note ->
         printer.println("Got message \"${note.message}\" at ${note.location.toStr()}")
       }
       println("Finished RouteChat")
     }
-    val requestList = listOf(
-      routeNote {
-        message = "First message"
-        location = point {
-          latitude = 0
-          longitude = 0
-        }
-      },
-      routeNote {
-        message = "Second message"
-        location = point {
-          latitude = 0
-          longitude = 1
-        }
-      },
-      routeNote {
-        message = "Third message"
-        location = point {
-          latitude = 1
-          longitude = 0
-        }
-      },
-      routeNote {
-        message = "Fourth message"
-        location = point {
-          latitude = 1
-          longitude = 1
-        }
-      }
-    )
 
-    for (request in requestList) {
-      printer.println("Sending message \"${request.message}\" at ${request.location.toStr()}")
-      requests.send(request)
-    }
-    requests.close()
     rpc.join()
   }
 }

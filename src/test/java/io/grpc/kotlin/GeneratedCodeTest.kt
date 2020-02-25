@@ -12,24 +12,30 @@ import io.grpc.examples.helloworld.HelloReply
 import io.grpc.examples.helloworld.HelloRequest
 import io.grpc.examples.helloworld.MultiHelloRequest
 import io.grpc.examples.helloworld.helloReply
-import io.grpc.examples.helloworld.helloRequest
-import io.grpc.examples.helloworld.multiHelloRequest
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.toList
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.produceIn
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import kotlin.coroutines.EmptyCoroutineContext
+import java.util.concurrent.TimeUnit
 
 @RunWith(JUnit4::class)
 @MediumTest(MediumTestAttribute.THREADS)
@@ -45,8 +51,8 @@ class GeneratedCodeTest : AbstractCallsTest() {
     val stub = GreeterCoroutineStub(channel)
 
     runBlocking {
-      assertThat(stub.sayHello(helloRequest { name = "Steven" }))
-        .isEqualTo(helloReply { message = "Hello, Steven!" })
+      assertThat(stub.sayHello(helloRequest("Steven")))
+        .isEqualTo(helloReply("Hello, Steven!"))
     }
   }
 
@@ -65,7 +71,7 @@ class GeneratedCodeTest : AbstractCallsTest() {
     val stub = GreeterCoroutineStub(channel).withDeadlineAfter(100, TimeUnit.MILLISECONDS)
 
     val ex = assertThrows<StatusException> {
-      stub.sayHello(helloRequest { name = "Topaz" })
+      stub.sayHello(helloRequest("Topaz"))
     }
     assertThat(ex.status.code).isEqualTo(Status.Code.DEADLINE_EXCEEDED)
     serverCancelled.join()
@@ -87,7 +93,7 @@ class GeneratedCodeTest : AbstractCallsTest() {
 
     runBlocking {
       val result = async {
-        val request = helloRequest { name = "Steven" }
+        val request = helloRequest("Steven")
         helloStub.sayHello(request)
       }
       helloReceived.join()
@@ -133,9 +139,7 @@ class GeneratedCodeTest : AbstractCallsTest() {
   @Test
   fun simpleClientStreamingRpc() = runBlocking {
     val channel = makeChannel(object : GreeterCoroutineImplBase() {
-      override suspend fun clientStreamSayHello(
-        requests: ReceiveChannel<HelloRequest>
-      ): HelloReply {
+      override suspend fun clientStreamSayHello(requests: Flow<HelloRequest>): HelloReply {
         return helloReply {
           message = requests.toList().joinToString(prefix = "Hello, ", separator = ", ") { it.name }
         }
@@ -143,34 +147,35 @@ class GeneratedCodeTest : AbstractCallsTest() {
     })
 
     val stub = GreeterCoroutineStub(channel)
-    val requests = Channel<HelloRequest>()
+    val requests = flowOf(
+      helloRequest("Peridot"),
+      helloRequest("Lapis")
+    )
     val response = async { stub.clientStreamSayHello(requests) }
-    requests.send(helloRequest { name = "Peridot" })
-    requests.send(helloRequest { name = "Lapis" })
-    requests.close()
-    assertThat(response.await()).isEqualTo(helloReply { message = "Hello, Peridot, Lapis" })
+    assertThat(response.await()).isEqualTo(helloReply("Hello, Peridot, Lapis"))
   }
 
+  @FlowPreview
   @Test
   fun clientStreamingRpcCancellation() = runBlocking {
     val serverReceived = Job()
     val serverCancelled = Job()
     val channel = makeChannel(object : GreeterCoroutineImplBase() {
-      override suspend fun clientStreamSayHello(
-        requests: ReceiveChannel<HelloRequest>
-      ): HelloReply {
-        requests.receive() // TODO(lowasser): discuss whether this is appropriate
-        serverReceived.complete()
-        suspendUntilCancelled { serverCancelled.complete() }
+      override suspend fun clientStreamSayHello(requests: Flow<HelloRequest>): HelloReply {
+        requests.collect {
+          serverReceived.complete()
+          suspendUntilCancelled { serverCancelled.complete() }
+        }
+        throw AssertionError("unreachable")
       }
     })
 
     val stub = GreeterCoroutineStub(channel)
     val requests = Channel<HelloRequest>()
     val response = async {
-      stub.clientStreamSayHello(requests)
+      stub.clientStreamSayHello(requests.consumeAsFlow())
     }
-    requests.send(helloRequest { name = "Aquamarine" })
+    requests.send(helloRequest("Aquamarine"))
     serverReceived.join()
     response.cancel()
     serverCancelled.join()
@@ -182,158 +187,104 @@ class GeneratedCodeTest : AbstractCallsTest() {
   @Test
   fun clientStreamingRpcThrowsStatusException() = runBlocking {
     val channel = makeChannel(object : GreeterCoroutineImplBase() {
-      override suspend fun clientStreamSayHello(
-        requests: ReceiveChannel<HelloRequest>
-      ): HelloReply {
+      override suspend fun clientStreamSayHello(requests: Flow<HelloRequest>): HelloReply {
         throw StatusException(Status.PERMISSION_DENIED)
       }
     })
     val stub = GreeterCoroutineStub(channel)
-    val requests = Channel<HelloRequest>()
 
     val ex = assertThrows<StatusException> {
-      stub.clientStreamSayHello(requests)
+      stub.clientStreamSayHello(flowOf<HelloRequest>())
     }
     assertThat(ex.status.code).isEqualTo(Status.Code.PERMISSION_DENIED)
   }
 
   @Test
-  fun clientStreamingRpcReturnsEarly() = runBlocking {
-    val channel = makeChannel(object : GreeterCoroutineImplBase() {
-      override suspend fun clientStreamSayHello(
-        requests: ReceiveChannel<HelloRequest>
-      ): HelloReply {
-        var count = 0
-        val names = mutableListOf<String>()
-        for (request in requests) {
-          names += request.name
-          count++
-          if (count >= 2) {
-            break
-          }
-        }
-        return helloReply(names.joinToString(prefix = "Hello, ", separator = ", "))
-      }
-    })
-
-    val stub = GreeterCoroutineStub(channel)
-    val requests = Channel<HelloRequest>()
-    val response = async { stub.clientStreamSayHello(requests) }
-    requests.send(helloRequest { name = "Peridot" })
-    requests.send(helloRequest { name = "Lapis" })
-    assertThat(response.await()).isEqualTo(helloReply { message = "Hello, Peridot, Lapis" })
-    assertThrows<CancellationException> {
-      requests.send(helloRequest { name = "Jasper" })
-    }
-  }
-
-  @Test
   fun simpleServerStreamingRpc() = runBlocking {
     val channel = makeChannel(object : GreeterCoroutineImplBase() {
-      override suspend fun serverStreamSayHello(
-        request: MultiHelloRequest,
-        responses: SendChannel<HelloReply>
-      ) {
-        for (name in request.nameList) {
-          responses.send(helloReply { message = "Hello, $name" })
-        }
+      override fun serverStreamSayHello(request: MultiHelloRequest): Flow<HelloReply> {
+        return request.nameList.asFlow().map { helloReply("Hello, $it") }
       }
     })
 
     val responses = GreeterCoroutineStub(channel).serverStreamSayHello(
-      multiHelloRequest {
-        name += listOf("Garnet", "Amethyst", "Pearl")
-      }
+      multiHelloRequest("Garnet", "Amethyst", "Pearl")
     )
 
     assertThat(responses.toList())
       .containsExactly(
-        helloReply { message = "Hello, Garnet" },
-        helloReply { message = "Hello, Amethyst" },
-        helloReply { message = "Hello, Pearl" }
+        helloReply("Hello, Garnet"),
+        helloReply("Hello, Amethyst"),
+        helloReply("Hello, Pearl")
       )
       .inOrder()
   }
 
+  @FlowPreview
   @Test
   fun serverStreamingRpcCancellation() = runBlocking {
     val serverCancelled = Job()
     val serverReceived = Job()
 
     val channel = makeChannel(object : GreeterCoroutineImplBase() {
-      override suspend fun serverStreamSayHello(
-        request: MultiHelloRequest,
-        responses: SendChannel<HelloReply>
-      ) {
-        serverReceived.complete()
-        suspendUntilCancelled {
-          serverCancelled.complete()
-        }
-      }
-    })
-
-    val response = GreeterCoroutineStub(channel).serverStreamSayHello(
-      multiHelloRequest {
-        name += listOf("Topaz", "Aquamarine")
-      }
-    )
-    serverReceived.join()
-    response.cancel()
-    serverCancelled.join()
-  }
-
-  @Test
-  fun bidiPingPong() = runBlocking {
-    val channel = makeChannel(object : GreeterCoroutineImplBase() {
-      override suspend fun bidiStreamSayHello(
-        requests: ReceiveChannel<HelloRequest>,
-        responses: SendChannel<HelloReply>
-      ) {
-        for (request in requests) {
-          responses.send(helloReply { message = "Hello, ${request.name}" })
-        }
-      }
-    })
-
-    val requests = Channel<HelloRequest>()
-    val responses = GreeterCoroutineStub(channel).bidiStreamSayHello(requests)
-
-    requests.send(helloRequest { name = "Steven" })
-    assertThat(responses.receive()).isEqualTo(helloReply { message = "Hello, Steven" })
-    requests.send(helloRequest { name = "Garnet" })
-    assertThat(responses.receive()).isEqualTo(helloReply { message = "Hello, Garnet" })
-    requests.close()
-    assertThat(responses.toList()).isEmpty()
-  }
-
-  @Test
-  fun bidiStreamingRpcReturnsEarly() = runBlocking {
-    val channel = makeChannel(object : GreeterCoroutineImplBase() {
-      override suspend fun bidiStreamSayHello(
-        requests: ReceiveChannel<HelloRequest>,
-        responses: SendChannel<HelloReply>
-      ) {
-        var count = 0
-        for (request in requests) {
-          responses.send(helloReply { message = "Hello, ${request.name}" })
-          count++
-          if (count >= 2) {
-            break
+      override fun serverStreamSayHello(request: MultiHelloRequest): Flow<HelloReply> {
+        return flow {
+          serverReceived.complete()
+          suspendUntilCancelled {
+            serverCancelled.complete()
           }
         }
       }
     })
 
+    val response = GreeterCoroutineStub(channel).serverStreamSayHello(
+      multiHelloRequest("Topaz", "Aquamarine")
+    ).produceIn(this)
+    serverReceived.join()
+    response.cancel()
+    serverCancelled.join()
+  }
+
+  @FlowPreview
+  @Test
+  fun bidiPingPong() = runBlocking {
+    val channel = makeChannel(object : GreeterCoroutineImplBase() {
+      override fun bidiStreamSayHello(requests: Flow<HelloRequest>): Flow<HelloReply> {
+        return requests.map { helloReply("Hello, ${it.name}") }
+      }
+    })
+
+    val requests = Channel<HelloRequest>()
+    val responses = GreeterCoroutineStub(channel).bidiStreamSayHello(requests.consumeAsFlow()).produceIn(this)
+
+    requests.send(helloRequest("Steven"))
+    assertThat(responses.receive()).isEqualTo(helloReply("Hello, Steven"))
+    requests.send(helloRequest("Garnet"))
+    assertThat(responses.receive()).isEqualTo(helloReply("Hello, Garnet"))
+    requests.close()
+    assertThat(responses.toList()).isEmpty()
+  }
+
+  @ExperimentalCoroutinesApi
+  @FlowPreview
+  @Test
+  fun bidiStreamingRpcReturnsEarly() = runBlocking {
+    val channel = makeChannel(object : GreeterCoroutineImplBase() {
+      override fun bidiStreamSayHello(requests: Flow<HelloRequest>): Flow<HelloReply> {
+        return requests.take(2).map { helloReply("Hello, ${it.name}") }
+      }
+    })
+
     val stub = GreeterCoroutineStub(channel)
     val requests = Channel<HelloRequest>()
-    val responses = stub.bidiStreamSayHello(requests)
-    requests.send(helloRequest { name = "Peridot" })
-    assertThat(responses.receive()).isEqualTo(helloReply { message = "Hello, Peridot" })
-    requests.send(helloRequest { name = "Lapis" })
-    assertThat(responses.receive()).isEqualTo(helloReply { message = "Hello, Lapis" })
+    val responses = stub.bidiStreamSayHello(requests.consumeAsFlow()).produceIn(this)
+    requests.send(helloRequest("Peridot"))
+    assertThat(responses.receive()).isEqualTo(helloReply("Hello, Peridot"))
+    requests.send(helloRequest("Lapis"))
+    assertThat(responses.receive()).isEqualTo(helloReply("Hello, Lapis"))
     assertThat(responses.toList()).isEmpty()
     try {
-      requests.send(helloRequest { name = "Jasper" })
+      requests.send(helloRequest("Jasper"))
     } catch (allowed: CancellationException) {}
   }
 
@@ -353,7 +304,7 @@ class GeneratedCodeTest : AbstractCallsTest() {
     val stub = GreeterCoroutineStub(channel)
     val test = launch {
       val ex = assertThrows<StatusException> {
-        stub.sayHello(helloRequest { name = "Greg" })
+        stub.sayHello(helloRequest("Greg"))
       }
       assertThat(ex.status.code).isEqualTo(Status.Code.CANCELLED)
     }
@@ -376,7 +327,7 @@ class GeneratedCodeTest : AbstractCallsTest() {
     serverJob.cancel()
     val stub = GreeterCoroutineStub(channel)
     val ex = assertThrows<StatusException> {
-      stub.sayHello(helloRequest { name = "Greg" })
+      stub.sayHello(helloRequest("Greg"))
     }
     assertThat(ex.status.code).isEqualTo(Status.Code.CANCELLED)
   }

@@ -3,13 +3,17 @@ package io.grpc.examples.routeguide
 import com.google.common.base.Stopwatch
 import com.google.common.base.Ticker
 import com.google.common.io.ByteSource
-import com.google.protobuf.util.JavaTimeConversions
+import com.google.protobuf.util.Durations
 import io.grpc.Server
 import io.grpc.ServerBuilder
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.SendChannel
+import java.util.concurrent.TimeUnit
 
 /**
  * Kotlin adaptation of RouteGuideServer from the Java gRPC example.
@@ -74,53 +78,51 @@ class RouteGuideServer private constructor(
 
     override suspend fun getFeature(request: Point): Feature {
       return features.find { it.location == request }
-        ?: feature { location = request } // No feature was found, return an unnamed feature.
+        ?: Feature.newBuilder().apply { location = request }.build()
+      // No feature was found, return an unnamed feature.
     }
 
-    override suspend fun listFeatures(request: Rectangle, responses: SendChannel<Feature>) {
-      for (feature in features) {
-        if (feature.exists() && feature.location in request) {
-          responses.send(feature)
-        }
-      }
+    override fun listFeatures(request: Rectangle): Flow<Feature> {
+      return features.asFlow().filter { it.exists() && it.location in request }
     }
 
-    override suspend fun recordRoute(requests: ReceiveChannel<Point>): RouteSummary {
+    override suspend fun recordRoute(requests: Flow<Point>): RouteSummary {
       var pointCount = 0
       var featureCount = 0
       var distance = 0
       var previous: Point? = null
       val stopwatch = Stopwatch.createStarted(ticker)
-      for (request in requests) {
+      requests.collect { request ->
         pointCount++
         if (getFeature(request).exists()) {
           featureCount++
         }
-        if (previous != null) {
-          distance += previous distanceTo request
+        val prev = previous
+        if (prev != null) {
+          distance += prev distanceTo request
         }
         previous = request
       }
-      return routeSummary {
+      return RouteSummary.newBuilder().apply {
         this.pointCount = pointCount
         this.featureCount = featureCount
         this.distance = distance
-        this.elapsedTime = JavaTimeConversions.toProtoDuration(stopwatch.elapsed())
-      }
+        this.elapsedTime = Durations.fromMicros(stopwatch.elapsed(TimeUnit.MICROSECONDS))
+      }.build()
     }
 
-    override suspend fun routeChat(
-      requests: ReceiveChannel<RouteNote>,
-      responses: SendChannel<RouteNote>
-    ) {
-      for (note in requests) {
-        val notes: MutableList<RouteNote> = routeNotes.computeIfAbsent(note.location) {
-          Collections.synchronizedList(mutableListOf<RouteNote>())
+    override fun routeChat(requests: Flow<RouteNote>): Flow<RouteNote> {
+      return flow {
+        // could use transform, but it's currently experimental
+        requests.collect { note ->
+          val notes: MutableList<RouteNote> = routeNotes.computeIfAbsent(note.location) {
+            Collections.synchronizedList(mutableListOf<RouteNote>())
+          }
+          for (prevNote in notes.toTypedArray()) { // thread-safe snapshot
+            emit(prevNote)
+          }
+          notes += note
         }
-        for (prevNote in notes.toTypedArray()) { // thread-safe snapshot
-          responses.send(prevNote)
-        }
-        notes += note
       }
     }
   }
