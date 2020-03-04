@@ -31,7 +31,7 @@ import kotlinx.coroutines.runBlocking
 class HelloWorldClient constructor(
     private val channel: ManagedChannel
 ) : Closeable {
-  private val stub: GreeterCoroutineStub = GreeterCoroutineStub(channel);
+  private val stub: GreeterCoroutineStub = GreeterCoroutineStub(channel)
 
   fun greet(name: String) = runBlocking {
     val request = HelloRequest.newBuilder().setName(name).build()
@@ -62,7 +62,7 @@ fun main(args: Array<String>) {
             .usePlaintext()
             .executor(dispatcher.asExecutor()).build()
     ).use {
-      val user = if (args.size > 0) args[0] else "world"
+      val user = args.singleOrNull() ?: "world"
       it.greet(user)
     }
   }
