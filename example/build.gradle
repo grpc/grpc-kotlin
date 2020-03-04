@@ -87,14 +87,14 @@ protobuf {
 startScripts.enabled = false
 
 task helloWorldClient(type: CreateStartScripts) {
-    mainClassName = 'io.grpc.examples.helloworld.HelloWorldClient'
+    mainClassName = 'io.grpc.examples.helloworld.HelloWorldClientKt'
     applicationName = 'hello-world-client'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
 }
 
 task helloWorldServer(type: CreateStartScripts) {
-    mainClassName = 'io.grpc.examples.helloworld.HelloWorldServer'
+    mainClassName = 'io.grpc.examples.helloworld.HelloWorldServerKt'
     applicationName = 'hello-world-server'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath

@@ -19,37 +19,27 @@ package io.grpc.examples.helloworld
 import io.grpc.Server
 import io.grpc.ServerBuilder
 
-class HelloWorldServer private constructor(
-  val port: Int,
-  val server: Server
+class HelloWorldServer constructor(
+    private val port: Int
 ) {
-  constructor(port: Int) :
-  this(
-    serverBuilder = ServerBuilder.forPort(port),
-    port = port
-  )
-
-  constructor(
-    serverBuilder: ServerBuilder<*>,
-    port: Int
-  ) : this(
-    port = port,
-    server = serverBuilder.addService(HelloWorldService()).build()
-  )
+  val server: Server = ServerBuilder
+      .forPort(port)
+      .addService(HelloWorldService())
+      .build()
 
   fun start() {
     server.start()
     println("Server started, listening on $port")
     Runtime.getRuntime().addShutdownHook(
-      Thread {
-        println("*** shutting down gRPC server since JVM is shutting down")
-        this@HelloWorldServer.stop()
-        println("*** server shut down")
-      }
+        Thread {
+          println("*** shutting down gRPC server since JVM is shutting down")
+          this@HelloWorldServer.stop()
+          println("*** server shut down")
+        }
     )
   }
 
-  fun stop() {
+  private fun stop() {
     server.shutdown()
   }
 
@@ -57,20 +47,17 @@ class HelloWorldServer private constructor(
     server.awaitTermination()
   }
 
-  companion object {
-    @JvmStatic
-    fun main(args: Array<String>) {
-      val port = 50051
-      val server = HelloWorldServer(port)
-      server.start()
-      server.blockUntilShutdown()
-    }
+  private class HelloWorldService : GreeterGrpcKt.GreeterCoroutineImplBase() {
+    override suspend fun sayHello(request: HelloRequest) = HelloReply
+        .newBuilder()
+        .setMessage("Hello ${request.name}")
+        .build()
   }
+}
 
-  class HelloWorldService : GreeterGrpcKt.GreeterCoroutineImplBase() {
-
-    override suspend fun sayHello(request: HelloRequest): HelloReply {
-      return HelloReply.newBuilder().setMessage("Hello ${request.name}").build()
-    }
-  }
+fun main() {
+  val port = 50051
+  val server = HelloWorldServer(port)
+  server.start()
+  server.blockUntilShutdown()
 }
