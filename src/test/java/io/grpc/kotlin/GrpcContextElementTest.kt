@@ -40,15 +40,4 @@ class GrpcContextElementTest {
       assertThat(currentTestKey).isEqualTo("testValue")
     }
   }
-
-  @Test
-  fun testRun() {
-    val testGrpcContext = Context.ROOT.withValue(testKey, "testValue")
-    val coroutineContext = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
-    runBlocking(coroutineContext) {
-      testGrpcContext.runCoroutine {
-        assertThat(testKey.get()).isEqualTo("testValue")
-      }
-    }
-  }
 }

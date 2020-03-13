@@ -42,10 +42,3 @@ class GrpcContextElement(private val grpcContext: GrpcContext) : ThreadContextEl
     return grpcContext.attach()
   }
 }
-
-/**
- * Runs a coroutine with `this` as the [current][GrpcContext.current] gRPC context, suspends until
- * it completes, and returns the result.
- */
-suspend fun <T> GrpcContext.runCoroutine(block: suspend CoroutineScope.() -> T): T =
-  withContext(GrpcContextElement(this), block)
