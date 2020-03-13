@@ -25,27 +25,10 @@ import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineStub
 import io.grpc.examples.helloworld.HelloReply
 import io.grpc.examples.helloworld.HelloRequest
 import io.grpc.examples.helloworld.MultiHelloRequest
-import io.grpc.examples.helloworld.helloReply
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.toList
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.produceIn
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.*
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -57,7 +40,9 @@ class GeneratedCodeTest : AbstractCallsTest() {
   fun simpleUnary() {
     val server = object : GreeterCoroutineImplBase() {
       override suspend fun sayHello(request: HelloRequest): HelloReply {
-        return helloReply { message = "Hello, ${request.name}!" }
+        return HelloReply.newBuilder()
+          .setMessage("Hello, ${request.name}!" )
+          .build()
       }
     }
     val channel = makeChannel(server)
@@ -153,9 +138,11 @@ class GeneratedCodeTest : AbstractCallsTest() {
   fun simpleClientStreamingRpc() = runBlocking {
     val channel = makeChannel(object : GreeterCoroutineImplBase() {
       override suspend fun clientStreamSayHello(requests: Flow<HelloRequest>): HelloReply {
-        return helloReply {
-          message = requests.toList().joinToString(prefix = "Hello, ", separator = ", ") { it.name }
-        }
+        return HelloReply.newBuilder()
+          .setMessage(
+            requests.toList()
+              .joinToString(prefix = "Hello, ", separator = ", ") { it.name }
+          ).build()
       }
     })
 

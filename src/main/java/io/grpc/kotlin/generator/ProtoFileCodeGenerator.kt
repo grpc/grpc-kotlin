@@ -17,14 +17,9 @@
 package io.grpc.kotlin.generator
 
 import com.google.protobuf.Descriptors.FileDescriptor
-import com.google.protobuf.kotlin.protoc.GeneratorConfig
-import com.google.protobuf.kotlin.protoc.builder
-import com.google.protobuf.kotlin.protoc.declarations
-import com.google.protobuf.kotlin.protoc.objectBuilder
-import com.google.protobuf.kotlin.protoc.outerClassSimpleName
-import com.google.protobuf.kotlin.protoc.serviceName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.TypeSpec
+import io.grpc.kotlin.generator.protoc.*
 
 /**
  * Given a list of [ServiceCodeGenerator] factories, generates (optionally) a [FileSpec] of the
