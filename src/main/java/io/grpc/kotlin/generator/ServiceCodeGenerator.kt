@@ -18,15 +18,10 @@ package io.grpc.kotlin.generator
 
 import com.google.protobuf.Descriptors.MethodDescriptor
 import com.google.protobuf.Descriptors.ServiceDescriptor
-import com.google.protobuf.kotlin.protoc.Declarations
-import com.google.protobuf.kotlin.protoc.GeneratorConfig
-import com.google.protobuf.kotlin.protoc.declarations
-import com.google.protobuf.kotlin.protoc.member
-import com.google.protobuf.kotlin.protoc.methodName
-import com.google.protobuf.kotlin.protoc.serviceName
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.grpc.kotlin.generator.protoc.*
 
 /** Generates code based on a [ServiceDescriptor]. */
 abstract class ServiceCodeGenerator(protected val config: GeneratorConfig) {

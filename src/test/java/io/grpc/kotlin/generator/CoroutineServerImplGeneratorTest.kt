@@ -16,14 +16,13 @@
 
 package io.grpc.kotlin.generator
 
-import com.google.common.io.Resources
 import com.google.common.truth.Truth.assertThat
 import com.google.protobuf.Descriptors.MethodDescriptor
-import com.google.protobuf.kotlin.protoc.ClassSimpleName
-import com.google.protobuf.kotlin.protoc.GeneratorConfig
-import com.google.protobuf.kotlin.protoc.JavaPackagePolicy
-import com.google.protobuf.kotlin.protoc.testing.assertThat
 import io.grpc.examples.helloworld.HelloWorldProto
+import io.grpc.kotlin.generator.protoc.ClassSimpleName
+import io.grpc.kotlin.generator.protoc.GeneratorConfig
+import io.grpc.kotlin.generator.protoc.JavaPackagePolicy
+import io.grpc.kotlin.generator.protoc.testing.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4

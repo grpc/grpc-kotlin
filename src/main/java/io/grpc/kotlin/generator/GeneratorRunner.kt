@@ -17,10 +17,10 @@
 package io.grpc.kotlin.generator
 
 import com.google.protobuf.Descriptors.FileDescriptor
-import com.google.protobuf.kotlin.protoc.AbstractGeneratorRunner
-import com.google.protobuf.kotlin.protoc.GeneratorConfig
-import com.google.protobuf.kotlin.protoc.JavaPackagePolicy
 import com.squareup.kotlinpoet.FileSpec
+import io.grpc.kotlin.generator.protoc.AbstractGeneratorRunner
+import io.grpc.kotlin.generator.protoc.GeneratorConfig
+import io.grpc.kotlin.generator.protoc.JavaPackagePolicy
 
 /** Main runner for code generation for Kotlin gRPC APIs. */
 object GeneratorRunner: AbstractGeneratorRunner() {

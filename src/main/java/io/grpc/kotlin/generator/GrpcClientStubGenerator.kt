@@ -19,37 +19,19 @@ package io.grpc.kotlin.generator
 import com.google.common.annotations.VisibleForTesting
 import com.google.protobuf.Descriptors.MethodDescriptor
 import com.google.protobuf.Descriptors.ServiceDescriptor
-import com.google.protobuf.kotlin.protoc.Declarations
-import com.google.protobuf.kotlin.protoc.GeneratorConfig
-import com.google.protobuf.kotlin.protoc.MemberSimpleName
-import com.google.protobuf.kotlin.protoc.builder
-import com.google.protobuf.kotlin.protoc.classBuilder
-import com.google.protobuf.kotlin.protoc.declarations
-import com.google.protobuf.kotlin.protoc.member
-import com.google.protobuf.kotlin.protoc.methodName
-import com.google.protobuf.kotlin.protoc.of
-import com.google.protobuf.kotlin.protoc.serviceName
-import com.squareup.kotlinpoet.AnnotationSpec
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.KModifier
-import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.TypeName
-import com.squareup.kotlinpoet.TypeSpec
-import com.squareup.kotlinpoet.TypeVariableName
-import com.squareup.kotlinpoet.asClassName
-import com.squareup.kotlinpoet.asTypeName
 import io.grpc.CallOptions
-import io.grpc.Channel as GrpcChannel
-import io.grpc.Metadata as GrpcMetadata
 import io.grpc.MethodDescriptor.MethodType
 import io.grpc.Status
 import io.grpc.StatusException
 import io.grpc.kotlin.AbstractCoroutineStub
 import io.grpc.kotlin.ClientCalls
 import io.grpc.kotlin.StubFor
+import io.grpc.kotlin.generator.protoc.*
 import kotlinx.coroutines.flow.Flow
+import io.grpc.Channel as GrpcChannel
+import io.grpc.Metadata as GrpcMetadata
 
 /**
  * Logic for generating gRPC stubs for Kotlin.
