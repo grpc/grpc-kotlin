@@ -258,6 +258,7 @@ object TopologicalSort {
          * this list are not in a meaningful order.
          */
         fun <T> getElementsInCycle(): List<T> {
+            @Suppress("UNCHECKED_CAST")
             return Collections.unmodifiableList(elementsInCycle) as List<T>
         }
 

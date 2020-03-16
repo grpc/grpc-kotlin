@@ -31,9 +31,6 @@ apply plugin: 'idea'
 apply plugin: 'application'
 
 dependencies {
-  implementation "com.google.protobuf:protobuf-kotlin-util:0.1"
-  implementation "com.google.protobuf:protobuf-kotlin:0.1"
-
   // This repo
   implementation "io.grpc:grpc-kotlin:0.1"
 
@@ -59,9 +56,6 @@ protobuf {
     protoc { artifact = 'com.google.protobuf:protoc:3.11.0' }
     plugins {
         // Specify protoc to generate using kotlin protobuf plugin
-        kotlin {
-            artifact = 'com.google.protobuf:protobuf-kotlin:0.1'
-        }
         grpc {
             artifact = 'io.grpc:protoc-gen-grpc-java:1.27.0'
         }
@@ -73,8 +67,6 @@ protobuf {
     generateProtoTasks {
         all().each { task ->
             task.plugins {
-                // Generate Kotlin classes using proto-kotlin
-                kotlin { }
                 // Generate Java gRPC classes
                 grpc { }
                 // Generate Kotlin gRPC using the custom plugin from library

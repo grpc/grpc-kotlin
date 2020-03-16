@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.grpc.examples.routeguide;
+package io.grpc.examples.routeguide
 
 import com.google.common.io.ByteSource
 import com.google.common.io.Resources
