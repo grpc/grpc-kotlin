@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.grpc.examples.helloworld
+package io.grpc.examples.hello_world
 
 import io.grpc.StatusException
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
-import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineStub
+import io.grpc.examples.hello_world.GreeterGrpcKt.GreeterCoroutineStub
 import java.io.Closeable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit

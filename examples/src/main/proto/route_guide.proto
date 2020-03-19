@@ -13,7 +13,7 @@
 // limitations under the License.
 syntax = "proto3";
 
-package io.grpc.examples.routeguide;
+package io.grpc.examples.route_guide;
 
 import "google/protobuf/duration.proto";
 

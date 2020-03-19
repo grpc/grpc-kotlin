@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.grpc.examples.routeguide
+package io.grpc.examples.route_guide
 
 import com.google.common.base.Stopwatch
 import com.google.common.base.Ticker

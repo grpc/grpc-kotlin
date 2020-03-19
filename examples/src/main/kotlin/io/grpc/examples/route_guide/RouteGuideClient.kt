@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package io.grpc.examples.routeguide
+package io.grpc.examples.route_guide
 
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
-import io.grpc.examples.routeguide.RouteGuideGrpcKt.RouteGuideCoroutineStub
+import io.grpc.examples.route_guide.RouteGuideGrpcKt.RouteGuideCoroutineStub
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.asExecutor

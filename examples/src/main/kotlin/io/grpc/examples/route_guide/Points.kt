@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.grpc.examples.routeguide
+package io.grpc.examples.route_guide
 
 import kotlin.math.atan2
 import kotlin.math.cos

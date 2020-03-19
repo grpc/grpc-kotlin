@@ -79,28 +79,28 @@ protobuf {
 startScripts.enabled = false
 
 task helloWorldClient(type: CreateStartScripts) {
-    mainClassName = 'io.grpc.examples.helloworld.HelloWorldClientKt'
+    mainClassName = 'io.grpc.examples.hello_world.HelloWorldClientKt'
     applicationName = 'hello-world-client'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
 }
 
 task helloWorldServer(type: CreateStartScripts) {
-    mainClassName = 'io.grpc.examples.helloworld.HelloWorldServerKt'
+    mainClassName = 'io.grpc.examples.hello_world.HelloWorldServerKt'
     applicationName = 'hello-world-server'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
 }
 
 task routeGuideServer(type: CreateStartScripts) {
-    mainClassName = 'io.grpc.examples.routeguide.RouteGuideServer'
+    mainClassName = 'io.grpc.examples.route_guide.RouteGuideServer'
     applicationName = 'route-guide-server'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
 }
 
 task routeGuideClient(type: CreateStartScripts) {
-    mainClassName = 'io.grpc.examples.routeguide.RouteGuideClient'
+    mainClassName = 'io.grpc.examples.route_guide.RouteGuideClient'
     applicationName = 'route-guide-client'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
