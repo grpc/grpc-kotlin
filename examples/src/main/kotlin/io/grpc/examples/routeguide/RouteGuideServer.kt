@@ -127,7 +127,6 @@ class RouteGuideServer private constructor(
 
     override fun routeChat(requests: Flow<RouteNote>): Flow<RouteNote> =
       flow {
-        // could use transform, but it's currently experimental
         requests.collect { note ->
           val notes: MutableList<RouteNote> = routeNotes.computeIfAbsent(note.location) {
             Collections.synchronizedList(mutableListOf<RouteNote>())
