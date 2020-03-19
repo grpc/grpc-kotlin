@@ -36,30 +36,23 @@ import kotlin.random.Random
 import kotlin.random.nextLong
 
 class RouteGuideClient private constructor(
-  val channel: ManagedChannel,
-  val stub: RouteGuideCoroutineStub
+  val channel: ManagedChannel
 ) : Closeable {
   private val random = Random(314159)
+  private val stub = RouteGuideCoroutineStub(channel)
 
   constructor(
     channelBuilder: ManagedChannelBuilder<*>,
     dispatcher: CoroutineDispatcher
   ) : this(channelBuilder.executor(dispatcher.asExecutor()).build())
 
-  constructor(
-    channel: ManagedChannel
-  ) : this(channel, RouteGuideCoroutineStub(channel))
-
   companion object {
     @JvmStatic
     fun main(args: Array<String>) {
       val features = defaultFeatureSource().parseJsonFeatures()
       Executors.newFixedThreadPool(10).asCoroutineDispatcher().use { dispatcher ->
-        RouteGuideClient(
-          ManagedChannelBuilder.forAddress("localhost", 8980)
-            .usePlaintext(),
-          dispatcher
-        ).use {
+        val channel = ManagedChannelBuilder.forAddress("localhost", 8980).usePlaintext()
+        RouteGuideClient(channel, dispatcher).use {
           it.getFeature(409146138, -746188906)
           it.getFeature(0, 0)
           it.listFeatures(400000000, -750000000, 420000000, -730000000)
