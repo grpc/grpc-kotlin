@@ -37,21 +37,18 @@ import kotlin.random.nextLong
 
 class RouteGuideClient private constructor(
   val channel: ManagedChannel,
-  val stub: RouteGuideCoroutineStub,
-  val printer: Printer
+  val stub: RouteGuideCoroutineStub
 ) : Closeable {
   private val random = Random(314159)
 
   constructor(
     channelBuilder: ManagedChannelBuilder<*>,
-    dispatcher: CoroutineDispatcher,
-    printer: Printer
-  ) : this(channelBuilder.executor(dispatcher.asExecutor()).build(), printer)
+    dispatcher: CoroutineDispatcher
+  ) : this(channelBuilder.executor(dispatcher.asExecutor()).build())
 
   constructor(
-    channel: ManagedChannel,
-    printer: Printer
-  ) : this(channel, RouteGuideCoroutineStub(channel), printer)
+    channel: ManagedChannel
+  ) : this(channel, RouteGuideCoroutineStub(channel))
 
   companion object {
     @JvmStatic
@@ -61,8 +58,7 @@ class RouteGuideClient private constructor(
         RouteGuideClient(
           ManagedChannelBuilder.forAddress("localhost", 8980)
             .usePlaintext(),
-          dispatcher,
-          Printer.stdout
+          dispatcher
         ).use {
           it.getFeature(409146138, -746188906)
           it.getFeature(0, 0)
@@ -84,19 +80,8 @@ class RouteGuideClient private constructor(
     channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
   }
 
-  interface Printer {
-    companion object {
-      val stdout = object : Printer {
-        override fun println(str: String) {
-          System.out.println(str)
-        }
-      }
-    }
-    fun println(str: String)
-  }
-
   fun getFeature(latitude: Int, longitude: Int) = runBlocking {
-    printer.println("*** GetFeature: lat=$latitude lon=$longitude")
+    println("*** GetFeature: lat=$latitude lon=$longitude")
 
     val request = Point.newBuilder()
       .setLatitude(latitude)
@@ -105,14 +90,14 @@ class RouteGuideClient private constructor(
     val feature = stub.getFeature(request)
 
     if (feature.exists()) {
-      printer.println("Found feature called \"${feature.name}\" at ${feature.location.toStr()}")
+      println("Found feature called \"${feature.name}\" at ${feature.location.toStr()}")
     } else {
-      printer.println("Found no feature at ${request.toStr()}")
+      println("Found no feature at ${request.toStr()}")
     }
   }
 
   fun listFeatures(lowLat: Int, lowLon: Int, hiLat: Int, hiLon: Int) = runBlocking {
-    printer.println("*** ListFeatures: lowLat=$lowLat lowLon=$lowLon hiLat=$hiLat liLon=$hiLon")
+    println("*** ListFeatures: lowLat=$lowLat lowLon=$lowLon hiLat=$hiLat liLon=$hiLon")
 
     val request = Rectangle.newBuilder()
       .setLo(point(lowLat, lowLon))
@@ -120,12 +105,12 @@ class RouteGuideClient private constructor(
       .build()
     var i = 1
     stub.listFeatures(request).collect { feature ->
-      printer.println("Result #${i++}: $feature")
+      println("Result #${i++}: $feature")
     }
   }
 
   fun recordRoute(features: List<Feature>, numPoints: Int) = runBlocking {
-    printer.println("*** RecordRoute")
+    println("*** RecordRoute")
     val requests = flow {
       for (i in 1..numPoints) {
         val feature = features.random(random)
@@ -136,17 +121,17 @@ class RouteGuideClient private constructor(
     }
     val finish = launch {
       val summary = stub.recordRoute(requests)
-      printer.println("Finished trip with ${summary.pointCount} points.")
-      printer.println("Passed ${summary.featureCount} features.")
-      printer.println("Travelled ${summary.distance} meters.")
+      println("Finished trip with ${summary.pointCount} points.")
+      println("Passed ${summary.featureCount} features.")
+      println("Travelled ${summary.distance} meters.")
       val duration = summary.elapsedTime.seconds
-      printer.println("It took $duration seconds.")
+      println("It took $duration seconds.")
     }
     finish.join()
   }
 
   fun routeChat() = runBlocking {
-    printer.println("*** RouteChat")
+    println("*** RouteChat")
     val requestList = listOf(
       RouteNote.newBuilder().apply {
         message = "First message"
@@ -166,11 +151,11 @@ class RouteGuideClient private constructor(
       }.build()
     )
     val requests = requestList.asFlow().onEach { request ->
-      printer.println("Sending message \"${request.message}\" at ${request.location.toStr()}")
+      println("Sending message \"${request.message}\" at ${request.location.toStr()}")
     }
     val rpc = launch {
       stub.routeChat(requests).collect { note ->
-        printer.println("Got message \"${note.message}\" at ${note.location.toStr()}")
+        println("Got message \"${note.message}\" at ${note.location.toStr()}")
       }
       println("Finished RouteChat")
     }
