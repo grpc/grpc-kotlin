@@ -36,7 +36,7 @@ import kotlin.random.Random
 import kotlin.random.nextLong
 
 class RouteGuideClient private constructor(
-  val channel: ManagedChannel
+  private val channel: ManagedChannel
 ) : Closeable {
   private val random = Random(314159)
   private val stub = RouteGuideCoroutineStub(channel)
@@ -46,29 +46,6 @@ class RouteGuideClient private constructor(
     dispatcher: CoroutineDispatcher
   ) : this(channelBuilder.executor(dispatcher.asExecutor()).build())
 
-  companion object {
-    @JvmStatic
-    fun main(args: Array<String>) {
-      val features = defaultFeatureSource().parseJsonFeatures()
-      Executors.newFixedThreadPool(10).asCoroutineDispatcher().use { dispatcher ->
-        val channel = ManagedChannelBuilder.forAddress("localhost", 8980).usePlaintext()
-        RouteGuideClient(channel, dispatcher).use {
-          it.getFeature(409146138, -746188906)
-          it.getFeature(0, 0)
-          it.listFeatures(400000000, -750000000, 420000000, -730000000)
-          it.recordRoute(features, 10)
-          it.routeChat()
-        }
-      }
-    }
-
-    private fun point(lat: Int, lon: Int): Point =
-      Point.newBuilder()
-        .setLatitude(lat)
-        .setLongitude(lon)
-        .build()
-  }
-
   override fun close() {
     channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
   }
@@ -76,10 +53,7 @@ class RouteGuideClient private constructor(
   fun getFeature(latitude: Int, longitude: Int) = runBlocking {
     println("*** GetFeature: lat=$latitude lon=$longitude")
 
-    val request = Point.newBuilder()
-      .setLatitude(latitude)
-      .setLongitude(longitude)
-      .build()
+    val request = point(latitude, longitude)
     val feature = stub.getFeature(request)
 
     if (feature.exists()) {
@@ -156,3 +130,23 @@ class RouteGuideClient private constructor(
     rpc.join()
   }
 }
+
+fun main(args: Array<String>) {
+  val features = defaultFeatureSource().parseJsonFeatures()
+  Executors.newFixedThreadPool(10).asCoroutineDispatcher().use { dispatcher ->
+    val channel = ManagedChannelBuilder.forAddress("localhost", 8980).usePlaintext()
+    RouteGuideClient(channel, dispatcher).use {
+      it.getFeature(409146138, -746188906)
+      it.getFeature(0, 0)
+      it.listFeatures(400000000, -750000000, 420000000, -730000000)
+      it.recordRoute(features, 10)
+      it.routeChat()
+    }
+  }
+}
+
+private fun point(lat: Int, lon: Int): Point =
+  Point.newBuilder()
+    .setLatitude(lat)
+    .setLongitude(lon)
+    .build()

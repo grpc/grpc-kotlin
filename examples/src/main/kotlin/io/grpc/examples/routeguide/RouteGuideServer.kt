@@ -41,11 +41,11 @@ class RouteGuideServer private constructor(
   constructor(port: Int) : this(port, defaultFeatureSource())
 
   constructor(port: Int, featureData: ByteSource) :
-  this(
-    serverBuilder = ServerBuilder.forPort(port),
-    port = port,
-    features = featureData.parseJsonFeatures()
-  )
+    this(
+      serverBuilder = ServerBuilder.forPort(port),
+      port = port,
+      features = featureData.parseJsonFeatures()
+    )
 
   constructor(
     serverBuilder: ServerBuilder<*>,
@@ -74,16 +74,6 @@ class RouteGuideServer private constructor(
 
   fun blockUntilShutdown() {
     server.awaitTermination()
-  }
-
-  companion object {
-    @JvmStatic
-    fun main(args: Array<String>) {
-      val port = 8980
-      val server = RouteGuideServer(port)
-      server.start()
-      server.blockUntilShutdown()
-    }
   }
 
   class RouteGuideService(
@@ -139,4 +129,11 @@ class RouteGuideServer private constructor(
       }
 
   }
+}
+
+fun main(args: Array<String>) {
+  val port = 8980
+  val server = RouteGuideServer(port)
+  server.start()
+  server.blockUntilShutdown()
 }
