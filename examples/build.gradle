@@ -92,16 +92,16 @@ task helloWorldServer(type: CreateStartScripts) {
     classpath = startScripts.classpath
 }
 
-task routeGuideServer(type: CreateStartScripts) {
-    mainClassName = 'io.grpc.examples.routeguide.RouteGuideServer'
-    applicationName = 'route-guide-server'
+task routeGuideClient(type: CreateStartScripts) {
+    mainClassName = 'io.grpc.examples.routeguide.RouteGuideClientKt'
+    applicationName = 'route-guide-client'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
 }
 
-task routeGuideClient(type: CreateStartScripts) {
-    mainClassName = 'io.grpc.examples.routeguide.RouteGuideClient'
-    applicationName = 'route-guide-client'
+task routeGuideServer(type: CreateStartScripts) {
+    mainClassName = 'io.grpc.examples.routeguide.RouteGuideServerKt'
+    applicationName = 'route-guide-server'
     outputDir = new File(project.buildDir, 'tmp')
     classpath = startScripts.classpath
 }
@@ -109,7 +109,7 @@ task routeGuideClient(type: CreateStartScripts) {
 applicationDistribution.into('bin') {
     from(helloWorldClient)
     from(helloWorldServer)
-    from(routeGuideServer)
     from(routeGuideClient)
+    from(routeGuideServer)
     fileMode = 0755
 }
