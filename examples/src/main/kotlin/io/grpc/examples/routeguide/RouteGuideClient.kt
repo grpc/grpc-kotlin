@@ -98,7 +98,15 @@ class RouteGuideClient private constructor(
 
   fun routeChat() = runBlocking {
     println("*** RouteChat")
-    val requestList = listOf(
+    val requests = generateOutgoingNotes()
+    stub.routeChat(requests).collect { note ->
+      println("Got message \"${note.message}\" at ${note.location.toStr()}")
+    }
+    println("Finished RouteChat")
+  }
+
+  private fun generateOutgoingNotes(): Flow<RouteNote> = flow {
+    val notes = listOf(
       RouteNote.newBuilder().apply {
         message = "First message"
         location = point(0, 0)
@@ -114,20 +122,19 @@ class RouteGuideClient private constructor(
       RouteNote.newBuilder().apply {
         message = "Fourth message"
         location = point(10000000, 10000000)
+      }.build(),
+      RouteNote.newBuilder().apply {
+        message = "Last message"
+        location = point(0, 0)
       }.build()
     )
-    val requests = requestList.asFlow().onEach { request ->
-      println("Sending message \"${request.message}\" at ${request.location.toStr()}")
+    for (note in notes) {
+      println("Sending message \"${note.message}\" at ${note.location.toStr()}")
+      emit(note);
+      delay(500)
     }
-    val rpc = launch {
-      stub.routeChat(requests).collect { note ->
-        println("Got message \"${note.message}\" at ${note.location.toStr()}")
-      }
-      println("Finished RouteChat")
-    }
-
-    rpc.join()
   }
+
 }
 
 fun main(args: Array<String>) {
