@@ -109,11 +109,11 @@ class RouteGuideClient private constructor(
       }.build(),
       RouteNote.newBuilder().apply {
         message = "Third message"
-        location = point(1, 0)
+        location = point(10000000, 0)
       }.build(),
       RouteNote.newBuilder().apply {
         message = "Fourth message"
-        location = point(1, 1)
+        location = point(10000000, 10000000)
       }.build()
     )
     val requests = requestList.asFlow().onEach { request ->
