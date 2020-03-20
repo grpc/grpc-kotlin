@@ -152,3 +152,10 @@ publishing {
         }
     }
 }
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        showStandardStreams = true
+    }
+}
