@@ -26,6 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -76,25 +77,23 @@ class RouteGuideClient private constructor(
     }
   }
 
-  fun recordRoute(features: List<Feature>, numPoints: Int) = runBlocking {
+  fun recordRoute(points: Flow<Point>) = runBlocking {
     println("*** RecordRoute")
-    val requests = flow {
-      for (i in 1..numPoints) {
-        val feature = features.random(random)
-        println("Visiting point ${feature.location.toStr()}")
-        emit(feature.location)
-        delay(timeMillis = random.nextLong(500L..1500L))
-      }
+    val summary = stub.recordRoute(points)
+    println("Finished trip with ${summary.pointCount} points.")
+    println("Passed ${summary.featureCount} features.")
+    println("Travelled ${summary.distance} meters.")
+    val duration = summary.elapsedTime.seconds
+    println("It took $duration seconds.")
+  }
+
+  fun generateRoutePoints(features: List<Feature>, numPoints: Int): Flow<Point> = flow {
+    for (i in 1..numPoints) {
+      val feature = features.random(random)
+      println("Visiting point ${feature.location.toStr()}")
+      emit(feature.location)
+      delay(timeMillis = random.nextLong(500L..1500L))
     }
-    val finish = launch {
-      val summary = stub.recordRoute(requests)
-      println("Finished trip with ${summary.pointCount} points.")
-      println("Passed ${summary.featureCount} features.")
-      println("Travelled ${summary.distance} meters.")
-      val duration = summary.elapsedTime.seconds
-      println("It took $duration seconds.")
-    }
-    finish.join()
   }
 
   fun routeChat() = runBlocking {
@@ -139,7 +138,7 @@ fun main(args: Array<String>) {
       it.getFeature(409146138, -746188906)
       it.getFeature(0, 0)
       it.listFeatures(400000000, -750000000, 420000000, -730000000)
-      it.recordRoute(features, 10)
+      it.recordRoute(it.generateRoutePoints(features, 10))
       it.routeChat()
     }
   }
