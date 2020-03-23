@@ -4,3 +4,7 @@ build
 .idea
 local.properties
 *.iml
+
+# API reference docs on gh-pages
+/grpc-kotlin
+/style.css
