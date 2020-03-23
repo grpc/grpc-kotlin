@@ -105,8 +105,6 @@ public class Http2OkHttpTest extends AbstractInteropTest {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    // Disable the default census stats interceptor, use testing interceptor instead.
-    io.grpc.internal.TestingAccessor.setStatsEnabled(builder, false);
     return builder;
   }
 
