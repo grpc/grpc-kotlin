@@ -14,12 +14,9 @@
 
 syntax = "proto3";
 
-option java_multiple_files = true;
-option java_package = "io.grpc.examples.helloworld";
-option java_outer_classname = "HelloWorldProto";
-option objc_class_prefix = "HLW";
+package io.grpc.examples.helloworld;
 
-package helloworld;
+option java_multiple_files = true;
 
 // The greeting service definition.
 service Greeter {

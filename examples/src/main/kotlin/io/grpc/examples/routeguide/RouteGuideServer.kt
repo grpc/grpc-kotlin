@@ -41,11 +41,11 @@ class RouteGuideServer private constructor(
   constructor(port: Int) : this(port, defaultFeatureSource())
 
   constructor(port: Int, featureData: ByteSource) :
-  this(
-    serverBuilder = ServerBuilder.forPort(port),
-    port = port,
-    features = featureData.parseJsonFeatures()
-  )
+    this(
+      serverBuilder = ServerBuilder.forPort(port),
+      port = port,
+      features = featureData.parseJsonFeatures()
+    )
 
   constructor(
     serverBuilder: ServerBuilder<*>,
@@ -76,31 +76,19 @@ class RouteGuideServer private constructor(
     server.awaitTermination()
   }
 
-  companion object {
-    @JvmStatic
-    fun main(args: Array<String>) {
-      val port = 8980
-      val server = RouteGuideServer(port)
-      server.start()
-      server.blockUntilShutdown()
-    }
-  }
-
   class RouteGuideService(
     val features: Collection<Feature>,
     val ticker: Ticker = Ticker.systemTicker()
   ) : RouteGuideGrpcKt.RouteGuideCoroutineImplBase() {
     private val routeNotes = ConcurrentHashMap<Point, MutableList<RouteNote>>()
 
-    override suspend fun getFeature(request: Point): Feature {
-      return features.find { it.location == request }
-        ?: Feature.newBuilder().apply { location = request }.build()
+    override suspend fun getFeature(request: Point): Feature =
+      features.find { it.location == request } ?:
       // No feature was found, return an unnamed feature.
-    }
+      Feature.newBuilder().apply { location = request }.build()
 
-    override fun listFeatures(request: Rectangle): Flow<Feature> {
-      return features.asFlow().filter { it.exists() && it.location in request }
-    }
+    override fun listFeatures(request: Rectangle): Flow<Feature> =
+      features.asFlow().filter { it.exists() && it.location in request }
 
     override suspend fun recordRoute(requests: Flow<Point>): RouteSummary {
       var pointCount = 0
@@ -127,19 +115,24 @@ class RouteGuideServer private constructor(
       }.build()
     }
 
-    override fun routeChat(requests: Flow<RouteNote>): Flow<RouteNote> {
-      return flow {
-        // could use transform, but it's currently experimental
-        requests.collect { note ->
-          val notes: MutableList<RouteNote> = routeNotes.computeIfAbsent(note.location) {
-            Collections.synchronizedList(mutableListOf<RouteNote>())
-          }
-          for (prevNote in notes.toTypedArray()) { // thread-safe snapshot
-            emit(prevNote)
-          }
-          notes += note
+    override fun routeChat(requests: Flow<RouteNote>): Flow<RouteNote> = flow {
+      requests.collect { note ->
+        val notes: MutableList<RouteNote> = routeNotes.computeIfAbsent(note.location) {
+          Collections.synchronizedList(mutableListOf<RouteNote>())
         }
+        for (prevNote in notes.toTypedArray()) { // thread-safe snapshot
+          emit(prevNote)
+        }
+        notes += note
       }
     }
+
   }
+}
+
+fun main(args: Array<String>) {
+  val port = 8980
+  val server = RouteGuideServer(port)
+  server.start()
+  server.blockUntilShutdown()
 }

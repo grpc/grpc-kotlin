@@ -1,0 +1,61 @@
+language: java
+
+env:
+  global:
+    - GRADLE_OPTS=-Xmx512m
+    - LDFLAGS=-L/tmp/protobuf/lib
+    - CXXFLAGS=-I/tmp/protobuf/include
+    - LD_LIBRARY_PATH=/tmp/protobuf/lib
+
+before_install:
+  - rm ~/.m2/settings.xml || true # Avoid repository.apache.org, which has QPS limits and is useless
+  - mkdir -p $HOME/.gradle/caches &&
+    ln -s /tmp/gradle-caches-modules-2 $HOME/.gradle/caches/modules-2
+  - mkdir -p $HOME/.gradle &&
+    ln -s /tmp/gradle-wrapper $HOME/.gradle/wrapper
+  - PROTOBUF_VERSION=3.3.0 &&
+    PROTOC_FILENAME=protoc-${PROTOBUF_VERSION}-linux-x86_64.zip &&
+    pushd /home/travis &&
+    wget https://github.com/google/protobuf/releases/download/v${PROTOBUF_VERSION}/${PROTOC_FILENAME} &&
+    unzip ${PROTOC_FILENAME} &&
+    bin/protoc --version &&
+    popd
+  - echo "checkstyle.ignoreFailures=false" >> $HOME/.gradle/gradle.properties
+  - echo "failOnWarnings=true" >> $HOME/.gradle/gradle.properties
+  - echo "errorProne=true" >> $HOME/.gradle/gradle.properties
+
+install:
+  - ./gradlew build publishToMavenLocal
+  - pushd examples && ./gradlew build && popd
+
+before_script:
+  - test -z "$(git status --porcelain)" || (git status && echo Error Working directory is not clean. Forget to commit generated files? && false)
+
+script:
+  - ./gradlew check
+
+os:
+  - linux
+
+dist: xenial
+
+jdk:
+  - openjdk8
+  - openjdk11
+
+branches:
+  only: [master]
+
+notifications:
+  email: false
+
+cache:
+  directories:
+    - /tmp/protobuf-cache
+    - /tmp/gradle-caches-modules-2
+    - /tmp/gradle-wrapper
+
+before_cache:
+  # The lock changes based on folder name; normally $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm /tmp/gradle-caches-modules-2/gradle-caches-modules-2.lock
+  - find $HOME/.gradle/wrapper -not -name "*-all.zip" -and -not -name "*-bin.zip" -delete
