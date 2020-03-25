@@ -17,8 +17,8 @@ syntax = "proto3";
 
 package grpc.testing;
 
-import "third_party/kotlin/grpc_kotlin/interop_testing/src/main/proto/grpc/testing/empty.proto";
-import "third_party/kotlin/grpc_kotlin/interop_testing/src/main/proto/grpc/testing/messages.proto";
+import "grpc/testing/empty.proto";
+import "grpc/testing/messages.proto";
 
 option java_package = "io.grpc.testing.integration";
 
