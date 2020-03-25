@@ -54,9 +54,9 @@ class TestServiceClient {
   private var customCredentialsType: String? = null
   private var useTestCa = false
   private var useOkHttp = false
-  private lateinit var defaultServiceAccount: String
-  private lateinit var serviceAccountKeyFile: String
-  private lateinit var oauthScope: String
+  private var defaultServiceAccount: String = ""
+  private var serviceAccountKeyFile: String = ""
+  private var oauthScope: String = ""
   private var fullStreamDecompression = false
   private val tester = Tester()
 
