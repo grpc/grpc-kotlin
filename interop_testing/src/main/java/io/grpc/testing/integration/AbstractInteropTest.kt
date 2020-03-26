@@ -163,7 +163,8 @@ abstract class AbstractInteropTest {
       server = null
       return
     }
-    testServiceExecutor = Executors.newScheduledThreadPool(2)
+    val executor = Executors.newScheduledThreadPool(2)
+    testServiceExecutor = executor
     val allInterceptors: List<ServerInterceptor> = ImmutableList.builder<ServerInterceptor>()
       .add(recordServerCallInterceptor(serverCallCapture))
       .add(TestUtils.recordRequestHeadersInterceptor(requestHeadersCapture))
@@ -173,7 +174,7 @@ abstract class AbstractInteropTest {
     builder
       .addService(
         ServerInterceptors.intercept(
-          TestServiceImpl(testServiceExecutor),
+          TestServiceImpl(executor),
           allInterceptors
         )
       )
