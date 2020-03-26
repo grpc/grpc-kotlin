@@ -69,7 +69,7 @@ class TestServiceClient {
         usage = true
         break
       }
-      val parts = arg.substring(2).split("=".toRegex(), 2).toTypedArray()
+      val parts = arg.substring(2).split('=')
       val key = parts[0]
       if ("help" == key) {
         usage = true
@@ -84,7 +84,7 @@ class TestServiceClient {
       when (key) {
         "server_host" -> serverHost = value
         "server_host_override" -> serverHostOverride = value
-        "server_post" -> serverPort = value.toInt()
+        "server_port" -> serverPort = value.toInt()
         "test_case" -> testCase = value
         "use_tls" -> useTls = value.toBoolean()
         "use_upgrade" -> useH2cUpgrade = value.toBoolean()
