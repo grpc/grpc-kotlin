@@ -125,7 +125,7 @@ abstract class AbstractInteropTest {
   private val clientCallCapture = AtomicReference<ClientCall<*, *>>()
   private val requestHeadersCapture = AtomicReference<Metadata?>()
   private val contextCapture = AtomicReference<Context>()
-  private lateinit var testServiceExecutor: ScheduledExecutorService
+  private var testServiceExecutor: ScheduledExecutorService? = null
   private var server: Server? = null
   private val serverStreamTracers = LinkedBlockingQueue<ServerStreamTracerInfo>()
 
@@ -187,7 +187,7 @@ abstract class AbstractInteropTest {
 
   private fun stopServer() {
     server?.shutdownNow()
-    testServiceExecutor.shutdown()
+    testServiceExecutor?.shutdown()
   }
 
   @get:VisibleForTesting
