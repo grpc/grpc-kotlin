@@ -63,7 +63,7 @@ goto fail
 
 :execute
 setlocal ENABLEDELAYEDEXPANSION
-set JAR_FILENAME=%~n0.jar
+set JAR_FILENAME=%~n0-protoc.jar
 @REM Get jar file name from current filename by stripping os and arch
 call set JAR_FILENAME=%%JAR_FILENAME:-windows-x86_32=%%
 call set JAR_FILENAME=%%JAR_FILENAME:-windows-x86_64=%%

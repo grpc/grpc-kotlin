@@ -23,4 +23,4 @@ JAR_FILENAME=${JAR_FILENAME/-linux-x86_64/}
 JAR_FILENAME=${JAR_FILENAME/-osx-x86_64/}
 
 # Call the jar and pass our args
-java -jar $JAR_FILENAME.jar $1 $2
+java -jar $JAR_FILENAME-protoc.jar $1 $2
