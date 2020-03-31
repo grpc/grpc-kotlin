@@ -19,11 +19,13 @@ mainClassName = 'io.grpc.kotlin.generator.GeneratorRunner'
 applicationName = 'grpc-kotlin'
 
 // Generate the jar file to be used by our custom plugin
-jar {
+task protocJar(type: Jar) {
     manifest {
         attributes 'Main-Class': mainClassName
     }
+    baseName = 'protoc-gen-grpc-kotlin'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }
 
 repositories {
@@ -140,6 +142,12 @@ publishing {
             artifactId = 'grpc-kotlin'
             version = '0.1'
             from components.java
+
+            // Add a Fat JAR for the protoc plugin
+            artifact protocJar {
+                classifier "protoc"
+                extension "jar"
+            }
 
             // Generate the artifacts expected by protobuf-gradle-plugin
             artifactForGradlePlugin(it, 'linux', 'aarch_64')
