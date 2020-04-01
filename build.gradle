@@ -138,9 +138,42 @@ def artifactForGradlePlugin(MavenPublication pub, String os, String arch) {
 publishing {
     publications {
         maven(MavenPublication) {
+            pom {
+                name = 'grpc.io:grpc-kotlin'
+                url = 'https://github.com/grpc/grpc-kotlin'
+                afterEvaluate {
+                    // description is not available until evaluated.
+                    description = 'The protoc plugin for gRPC Kotlin'
+                }
+
+                scm {
+                    connection = 'scm:git:https://github.com/grpc/grpc-kotlin.git'
+                    developerConnection = 'scm:git:git@github.com:grpc/grpc-kotlin.git'
+                    url = 'https://github.com/grpc/grpc-kotlin'
+                }
+
+                licenses {
+                    license {
+                        name = 'Apache 2.0'
+                        url = 'https://opensource.org/licenses/Apache-2.0'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = "grpc.io"
+                        name = "gRPC Contributors"
+                        email = "grpc-io@googlegroups.com"
+                        url = "https://grpc.io/"
+                        organization = "gRPC Authors"
+                        organizationUrl = "https://www.google.com"
+                    }
+                }
+            }
+
             groupId = 'io.grpc'
             artifactId = 'grpc-kotlin'
-            version = '0.1'
+            version = '0.1.0'
             from components.java
 
             // Add a Fat JAR for the protoc plugin

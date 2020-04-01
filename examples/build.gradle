@@ -61,7 +61,7 @@ protobuf {
         }
         // Specify protoc to generate using our grpc kotlin plugin
         grpckt {
-            artifact = 'io.grpc:grpc-kotlin:0.1'
+            artifact = 'io.grpc:grpc-kotlin:0.1.0'
         }
     }
     generateProtoTasks {
