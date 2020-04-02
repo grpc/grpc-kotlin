@@ -94,7 +94,7 @@ subprojects {
                 manifest {
                     attributes 'Main-Class': 'io.grpc.kotlin.generator.GeneratorRunner'
                 }
-                baseName = 'protoc-gen-grpc-kotlin'
+                baseName = project.name
                 from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
                 with jar
             }
