@@ -28,7 +28,7 @@ $ cd $GRPC_KOTLIN_ROOT/compiler
 
 To compile the plugin:
 ```
-$ ../gradlew kotlin_pluginExecutable
+$ ../gradlew :protoc-gen-grpc-kotlin:build./gradlew
 ```
 
 To test the plugin with the compiler:
@@ -39,13 +39,8 @@ You will see a `PASS` if the test succeeds.
 
 To compile a proto file and generate Kotlin interfaces out of the service definitions:
 ```
-$ protoc --plugin=protoc-gen-grpc-kotlin=build/exe/kotlin_plugin/protoc-gen-grpc-kotlin \
-  --grpc-kotlin_out="$OUTPUT_FILE" --proto_path="$DIR_OF_PROTO_FILE" "$PROTO_FILE"
-```
-To generate Kotlin interfaces with protobuf lite:
-```
-$ protoc --plugin=protoc-gen-grpc-kotlin=build/exe/kotlin_plugin/protoc-gen-grpc-kotlin \
-  --grpc-kotlin_out=lite:"$OUTPUT_FILE" --proto_path="$DIR_OF_PROTO_FILE" "$PROTO_FILE"
+$ protoc --plugin=protoc-gen-grpc-kotlin=build/install/protoc-gen-grpc-kotlin/bin/protoc-gen-grpc-kotlin \
+  --grpckt_out="$OUTPUT_FILE" --proto_path="$DIR_OF_PROTO_FILE" "$PROTO_FILE"
 ```
 
 ## Installing the codegen to Maven local repository
@@ -55,7 +50,3 @@ repositories.
 ```
 $ ../gradlew publishToMavenLocal
 ```
-
-## Creating a release of gRPC Kotlin
-Please follow the instructions in ``RELEASING.md`` under the root directory for
-details on how to create a new release.
