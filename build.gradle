@@ -2,8 +2,17 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version'1.3.61' apply false
 }
 
+ext {
+    grpcVersion = '1.28.0' // CURRENT_GRPC_VERSION
+    protobufVersion = '3.11.0'
+    coroutinesVersion = '1.3.3'
+}
+
 subprojects {
     apply plugin: 'org.jetbrains.kotlin.jvm'
+
+    group = "io.grpc"
+    version = "0.1.0" // CURRENT_GRPC_KOTLIN_VERSION
 
     plugins.withId("org.jetbrains.dokka") {
         dokka {
@@ -33,7 +42,7 @@ subprojects {
             publications {
                 maven(MavenPublication) {
                     pom {
-                        name = "grpc.io:" + project.name
+                        name = project.group + ":" + project.name
                         url = 'https://github.com/grpc/grpc-kotlin'
                         afterEvaluate {
                             // description is not available until evaluated.
@@ -93,9 +102,7 @@ subprojects {
             publishing {
                 publications {
                     maven {
-                        version = '0.1.0'
                         from components.java
-                        groupId = 'io.grpc'
 
                         artifact javadocJar
                         artifact sourcesJar

@@ -24,18 +24,13 @@ repositories {
     mavenLocal()
 }
 
-// Feel free to delete the comment at the next line. It is just for safely
-// updating the version in our release process.
-def grpcVersion = '1.26.0' // CURRENT_GRPC_VERSION
-def coroutinesVersion = '1.3.3'
-
 dependencies {
     // Kotlin
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}"
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext.coroutinesVersion}"
 
     // Grpc and Protobuf
-    compile "io.grpc:grpc-protobuf:${grpcVersion}"
-    compile "io.grpc:grpc-stub:${grpcVersion}"
+    compile "io.grpc:grpc-protobuf:${rootProject.ext.grpcVersion}"
+    compile "io.grpc:grpc-stub:${rootProject.ext.grpcVersion}"
 
     // Java
     compile "javax.annotation:javax.annotation-api:1.2"
@@ -46,15 +41,15 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:1.3.61"
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.3.2'
     testImplementation "com.google.truth.extensions:truth-proto-extension:1.0"
-    testImplementation "io.grpc:grpc-testing:${grpcVersion}" // gRCP testing utilities
+    testImplementation "io.grpc:grpc-testing:${rootProject.ext.grpcVersion}" // gRCP testing utilities
 }
 
 protobuf {
-    protoc { artifact = 'com.google.protobuf:protoc:3.11.0' }
+    protoc { artifact = "com.google.protobuf:protoc:${rootProject.ext.protobufVersion}" }
     plugins {
         // Specify protoc to generate using kotlin protobuf plugin
         grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.27.0'
+            artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.ext.grpcVersion}"
         }
         // Specify protoc to generate using our grpc kotlin plugin
         grpckt {

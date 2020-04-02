@@ -23,15 +23,11 @@ repositories {
     mavenLocal()
 }
 
-// Feel free to delete the comment at the next line. It is just for safely
-// updating the version in our release process.
-def grpcVersion = '1.26.0' // CURRENT_GRPC_VERSION
-
 dependencies {
     // Grpc and Protobuf
     compile project(':grpc-kotlin-stub')
-    compile 'com.google.protobuf:protobuf-java:3.11.0'
-    compile "io.grpc:grpc-netty-shaded:${grpcVersion}"
+    compile 'com.google.protobuf:protobuf-java:${rootProject.ext.protobufVersion}'
+    compile "io.grpc:grpc-netty-shaded:${rootProject.ext.grpcVersion}"
 
     // Misc
     compile 'com.squareup:kotlinpoet:1.5.0'
@@ -48,11 +44,11 @@ dependencies {
 }
 
 protobuf {
-    protoc { artifact = 'com.google.protobuf:protoc:3.11.0' }
+    protoc { artifact = "com.google.protobuf:protoc:${rootProject.ext.protobufVersion}" }
     plugins {
         // Specify protoc to generate using kotlin protobuf plugin
         grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.27.0'
+            artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.ext.grpcVersion}"
         }
         // Specify protoc to generate using our grpc kotlin plugin
         grpckt {
