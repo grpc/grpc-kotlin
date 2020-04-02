@@ -18,16 +18,6 @@ plugins {
 mainClassName = 'io.grpc.kotlin.generator.GeneratorRunner'
 applicationName = 'grpc-kotlin'
 
-// Generate the jar file to be used by our custom plugin
-task protocJar(type: Jar) {
-    manifest {
-        attributes 'Main-Class': mainClassName
-    }
-    baseName = 'protoc-gen-grpc-kotlin'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
-
 repositories {
     google()
     jcenter()
@@ -135,19 +125,72 @@ def artifactForGradlePlugin(MavenPublication pub, String os, String arch) {
     }
 }
 
+// Generate the jar file to be used by our custom plugin
+task protocJar(type: Jar) {
+    classifier "protoc"
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+    baseName = 'protoc-gen-grpc-kotlin'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
+            pom {
+                name = 'grpc.io:grpc-kotlin'
+                url = 'https://github.com/grpc/grpc-kotlin'
+                afterEvaluate {
+                    // description is not available until evaluated.
+                    description = 'The protoc plugin for gRPC Kotlin'
+                }
+
+                scm {
+                    connection = 'scm:git:https://github.com/grpc/grpc-kotlin.git'
+                    developerConnection = 'scm:git:git@github.com:grpc/grpc-kotlin.git'
+                    url = 'https://github.com/grpc/grpc-kotlin'
+                }
+
+                licenses {
+                    license {
+                        name = 'Apache 2.0'
+                        url = 'https://opensource.org/licenses/Apache-2.0'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = "grpc.io"
+                        name = "gRPC Contributors"
+                        email = "grpc-io@googlegroups.com"
+                        url = "https://grpc.io/"
+                        organization = "gRPC Authors"
+                        organizationUrl = "https://www.google.com"
+                    }
+                }
+            }
+
             groupId = 'io.grpc'
             artifactId = 'grpc-kotlin'
-            version = '0.1'
+            version = '0.1.0'
             from components.java
 
             // Add a Fat JAR for the protoc plugin
-            artifact protocJar {
-                classifier "protoc"
-                extension "jar"
-            }
+            artifact protocJar
+            artifact javadocJar
+            artifact sourcesJar
 
             // Generate the artifacts expected by protobuf-gradle-plugin
             artifactForGradlePlugin(it, 'linux', 'aarch_64')
