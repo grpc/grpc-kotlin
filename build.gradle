@@ -1,112 +1,112 @@
-plugins {
-    id 'org.jetbrains.kotlin.jvm' version'1.3.61'
-    id 'com.google.protobuf' version '0.8.8'
-    id 'org.jetbrains.dokka' version '0.10.1'
-
-    // Generate IntelliJ IDEA's .idea & .iml project files
-    // Starting with 0.8.4 of protobuf-gradle-plugin, *.proto and the gen output files are added
-    // to IntelliJ as sources. It is no longer necessary to add them manually to the idea {} block
-    // to jump to definitions from Java and Kotlin files.
-    // For best results, install the Protobuf and Kotlin plugins for IntelliJ.
-    id 'idea'
-
-    // Provide convenience executables for trying out the examples.
-    id 'application'
-    id 'maven-publish'
-}
-
-mainClassName = 'io.grpc.kotlin.generator.GeneratorRunner'
-applicationName = 'grpc-kotlin'
-
-repositories {
-    google()
-    jcenter()
-    mavenCentral()
-    mavenLocal()
-}
-
-// Feel free to delete the comment at the next line. It is just for safely
-// updating the version in our release process.
-def grpcVersion = '1.26.0' // CURRENT_GRPC_VERSION
-def coroutinesVersion = '1.3.3'
-def kotlinVersion = '1.3.61'
-
-dependencies {
-    // Kotlin
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:${coroutinesVersion}"
-
-    // Grpc and Protobuf
-    compile 'com.google.protobuf:protobuf-java:3.11.0'
-    compile "io.grpc:grpc-netty-shaded:${grpcVersion}"
-    compile "io.grpc:grpc-protobuf:${grpcVersion}"
-    compile "io.grpc:grpc-stub:${grpcVersion}"
-
-    // Java
-    compile "javax.annotation:javax.annotation-api:1.2"
-
-    // Misc
-    compile 'com.squareup:kotlinpoet:1.5.0'
-    compile "org.jetbrains.kotlin:kotlin-reflect:1.3.61"
-    compile "com.google.truth:truth:1.0.1"
-
-    // Testing
-    testImplementation "com.google.guava:guava:28.2-jre"
-    testImplementation "com.google.jimfs:jimfs:1.1"
-    testImplementation 'com.google.protobuf:protobuf-gradle-plugin:0.8.11'
-    testImplementation "com.google.truth.extensions:truth-proto-extension:1.0"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
-    testImplementation "io.grpc:grpc-testing:${grpcVersion}" // gRCP testing utilities
-    testImplementation "junit:junit:4.12"
-    testImplementation "org.junit.jupiter:junit-jupiter-engine:5.5.2"
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.3.2'
-    testImplementation "org.jetbrains.kotlin:kotlin-android-extensions:$kotlinVersion"
-    testImplementation "org.mockito:mockito-core:2.28.2"
-}
-
-protobuf {
-    protoc { artifact = 'com.google.protobuf:protoc:3.11.0' }
-    plugins {
-        // Specify protoc to generate using kotlin protobuf plugin
-        grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.27.0'
-        }
-        // Specify protoc to generate using our grpc kotlin plugin
-        grpckt {
-            path = 'build/install/grpc-kotlin/bin/grpc-kotlin'
-        }
-    }
-    generateProtoTasks {
-        all().each { task ->
-            if (task.name.startsWith('generateTestProto')) {
-                task.dependsOn { installDist }
-            }
-            task.plugins {
-                // Generate Java gRPC classes
-                grpc { }
-                // Generate Kotlin gRPC using the custom plugin from library
-                grpckt { }
+subprojects {
+    plugins.withId("org.jetbrains.dokka") {
+        dokka {
+            outputFormat = 'html'
+            outputDirectory = "$buildDir/dokka"
+            configuration {
+                externalDocumentationLink {
+                    url = new URL("http://grpc.github.io/grpc-java/javadoc/")
+                }
+                externalDocumentationLink {
+                    url = new URL("http://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
+                }
+                perPackageOption {
+                    prefix = "io.grpc.testing"
+                    suppress = true
+                }
+                perPackageOption {
+                    prefix = "io.grpc.kotlin.generator"
+                    suppress = true
+                }
             }
         }
     }
-}
 
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/dokka"
-    configuration {
-        externalDocumentationLink {
-            url = new URL("http://grpc.github.io/grpc-java/javadoc/")
+    plugins.withId("maven-publish") {
+        publishing {
+            publications {
+                maven(MavenPublication) {
+                    pom {
+                        name = "grpc.io:" + project.name
+                        url = 'https://github.com/grpc/grpc-kotlin'
+                        afterEvaluate {
+                            // description is not available until evaluated.
+                            description = project.description
+                        }
+
+                        scm {
+                            connection = 'scm:git:https://github.com/grpc/grpc-kotlin.git'
+                            developerConnection = 'scm:git:git@github.com:grpc/grpc-kotlin.git'
+                            url = 'https://github.com/grpc/grpc-kotlin'
+                        }
+
+                        licenses {
+                            license {
+                                name = 'Apache 2.0'
+                                url = 'https://opensource.org/licenses/Apache-2.0'
+                            }
+                        }
+
+                        developers {
+                            developer {
+                                id = "grpc.io"
+                                name = "gRPC Contributors"
+                                email = "grpc-io@googlegroups.com"
+                                url = "https://grpc.io/"
+                                organization = "gRPC Authors"
+                                organizationUrl = "https://www.google.com"
+                            }
+                        }
+                    }
+                }
+            }
         }
-        externalDocumentationLink {
-            url = new URL("http://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
-        }
-        perPackageOption {
-            prefix = "io.grpc.testing"
-            suppress = true
-        }
-        perPackageOption {
-            prefix = "io.grpc.kotlin.generator"
-            suppress = true
+
+        plugins.withId("java") {
+            task javadocJar(type: Jar) {
+                classifier = 'javadoc'
+                from javadoc
+            }
+
+            task sourcesJar(type: Jar) {
+                classifier = 'sources'
+                from sourceSets.main.allSource
+            }
+
+            // Generate the jar file to be used by our custom plugin
+            task protocJar(type: Jar) {
+                classifier "protoc"
+                manifest {
+                    attributes 'Main-Class': 'io.grpc.kotlin.generator.GeneratorRunner'
+                }
+                baseName = 'protoc-gen-grpc-kotlin'
+                from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+                with jar
+            }
+
+            publishing {
+                publications {
+                    maven {
+                        version = '0.1.0'
+                        from components.java
+                        groupId = 'io.grpc'
+
+                        artifact javadocJar
+                        artifact sourcesJar
+
+                        if (project.name == 'protoc-gen-grpc-kotlin') {
+                            // Generate the artifacts expected by protobuf-gradle-plugin
+                            artifact protocJar
+                            artifactForGradlePlugin(it, 'linux', 'aarch_64')
+                            artifactForGradlePlugin(it, 'linux', 'x86_32')
+                            artifactForGradlePlugin(it, 'linux', 'x86_64')
+                            artifactForGradlePlugin(it, 'osx', 'x86_64')
+                            artifactForGradlePlugin(it, 'windows', 'x86_32')
+                            artifactForGradlePlugin(it, 'windows', 'x86_64')
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -122,90 +122,5 @@ def artifactForGradlePlugin(MavenPublication pub, String os, String arch) {
             classifier os + "-" + arch
             extension "exe"
         }
-    }
-}
-
-// Generate the jar file to be used by our custom plugin
-task protocJar(type: Jar) {
-    classifier "protoc"
-    manifest {
-        attributes 'Main-Class': mainClassName
-    }
-    baseName = 'protoc-gen-grpc-kotlin'
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            pom {
-                name = 'grpc.io:grpc-kotlin'
-                url = 'https://github.com/grpc/grpc-kotlin'
-                afterEvaluate {
-                    // description is not available until evaluated.
-                    description = 'The protoc plugin for gRPC Kotlin'
-                }
-
-                scm {
-                    connection = 'scm:git:https://github.com/grpc/grpc-kotlin.git'
-                    developerConnection = 'scm:git:git@github.com:grpc/grpc-kotlin.git'
-                    url = 'https://github.com/grpc/grpc-kotlin'
-                }
-
-                licenses {
-                    license {
-                        name = 'Apache 2.0'
-                        url = 'https://opensource.org/licenses/Apache-2.0'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id = "grpc.io"
-                        name = "gRPC Contributors"
-                        email = "grpc-io@googlegroups.com"
-                        url = "https://grpc.io/"
-                        organization = "gRPC Authors"
-                        organizationUrl = "https://www.google.com"
-                    }
-                }
-            }
-
-            groupId = 'io.grpc'
-            artifactId = 'grpc-kotlin'
-            version = '0.1.0'
-            from components.java
-
-            // Add a Fat JAR for the protoc plugin
-            artifact protocJar
-            artifact javadocJar
-            artifact sourcesJar
-
-            // Generate the artifacts expected by protobuf-gradle-plugin
-            artifactForGradlePlugin(it, 'linux', 'aarch_64')
-            artifactForGradlePlugin(it, 'linux', 'x86_32')
-            artifactForGradlePlugin(it, 'linux', 'x86_64')
-            artifactForGradlePlugin(it, 'osx', 'x86_64')
-            artifactForGradlePlugin(it, 'windows', 'x86_32')
-            artifactForGradlePlugin(it, 'windows', 'x86_64')
-        }
-    }
-}
-
-test {
-    useJUnitPlatform()
-    testLogging {
-        showStandardStreams = true
     }
 }
