@@ -32,7 +32,7 @@ import kotlinx.coroutines.runBlocking
  * Extracts the value of a [Deferred] known to be completed, or throws its exception if it was
  * not completed successfully.  (Non-experimental variant of `getDone`.)
  */
-val <T> Deferred<T>.doneValue: T
+internal val <T> Deferred<T>.doneValue: T
   get() {
     check(isCompleted) { "doneValue should only be called on completed Deferred values" }
     return runBlocking(Dispatchers.Unconfined) {
@@ -43,7 +43,7 @@ val <T> Deferred<T>.doneValue: T
 /**
  * Cancels a [Job] with a cause and suspends until the job completes/is finished cancelling.
  */
-suspend fun Job.cancelAndJoin(message: String, cause: Exception? = null) {
+internal suspend fun Job.cancelAndJoin(message: String, cause: Exception? = null) {
   cancel(message, cause)
   join()
 }
@@ -54,7 +54,7 @@ suspend fun Job.cancelAndJoin(message: String, cause: Exception? = null) {
  * The purpose of this function is to enable the one element to get processed before we have
  * confirmation that the input flow is done.
  */
-fun <T> Flow<T>.singleOrStatusFlow(
+internal fun <T> Flow<T>.singleOrStatusFlow(
   expected: String,
   descriptor: Any
 ): Flow<T> = flow {
@@ -80,7 +80,7 @@ fun <T> Flow<T>.singleOrStatusFlow(
  * Returns the one and only element of this flow, and throws a [StatusException] if there is not
  * exactly one element.
  */
-suspend fun <T> Flow<T>.singleOrStatus(
+internal suspend fun <T> Flow<T>.singleOrStatus(
   expected: String,
   descriptor: Any
 ): T = singleOrStatusFlow(expected, descriptor).single()
