@@ -26,14 +26,14 @@ repositories {
 
 dependencies {
     // Kotlin
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext.coroutinesVersion}"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext.coroutinesVersion}"
 
     // Grpc and Protobuf
-    compile "io.grpc:grpc-protobuf:${rootProject.ext.grpcVersion}"
-    compile "io.grpc:grpc-stub:${rootProject.ext.grpcVersion}"
+    implementation "io.grpc:grpc-protobuf:${rootProject.ext.grpcVersion}"
+    implementation "io.grpc:grpc-stub:${rootProject.ext.grpcVersion}"
 
     // Java
-    compile "javax.annotation:javax.annotation-api:1.2"
+    implementation "javax.annotation:javax.annotation-api:1.2"
 
     // Testing
     testImplementation "junit:junit:4.12"
