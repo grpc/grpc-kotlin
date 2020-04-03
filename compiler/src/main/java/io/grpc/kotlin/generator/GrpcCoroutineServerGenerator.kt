@@ -19,15 +19,30 @@ package io.grpc.kotlin.generator
 import com.google.common.annotations.VisibleForTesting
 import com.google.protobuf.Descriptors.MethodDescriptor
 import com.google.protobuf.Descriptors.ServiceDescriptor
-import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.MemberName.Companion.member
+import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asClassName
 import io.grpc.ServerServiceDefinition
 import io.grpc.Status
 import io.grpc.StatusException
 import io.grpc.kotlin.AbstractCoroutineServerImpl
 import io.grpc.kotlin.ServerCalls
-import io.grpc.kotlin.generator.protoc.*
+import io.grpc.kotlin.generator.protoc.Declarations
+import io.grpc.kotlin.generator.protoc.GeneratorConfig
+import io.grpc.kotlin.generator.protoc.MemberSimpleName
+import io.grpc.kotlin.generator.protoc.builder
+import io.grpc.kotlin.generator.protoc.classBuilder
+import io.grpc.kotlin.generator.protoc.declarations
+import io.grpc.kotlin.generator.protoc.methodName
+import io.grpc.kotlin.generator.protoc.of
+import io.grpc.kotlin.generator.protoc.serviceName
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlin.coroutines.CoroutineContext
@@ -78,7 +93,7 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
       .addModifiers(KModifier.ABSTRACT)
       .addKdoc(
         """
-        Skeletal implementation of the %L service based on Kotlin coroutines.
+        Skeletal implementation of the %L service based on Kotlin coroutines. 
         """.trimIndent(),
         service.fullName
       )
@@ -167,7 +182,7 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
       CodeBlock.of(
         """
           %M(
-            scope = this,
+            context = this.context,
             descriptor = %L,
             implementation = ::%N
           )
@@ -204,7 +219,7 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
           If creating or collecting the returned flow fails with a [%statusException:T], the RPC
           will fail with the corresponding [%status:T].  If it fails with a
           [%cancellationException:T], the RPC will fail with status `Status.CANCELLED`.  If creating
-          or collecting the returned flow fails for any other reason, the RPC will fail with
+          or collecting the returned flow fails for any other reason, the RPC will fail with 
           `Status.UNKNOWN` with the exception as a cause.
         """.trimIndent()
       )
