@@ -33,6 +33,7 @@ import io.grpc.examples.helloworld.GreeterGrpc
 import io.grpc.examples.helloworld.HelloReply
 import io.grpc.examples.helloworld.HelloRequest
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -41,6 +42,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.channels.toList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asFlow
@@ -64,12 +66,15 @@ import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
+@ExperimentalCoroutinesApi
 @RunWith(JUnit4::class)
 class ServerCallsTest : AbstractCallsTest() {
+  val context = CoroutineName("server context")
+
   @Test
   fun simpleUnaryMethod() = runBlocking {
     val channel = makeChannel(
-      ServerCalls.unaryServerMethodDefinition(this, sayHelloMethod) { request ->
+      ServerCalls.unaryServerMethodDefinition(context, sayHelloMethod) { request ->
         helloReply("Hello, ${request.name}")
       }
     )
@@ -84,7 +89,7 @@ class ServerCallsTest : AbstractCallsTest() {
     val requestReceived = Job()
     val cancelled = Job()
     val channel = makeChannel(
-      ServerCalls.unaryServerMethodDefinition(this, sayHelloMethod) {
+      ServerCalls.unaryServerMethodDefinition(context, sayHelloMethod) {
         requestReceived.complete()
         suspendUntilCancelled { cancelled.complete() }
       }
@@ -98,9 +103,41 @@ class ServerCallsTest : AbstractCallsTest() {
   }
 
   @Test
+  fun unaryRequestHandledWithoutWaitingForHalfClose() = runBlocking {
+    val processingStarted = Job()
+    val channel = makeChannel(
+      ServerCalls.unaryServerMethodDefinition(context, sayHelloMethod) {
+        processingStarted.complete()
+        helloReply("Hello!")
+      }
+    )
+
+    val clientCall = channel.newCall(sayHelloMethod, CallOptions.DEFAULT)
+    val response = CompletableDeferred<HelloReply>()
+    val closeStatus = CompletableDeferred<Status>()
+    clientCall.start(object: ClientCall.Listener<HelloReply>() {
+      override fun onMessage(message: HelloReply) {
+        response.complete(message)
+      }
+
+      override fun onClose(status: Status, trailers: Metadata) {
+        closeStatus.complete(status)
+      }
+    }, Metadata())
+    clientCall.sendMessage(helloRequest(""))
+    clientCall.request(1)
+    processingStarted.join()
+    assertThat(response.await()).isEqualTo(helloReply("Hello!"))
+    delay(200)
+    assertThat(closeStatus.isCompleted).isFalse()
+    clientCall.halfClose()
+    assertThat(closeStatus.await().code).isEqualTo(Status.Code.OK)
+  }
+
+  @Test
   fun unaryMethodReceivedTooManyRequests() = runBlocking {
     val channel = makeChannel(
-      ServerCalls.unaryServerMethodDefinition(this, sayHelloMethod) {
+      ServerCalls.unaryServerMethodDefinition(context, sayHelloMethod) {
         helloReply("Hello, ${it.name}")
       }
     )
@@ -127,7 +164,7 @@ class ServerCallsTest : AbstractCallsTest() {
   @Test
   fun unaryMethodReceivedNoRequests() = runBlocking {
     val channel = makeChannel(
-      ServerCalls.unaryServerMethodDefinition(this, sayHelloMethod) {
+      ServerCalls.unaryServerMethodDefinition(context, sayHelloMethod) {
         helloReply("Hello, ${it.name}")
       }
     )
@@ -152,7 +189,7 @@ class ServerCallsTest : AbstractCallsTest() {
   @Test
   fun unaryMethodThrowsStatusException() = runBlocking {
     val channel = makeChannel(
-      ServerCalls.unaryServerMethodDefinition(this, sayHelloMethod) {
+      ServerCalls.unaryServerMethodDefinition(context, sayHelloMethod) {
         throw StatusException(Status.OUT_OF_RANGE)
       }
     )
@@ -169,7 +206,7 @@ class ServerCallsTest : AbstractCallsTest() {
   @Test
   fun unaryMethodThrowsException() = runBlocking {
     val channel = makeChannel(
-      ServerCalls.unaryServerMethodDefinition(this, sayHelloMethod) {
+      ServerCalls.unaryServerMethodDefinition(context, sayHelloMethod) {
         throw MyException()
       }
     )
@@ -184,7 +221,7 @@ class ServerCallsTest : AbstractCallsTest() {
   @Test
   fun simpleServerStreaming() = runBlocking {
     val channel = makeChannel(
-      ServerCalls.serverStreamingServerMethodDefinition(this, serverStreamingSayHelloMethod) {
+      ServerCalls.serverStreamingServerMethodDefinition(context, serverStreamingSayHelloMethod) {
         it.nameList.asFlow().map { helloReply("Hello, $it") }
       }
     )
@@ -208,7 +245,7 @@ class ServerCallsTest : AbstractCallsTest() {
     val cancelled = Job()
     val channel = makeChannel(
       ServerCalls.serverStreamingServerMethodDefinition(
-        this,
+        context,
         serverStreamingSayHelloMethod
       ) {
         flow {
@@ -240,7 +277,7 @@ class ServerCallsTest : AbstractCallsTest() {
   fun serverStreamingThrowsStatusException() = runBlocking {
     val channel = makeChannel(
       ServerCalls.serverStreamingServerMethodDefinition(
-        this,
+        context,
         serverStreamingSayHelloMethod
       ) { flow { throw StatusException(Status.OUT_OF_RANGE) } }
     )
@@ -263,10 +300,46 @@ class ServerCallsTest : AbstractCallsTest() {
   }
 
   @Test
+  fun serverStreamingHandledWithoutWaitingForHalfClose() = runBlocking {
+    val processingStarted = Job()
+    val channel = makeChannel(
+      ServerCalls.serverStreamingServerMethodDefinition(context, serverStreamingSayHelloMethod) {
+        request -> flow {
+          processingStarted.complete()
+          for (name in request.nameList) {
+            emit(helloReply("Hello, $name"))
+          }
+        }
+      }
+    )
+
+    val clientCall = channel.newCall(serverStreamingSayHelloMethod, CallOptions.DEFAULT)
+    val responseChannel = Channel<HelloReply>()
+    clientCall.start(object: ClientCall.Listener<HelloReply>() {
+      override fun onMessage(message: HelloReply) {
+        responseChannel.sendBlocking(message)
+      }
+
+      override fun onClose(status: Status, trailers: Metadata) {
+        responseChannel.close()
+      }
+    }, Metadata())
+    clientCall.sendMessage(multiHelloRequest("Ruby", "Sapphire"))
+    clientCall.request(2)
+    processingStarted.join()
+    assertThat(responseChannel.receive()).isEqualTo(helloReply("Hello, Ruby"))
+    assertThat(responseChannel.receive()).isEqualTo(helloReply("Hello, Sapphire"))
+    delay(200)
+    assertThat(responseChannel.isClosedForReceive).isFalse()
+    clientCall.halfClose()
+    assertThat(responseChannel.toList()).isEmpty() // closed with no further responses
+  }
+
+  @Test
   fun serverStreamingThrowsException() = runBlocking {
     val channel = makeChannel(
       ServerCalls.serverStreamingServerMethodDefinition(
-        this,
+        context,
         serverStreamingSayHelloMethod
       ) { throw MyException() }
     )
@@ -293,7 +366,7 @@ class ServerCallsTest : AbstractCallsTest() {
   fun simpleClientStreaming() = runBlocking {
     val channel = makeChannel(
       ServerCalls.clientStreamingServerMethodDefinition(
-        this,
+        context,
         clientStreamingSayHelloMethod
       ) { requests ->
         helloReply(requests.toList().joinToString(separator = ", ", prefix = "Hello, ") { it.name })
@@ -318,7 +391,7 @@ class ServerCallsTest : AbstractCallsTest() {
   fun clientStreamingDoesntWaitForAllRequests() = runBlocking {
     val channel = makeChannel(
       ServerCalls.clientStreamingServerMethodDefinition(
-        this,
+        context,
         clientStreamingSayHelloMethod
       ) { requests ->
         val (req1, req2) = requests.take(2).toList()
@@ -348,7 +421,7 @@ class ServerCallsTest : AbstractCallsTest() {
     val barrier = Job()
     val channel = makeChannel(
       ServerCalls.clientStreamingServerMethodDefinition(
-        this,
+        context,
         clientStreamingSayHelloMethod
       ) { requests ->
         val (req1, req2) = requests.take(2).toList()
@@ -380,7 +453,7 @@ class ServerCallsTest : AbstractCallsTest() {
     val cancelled = Job()
     val channel = makeChannel(
       ServerCalls.clientStreamingServerMethodDefinition(
-        this,
+        context,
         clientStreamingSayHelloMethod
       ) {
         it.collect {
@@ -412,7 +485,7 @@ class ServerCallsTest : AbstractCallsTest() {
   fun clientStreamingThrowsStatusException() = runBlocking {
     val channel = makeChannel(
       ServerCalls.clientStreamingServerMethodDefinition(
-        this,
+        context,
         clientStreamingSayHelloMethod
       ) { throw StatusException(Status.INVALID_ARGUMENT) }
     )
@@ -435,7 +508,7 @@ class ServerCallsTest : AbstractCallsTest() {
   fun clientStreamingThrowsException() = runBlocking {
     val channel = makeChannel(
       ServerCalls.clientStreamingServerMethodDefinition(
-        this,
+        context,
         clientStreamingSayHelloMethod
       ) {
         throw MyException()
@@ -461,7 +534,7 @@ class ServerCallsTest : AbstractCallsTest() {
   @Test
   fun simpleBidiStreamingPingPong() = runBlocking {
     val channel = makeChannel(
-      ServerCalls.bidiStreamingServerMethodDefinition(this, bidiStreamingSayHelloMethod) {
+      ServerCalls.bidiStreamingServerMethodDefinition(context, bidiStreamingSayHelloMethod) {
         requests -> requests.map { helloReply("Hello, ${it.name}") }.onCompletion { emit(helloReply("Goodbye")) }
       }
     )
@@ -486,7 +559,7 @@ class ServerCallsTest : AbstractCallsTest() {
     val cancelled = Job()
     val channel = makeChannel(
       ServerCalls.bidiStreamingServerMethodDefinition(
-        this,
+        context,
         bidiStreamingSayHelloMethod
       ) { requests ->
         flow {
@@ -519,7 +592,7 @@ class ServerCallsTest : AbstractCallsTest() {
   fun bidiStreamingThrowsStatusException() = runBlocking {
     val channel = makeChannel(
       ServerCalls.bidiStreamingServerMethodDefinition(
-        this,
+        context,
         bidiStreamingSayHelloMethod
       ) { flow { throw StatusException(Status.INVALID_ARGUMENT) } }
     )
@@ -542,7 +615,7 @@ class ServerCallsTest : AbstractCallsTest() {
   fun bidiStreamingThrowsException() = runBlocking {
     val channel = makeChannel(
       ServerCalls.bidiStreamingServerMethodDefinition(
-        this,
+        context,
         bidiStreamingSayHelloMethod
       ) { throw MyException() }
     )
@@ -564,7 +637,7 @@ class ServerCallsTest : AbstractCallsTest() {
   @Test
   fun rejectNonUnaryMethod() = runBlocking {
     assertThrows<IllegalArgumentException> {
-      ServerCalls.unaryServerMethodDefinition(this, bidiStreamingSayHelloMethod) { TODO() }
+      ServerCalls.unaryServerMethodDefinition(context, bidiStreamingSayHelloMethod) { TODO() }
     }
   }
 
@@ -572,7 +645,7 @@ class ServerCallsTest : AbstractCallsTest() {
   fun rejectNonClientStreamingMethod() = runBlocking {
     assertThrows<IllegalArgumentException> {
       ServerCalls
-        .clientStreamingServerMethodDefinition(this, sayHelloMethod) { TODO() }
+        .clientStreamingServerMethodDefinition(context, sayHelloMethod) { TODO() }
     }
   }
 
@@ -580,7 +653,7 @@ class ServerCallsTest : AbstractCallsTest() {
   fun rejectNonServerStreamingMethod() = runBlocking {
     assertThrows<IllegalArgumentException> {
       ServerCalls
-        .serverStreamingServerMethodDefinition(this, sayHelloMethod) { TODO() }
+        .serverStreamingServerMethodDefinition(context, sayHelloMethod) { TODO() }
     }
   }
 
@@ -588,7 +661,7 @@ class ServerCallsTest : AbstractCallsTest() {
   fun rejectNonBidiStreamingMethod() = runBlocking {
     assertThrows<IllegalArgumentException> {
       ServerCalls
-        .bidiStreamingServerMethodDefinition(this, sayHelloMethod) { TODO() }
+        .bidiStreamingServerMethodDefinition(context, sayHelloMethod) { TODO() }
     }
   }
 
@@ -615,7 +688,7 @@ class ServerCallsTest : AbstractCallsTest() {
     }
 
     val channel = makeChannel(
-      ServerCalls.unaryServerMethodDefinition(this, sayHelloMethod) {
+      ServerCalls.unaryServerMethodDefinition(context, sayHelloMethod) {
         withContext(differentThreadContext) {
           // Run this in a definitely different thread, just to verify context propagation
           // is WAI.
@@ -630,47 +703,6 @@ class ServerCallsTest : AbstractCallsTest() {
     assertThat(stub.sayHello(helloRequest("Peridot"))).isEqualTo(helloReply("Hello, Peridot"))
   }
 
-  @Test
-  fun serverScopeCancelledDuringRpc() = runBlocking {
-    val serverScope = CoroutineScope(EmptyCoroutineContext)
-    val serverReceived = Job()
-    val channel = makeChannel(
-      ServerCalls.unaryServerMethodDefinition(serverScope, sayHelloMethod) {
-        serverReceived.complete()
-        suspendForever()
-      }
-    )
-
-    val test = launch {
-      val ex = assertThrows<StatusException> {
-        ClientCalls.unaryRpc(channel, sayHelloMethod, helloRequest("Greg"))
-      }
-      assertThat(ex.status.code).isEqualTo(Status.Code.CANCELLED)
-    }
-    serverReceived.join()
-    serverScope.cancel()
-    test.join()
-  }
-
-  @Test
-  fun serverScopeCancelledBeforeRpc() = runBlocking {
-    val serverScope = CoroutineScope(EmptyCoroutineContext)
-    val channel = makeChannel(
-      ServerCalls.unaryServerMethodDefinition(serverScope, sayHelloMethod) {
-        suspendForever()
-      }
-    )
-
-    serverScope.cancel()
-    val test = launch {
-      val ex = assertThrows<StatusException> {
-        ClientCalls.unaryRpc(channel, sayHelloMethod, helloRequest("Greg"))
-      }
-      assertThat(ex.status.code).isEqualTo(Status.Code.CANCELLED)
-    }
-    test.join()
-  }
-
   @ExperimentalCoroutinesApi
   @FlowPreview
   @Test
@@ -679,7 +711,7 @@ class ServerCallsTest : AbstractCallsTest() {
     val receivedFirstMessage = Job()
     val channel = makeChannel(
       ServerCalls.serverStreamingServerMethodDefinition(
-        this,
+        EmptyCoroutineContext,
         serverStreamingSayHelloMethod
       ) {
         channelFlow {
@@ -715,7 +747,7 @@ class ServerCallsTest : AbstractCallsTest() {
     val contextKey = Context.key<String>("foo")
     val channel = makeChannel(
       ServerCalls.unaryServerMethodDefinition(
-        this,
+        context,
         sayHelloMethod
       ) {
         assertThat(contextKey.get()).isEqualTo("bar")

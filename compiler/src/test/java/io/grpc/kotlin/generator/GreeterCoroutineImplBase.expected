@@ -20,9 +20,8 @@ import kotlinx.coroutines.flow.Flow
 /**
  * Skeletal implementation of the helloworld.Greeter service based on Kotlin coroutines.
  */
-abstract class GreeterCoroutineImplBase(
-  coroutineContext: CoroutineContext = EmptyCoroutineContext
-) : AbstractCoroutineServerImpl(coroutineContext) {
+abstract class GreeterCoroutineImplBase(coroutineContext: CoroutineContext = EmptyCoroutineContext)
+    : AbstractCoroutineServerImpl(coroutineContext) {
   /**
    * Returns the response to an RPC for helloworld.Greeter.SayHello.
    *
@@ -34,8 +33,10 @@ abstract class GreeterCoroutineImplBase(
    *
    * @param request The request from the client.
    */
-  open suspend fun sayHello(request: HelloRequest): HelloReply = throw
-      StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.SayHello is unimplemented"))
+  open suspend fun sayHello(request: HelloRequest): HelloReply {
+    throw
+        StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.SayHello is unimplemented"))
+  }
 
   /**
    * Returns the response to an RPC for helloworld.Greeter.ClientStreamSayHello.
@@ -50,8 +51,10 @@ abstract class GreeterCoroutineImplBase(
    *        collected only once and throws [java.lang.IllegalStateException] on attempts to collect
    *        it more than once.
    */
-  open suspend fun clientStreamSayHello(requests: Flow<HelloRequest>): HelloReply = throw
-      StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ClientStreamSayHello is unimplemented"))
+  open suspend fun clientStreamSayHello(requests: Flow<HelloRequest>): HelloReply {
+    throw
+        StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ClientStreamSayHello is unimplemented"))
+  }
 
   /**
    * Returns a [Flow] of responses to an RPC for helloworld.Greeter.ServerStreamSayHello.
@@ -65,8 +68,10 @@ abstract class GreeterCoroutineImplBase(
    *
    * @param request The request from the client.
    */
-  open fun serverStreamSayHello(request: MultiHelloRequest): Flow<HelloReply> = throw
-      StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ServerStreamSayHello is unimplemented"))
+  open fun serverStreamSayHello(request: MultiHelloRequest): Flow<HelloReply> {
+    throw
+        StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ServerStreamSayHello is unimplemented"))
+  }
 
   /**
    * Returns a [Flow] of responses to an RPC for helloworld.Greeter.BidiStreamSayHello.
@@ -82,27 +87,29 @@ abstract class GreeterCoroutineImplBase(
    *        collected only once and throws [java.lang.IllegalStateException] on attempts to collect
    *        it more than once.
    */
-  open fun bidiStreamSayHello(requests: Flow<HelloRequest>): Flow<HelloReply> = throw
-      StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.BidiStreamSayHello is unimplemented"))
+  open fun bidiStreamSayHello(requests: Flow<HelloRequest>): Flow<HelloReply> {
+    throw
+        StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.BidiStreamSayHello is unimplemented"))
+  }
 
   final override fun bindService(): ServerServiceDefinition = builder(getServiceDescriptor())
     .addMethod(unaryServerMethodDefinition(
-    scope = this,
+    context = this.context,
     descriptor = GreeterGrpc.getSayHelloMethod(),
     implementation = ::sayHello
   ))
     .addMethod(clientStreamingServerMethodDefinition(
-    scope = this,
+    context = this.context,
     descriptor = GreeterGrpc.getClientStreamSayHelloMethod(),
     implementation = ::clientStreamSayHello
   ))
     .addMethod(serverStreamingServerMethodDefinition(
-    scope = this,
+    context = this.context,
     descriptor = GreeterGrpc.getServerStreamSayHelloMethod(),
     implementation = ::serverStreamSayHello
   ))
     .addMethod(bidiStreamingServerMethodDefinition(
-    scope = this,
+    context = this.context,
     descriptor = GreeterGrpc.getBidiStreamSayHelloMethod(),
     implementation = ::bidiStreamSayHello
   )).build()

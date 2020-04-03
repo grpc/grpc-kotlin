@@ -16,7 +16,6 @@
 
 package io.grpc.kotlin
 
-import io.grpc.Metadata as GrpcMetadata
 import io.grpc.MethodDescriptor
 import io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING
 import io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING
@@ -36,8 +35,10 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.plus
+import kotlinx.coroutines.flow.map
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.coroutines.CoroutineContext
+import io.grpc.Metadata as GrpcMetadata
 
 /**
  * Helpers for implementing a gRPC server based on a Kotlin coroutine implementation.
@@ -45,8 +46,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 object ServerCalls {
   /**
    * Creates a [ServerMethodDefinition] that implements the specified unary RPC method by running
-   * the specified implementation and associated implementation details within the specified
-   * [CoroutineScope] (and/or a subscope).
+   * the specified implementation and associated implementation details within a per-RPC
+   * [CoroutineScope] generated with the specified [CoroutineContext].
    *
    * When the RPC is received, this method definition will pass the request from the client
    * to [implementation], and send the response back to the client when it is returned.
@@ -58,31 +59,29 @@ object ServerCalls {
    * from the client before [implementation] is complete, the coroutine will be cancelled and the
    * RPC will fail with [Status.CANCELLED].
    *
-   * @param scope The scope to run the RPC implementation in
+   * @param context The context of the scopes the RPC implementation will run in
    * @param descriptor The descriptor of the method being implemented
    * @param implementation The implementation of the RPC method
    */
   fun <RequestT, ResponseT> unaryServerMethodDefinition(
-    scope: CoroutineScope,
+    context: CoroutineContext,
     descriptor: MethodDescriptor<RequestT, ResponseT>,
     implementation: suspend (request: RequestT) -> ResponseT
   ): ServerMethodDefinition<RequestT, ResponseT> {
     require(descriptor.type == UNARY) {
       "Expected a unary method descriptor but got $descriptor"
     }
-    return serverMethodDefinition(scope, descriptor) { requests ->
-      flow {
-        val request = requests.singleOrStatus("request", descriptor)
-        val response = implementation(request)
-        emit(response)
-      }
+    return serverMethodDefinition(context, descriptor) { requests ->
+      requests
+        .singleOrStatusFlow("request", descriptor)
+        .map { implementation(it) }
     }
   }
 
   /**
    * Creates a [ServerMethodDefinition] that implements the specified client-streaming RPC method by
-   * running the specified implementation and associated implementation details within the specified
-   * [CoroutineScope] (and/or a subscope).
+   * running the specified implementation and associated implementation details within a per-RPC
+   * [CoroutineScope] generated with the specified [CoroutineContext].
    *
    * When the RPC is received, this method definition will pass a [Flow] of requests from the client
    * to [implementation], and send the response back to the client when it is returned.
@@ -91,19 +90,19 @@ object ServerCalls {
    * cancels collection of the requests flow, further requests from the client will be ignored
    * (and no backpressure will be applied).
    *
-   * @param scope The scope to run the RPC implementation in
+   * @param context The context of the scopes the RPC implementation will run in
    * @param descriptor The descriptor of the method being implemented
    * @param implementation The implementation of the RPC method
    */
   fun <RequestT, ResponseT> clientStreamingServerMethodDefinition(
-    scope: CoroutineScope,
+    context: CoroutineContext,
     descriptor: MethodDescriptor<RequestT, ResponseT>,
     implementation: suspend (requests: Flow<RequestT>) -> ResponseT
   ): ServerMethodDefinition<RequestT, ResponseT> {
     require(descriptor.type == CLIENT_STREAMING) {
       "Expected a client streaming method descriptor but got $descriptor"
     }
-    return serverMethodDefinition(scope, descriptor) { requests ->
+    return serverMethodDefinition(context, descriptor) { requests ->
       flow {
         val response = implementation(requests)
         emit(response)
@@ -113,39 +112,42 @@ object ServerCalls {
 
   /**
    * Creates a [ServerMethodDefinition] that implements the specified server-streaming RPC method by
-   * running the specified implementation and associated implementation details within the specified
-   * [CoroutineScope] (and/or a subscope).  When the RPC is received, this method definition will
-   * collect the flow returned by [implementation] and send the emitted values back to the client.
+   * running the specified implementation and associated implementation details within a per-RPC
+   * [CoroutineScope] generated with the specified [CoroutineContext].  When the RPC is received,
+   * this method definition will collect the flow returned by [implementation] and send the emitted
+   * values back to the client.
    *
    * When the RPC is received, this method definition will pass the request from the client
    * to [implementation], and collect the returned [Flow], sending responses to the client as they
    * are emitted.  Exceptions and cancellation are handled as in [unaryServerMethodDefinition].
    *
-   * @param scope The scope to run the RPC implementation in
+   * @param context The context of the scopes the RPC implementation will run in
    * @param descriptor The descriptor of the method being implemented
    * @param implementation The implementation of the RPC method
    */
   fun <RequestT, ResponseT> serverStreamingServerMethodDefinition(
-    scope: CoroutineScope,
+    context: CoroutineContext,
     descriptor: MethodDescriptor<RequestT, ResponseT>,
     implementation: (request: RequestT) -> Flow<ResponseT>
   ): ServerMethodDefinition<RequestT, ResponseT> {
     require(descriptor.type == SERVER_STREAMING) {
       "Expected a server streaming method descriptor but got $descriptor"
     }
-    return serverMethodDefinition(scope, descriptor) {
-      requests -> flow {
-        val request = requests.singleOrStatus("request", descriptor)
-        val responses = implementation(request)
-        emitAll(responses)
+    return serverMethodDefinition(context, descriptor) { requests ->
+      flow {
+        requests
+          .singleOrStatusFlow("request", descriptor)
+          .collect { req ->
+            implementation(req).collect { resp -> emit(resp) }
+          }
       }
     }
   }
 
   /**
    * Creates a [ServerMethodDefinition] that implements the specified bidirectional-streaming RPC
-   * method by running the specified implementation and associated implementation details within the
-   * specified [CoroutineScope] (and/or a subscope).
+   * method by running the specified implementation and associated implementation details within a
+   * per-RPC [CoroutineScope] generated with the specified [CoroutineContext].
    *
    * When the RPC is received, this method definition will pass a [Flow] of requests from the client
    * to [implementation], and collect the returned [Flow], sending responses to the client as they
@@ -154,19 +156,19 @@ object ServerCalls {
    * Exceptions and cancellation are handled as in [clientStreamingServerMethodDefinition] and as
    * in [serverStreamingServerMethodDefinition].
    *
-   * @param scope The scope to run the RPC implementation in
+   * @param context The context of the scopes the RPC implementation will run in
    * @param descriptor The descriptor of the method being implemented
    * @param implementation The implementation of the RPC method
    */
   fun <RequestT, ResponseT> bidiStreamingServerMethodDefinition(
-    scope: CoroutineScope,
+    context: CoroutineContext,
     descriptor: MethodDescriptor<RequestT, ResponseT>,
     implementation: (requests: Flow<RequestT>) -> Flow<ResponseT>
   ): ServerMethodDefinition<RequestT, ResponseT> {
     require(descriptor.type == BIDI_STREAMING) {
       "Expected a bidi streaming method descriptor but got $descriptor"
     }
-    return serverMethodDefinition(scope, descriptor, implementation)
+    return serverMethodDefinition(context, descriptor, implementation)
   }
 
   /**
@@ -175,13 +177,13 @@ object ServerCalls {
    * subscope).
    */
   private fun <RequestT, ResponseT> serverMethodDefinition(
-    scope: CoroutineScope,
+    context: CoroutineContext,
     descriptor: MethodDescriptor<RequestT, ResponseT>,
     implementation: (Flow<RequestT>) -> Flow<ResponseT>
   ): ServerMethodDefinition<RequestT, ResponseT> =
     ServerMethodDefinition.create(
       descriptor,
-      serverCallHandler(scope, implementation)
+      serverCallHandler(context, implementation)
     )
 
   /**
@@ -189,19 +191,19 @@ object ServerCalls {
    * channel-based implementation within the specified [CoroutineScope] (and/or a subscope).
    */
   private fun <RequestT, ResponseT> serverCallHandler(
-    scope: CoroutineScope,
+    context: CoroutineContext,
     implementation: (Flow<RequestT>) -> Flow<ResponseT>
   ): ServerCallHandler<RequestT, ResponseT> =
     ServerCallHandler {
       call, _ -> serverCallListener(
-        scope + GrpcContextElement.current(),
+        context + GrpcContextElement.current(),
         call,
         implementation
       )
     }
 
   private fun <RequestT, ResponseT> serverCallListener(
-    scope: CoroutineScope,
+    context: CoroutineContext,
     call: ServerCall<RequestT, ResponseT>,
     implementation: (Flow<RequestT>) -> Flow<ResponseT>
   ): ServerCall.Listener<RequestT> {
@@ -232,15 +234,16 @@ object ServerCalls {
       }
     }
 
-    val rpcJob = scope.async(
+    val rpcScope = CoroutineScope(context)
+    val rpcJob = rpcScope.async(
       CoroutineName("${call.methodDescriptor.fullMethodName} implementation")
     ) {
-      thrownOrNull {
+      runCatching {
         implementation(requests).collect {
           readiness.suspendUntilReady()
           call.sendMessage(it)
         }
-      }
+      }.exceptionOrNull()
     }
 
     rpcJob.invokeOnCompletion { cause ->
@@ -256,7 +259,7 @@ object ServerCalls {
       var isReceiving = true
 
       override fun onCancel() {
-        rpcJob.cancel("Cancellation received from client")
+        rpcScope.cancel("Cancellation received from client")
       }
 
       override fun onMessage(message: RequestT) {
