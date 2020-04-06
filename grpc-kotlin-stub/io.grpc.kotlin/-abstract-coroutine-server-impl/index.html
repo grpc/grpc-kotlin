@@ -8,7 +8,7 @@
 <a href="../../index.html">grpc-kotlin-stub</a>&nbsp;/&nbsp;<a href="../index.html">io.grpc.kotlin</a>&nbsp;/&nbsp;<a href="./index.html">AbstractCoroutineServerImpl</a><br/>
 <br/>
 <h1>AbstractCoroutineServerImpl</h1>
-<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">AbstractCoroutineServerImpl</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="http://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-coroutine-scope/index.html"><span class="identifier">CoroutineScope</span></a><span class="symbol">, </span><a href="http://grpc.github.io/grpc-java/javadoc/io/grpc/BindableService.html"><span class="identifier">BindableService</span></a></code>
+<code><span class="keyword">abstract</span> <span class="keyword">class </span><span class="identifier">AbstractCoroutineServerImpl</span>&nbsp;<span class="symbol">:</span>&nbsp;<a href="http://grpc.github.io/grpc-java/javadoc/io/grpc/BindableService.html"><span class="identifier">BindableService</span></a></code>
 <p>Skeleton implementation of a coroutine-based gRPC server implementation.  Intended to be
 subclassed by generated code.</p>
 <h3>Constructors</h3>
@@ -19,7 +19,9 @@ subclassed by generated code.</p>
 <h4><a href="-init-.html">&lt;init&gt;</a></h4>
 </td>
 <td>
-<code><span class="identifier">AbstractCoroutineServerImpl</span><span class="symbol">(</span><span class="identifier" id="io.grpc.kotlin.AbstractCoroutineServerImpl$<init>(kotlin.coroutines.CoroutineContext)/coroutineContext">coroutineContext</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.coroutines/-coroutine-context/index.html"><span class="identifier">CoroutineContext</span></a>&nbsp;<span class="symbol">=</span>&nbsp;EmptyCoroutineContext<span class="symbol">)</span></code></td>
+<p>Skeleton implementation of a coroutine-based gRPC server implementation.  Intended to be
+subclassed by generated code.</p>
+<code><span class="identifier">AbstractCoroutineServerImpl</span><span class="symbol">(</span><span class="identifier" id="io.grpc.kotlin.AbstractCoroutineServerImpl$<init>(kotlin.coroutines.CoroutineContext)/context">context</span><span class="symbol">:</span>&nbsp;<a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.coroutines/-coroutine-context/index.html"><span class="identifier">CoroutineContext</span></a>&nbsp;<span class="symbol">=</span>&nbsp;EmptyCoroutineContext<span class="symbol">)</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -28,10 +30,11 @@ subclassed by generated code.</p>
 <tbody>
 <tr>
 <td>
-<h4><a href="coroutine-context.html">coroutineContext</a></h4>
+<h4><a href="context.html">context</a></h4>
 </td>
 <td>
-<code><span class="keyword">val </span><span class="identifier">coroutineContext</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.coroutines/-coroutine-context/index.html"><span class="identifier">CoroutineContext</span></a></code></td>
+<p>The context in which to run server coroutines.</p>
+<code><span class="keyword">val </span><span class="identifier">context</span><span class="symbol">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.coroutines/-coroutine-context/index.html"><span class="identifier">CoroutineContext</span></a></code></td>
 </tr>
 </tbody>
 </table>
