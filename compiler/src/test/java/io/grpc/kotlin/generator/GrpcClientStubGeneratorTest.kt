@@ -16,18 +16,16 @@
 
 package io.grpc.kotlin.generator
 
+import com.google.common.io.Resources
 import com.google.protobuf.Descriptors.MethodDescriptor
 import com.google.protobuf.Descriptors.ServiceDescriptor
-import io.grpc.examples.helloworld.HelloWorldProto
 import io.grpc.kotlin.generator.protoc.GeneratorConfig
 import io.grpc.kotlin.generator.protoc.JavaPackagePolicy
 import io.grpc.kotlin.generator.protoc.testing.assertThat
+import io.grpc.examples.helloworld.HelloWorldProto
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.Paths
 
 @RunWith(JUnit4::class)
 class GrpcClientStubGeneratorTest {
@@ -56,12 +54,12 @@ class GrpcClientStubGeneratorTest {
        *
        * @return The single response from the server.
        */
-      suspend fun sayHello(request: io.grpc.examples.helloworld.HelloRequest, headers: io.grpc.Metadata = io.grpc.Metadata()): io.grpc.examples.helloworld.HelloReply = io.grpc.kotlin.ClientCalls.unaryRpc(
+      suspend fun sayHello(request: io.grpc.examples.helloworld.HelloRequest): io.grpc.examples.helloworld.HelloReply = io.grpc.kotlin.ClientCalls.unaryRpc(
         channel,
         io.grpc.examples.helloworld.GreeterGrpc.getSayHelloMethod(),
         request,
         callOptions,
-        headers
+        io.grpc.Metadata()
       )
       """.trimIndent()
     )
@@ -74,12 +72,12 @@ class GrpcClientStubGeneratorTest {
       /**
        * Returns a [kotlinx.coroutines.flow.Flow] that, when collected, executes this RPC and emits responses from the
        * server as they arrive.  That flow finishes normally if the server closes its response with
-       * [`Status.OK`][io.grpc.Status], and fails by throwing a [io.grpc.StatusException] otherwise.  If
+       * [`Status.OK`][io.grpc.Status], and fails by throwing a [io.grpc.StatusException] otherwise.  If 
        * collecting the flow downstream fails exceptionally (including via cancellation), the RPC
        * is cancelled with that exception as a cause.
        *
-       * The [kotlinx.coroutines.flow.Flow] of requests is collected once each time the [kotlinx.coroutines.flow.Flow] of responses is
-       * collected. If collection of the [kotlinx.coroutines.flow.Flow] of responses completes normally or
+       * The [kotlinx.coroutines.flow.Flow] of requests is collected once each time the [kotlinx.coroutines.flow.Flow] of responses is 
+       * collected. If collection of the [kotlinx.coroutines.flow.Flow] of responses completes normally or 
        * exceptionally before collection of `requests` completes, the collection of
        * `requests` is cancelled.  If the collection of `requests` completes
        * exceptionally for any other reason, then the collection of the [kotlinx.coroutines.flow.Flow] of responses
@@ -89,12 +87,12 @@ class GrpcClientStubGeneratorTest {
        *
        * @return A flow that, when collected, emits the responses from the server.
        */
-      fun bidiStreamSayHello(requests: kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloRequest>, headers: io.grpc.Metadata = io.grpc.Metadata()): kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloReply> = io.grpc.kotlin.ClientCalls.bidiStreamingRpc(
+      fun bidiStreamSayHello(requests: kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloRequest>): kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloReply> = io.grpc.kotlin.ClientCalls.bidiStreamingRpc(
         channel,
         io.grpc.examples.helloworld.GreeterGrpc.getBidiStreamSayHelloMethod(),
         requests,
         callOptions,
-        headers
+        io.grpc.Metadata()
       )
       """.trimIndent()
     )
@@ -102,16 +100,11 @@ class GrpcClientStubGeneratorTest {
 
   @Test
   fun generateServiceStub() {
-    val expectedFileContents = Files.readAllLines(
-      Paths.get(
-        "src/test/java/io/grpc/kotlin/generator",
-        "GreeterCoroutineStub.expected"
-      ),
-      StandardCharsets.UTF_8
-    )
-
     assertThat(generator.generate(greeterServiceDescriptor)).generatesEnclosed(
-      expectedFileContents.joinToString("\n") + "\n"
+      Resources.toString(
+        Resources.getResource("io/grpc/kotlin/generator/GreeterCoroutineStub.expected"),
+        Charsets.UTF_8
+      )
     )
   }
 }
