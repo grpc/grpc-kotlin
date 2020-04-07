@@ -19,19 +19,37 @@ package io.grpc.kotlin.generator
 import com.google.common.annotations.VisibleForTesting
 import com.google.protobuf.Descriptors.MethodDescriptor
 import com.google.protobuf.Descriptors.ServiceDescriptor
-import com.squareup.kotlinpoet.*
+import io.grpc.kotlin.generator.protoc.Declarations
+import io.grpc.kotlin.generator.protoc.GeneratorConfig
+import io.grpc.kotlin.generator.protoc.MemberSimpleName
+import io.grpc.kotlin.generator.protoc.builder
+import io.grpc.kotlin.generator.protoc.classBuilder
+import io.grpc.kotlin.generator.protoc.declarations
+import io.grpc.kotlin.generator.protoc.member
+import io.grpc.kotlin.generator.protoc.methodName
+import io.grpc.kotlin.generator.protoc.of
+import io.grpc.kotlin.generator.protoc.serviceName
+import com.squareup.kotlinpoet.AnnotationSpec
+import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.TypeVariableName
+import com.squareup.kotlinpoet.asClassName
+import com.squareup.kotlinpoet.asTypeName
 import io.grpc.CallOptions
+import io.grpc.Channel as GrpcChannel
+import io.grpc.Metadata as GrpcMetadata
 import io.grpc.MethodDescriptor.MethodType
 import io.grpc.Status
 import io.grpc.StatusException
 import io.grpc.kotlin.AbstractCoroutineStub
 import io.grpc.kotlin.ClientCalls
 import io.grpc.kotlin.StubFor
-import io.grpc.kotlin.generator.protoc.*
 import kotlinx.coroutines.flow.Flow
-import io.grpc.Channel as GrpcChannel
-import io.grpc.Metadata as GrpcMetadata
 
 /**
  * Logic for generating gRPC stubs for Kotlin.
@@ -44,11 +62,6 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
     private val STREAMING_PARAMETER_NAME = MemberSimpleName("requests")
     private val GRPC_CHANNEL_PARAMETER_NAME = MemberSimpleName("channel")
     private val CALL_OPTIONS_PARAMETER_NAME = MemberSimpleName("callOptions")
-
-    private val HEADERS_PARAMETER: ParameterSpec = ParameterSpec
-      .builder("headers", GrpcMetadata::class)
-      .defaultValue("%T()", GrpcMetadata::class)
-      .build()
 
     val GRPC_CHANNEL_PARAMETER = ParameterSpec.of(GRPC_CHANNEL_PARAMETER_NAME, GrpcChannel::class)
     val CALL_OPTIONS_PARAMETER = ParameterSpec
@@ -159,7 +172,6 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
     val funSpecBuilder =
       funSpecBuilder(name)
         .addParameter(parameter)
-        .addParameter(HEADERS_PARAMETER)
         .returns(returnType)
         .addKdoc(rpcStubKDoc(method, parameter))
 
@@ -167,7 +179,7 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
       "helperMethod" to helperMethod,
       "methodDescriptor" to method.descriptorCode,
       "parameter" to parameter,
-      "headers" to HEADERS_PARAMETER
+      "headers" to GrpcMetadata::class
     )
 
     if (!method.isServerStreaming) {
@@ -181,7 +193,7 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
         %methodDescriptor:L,
         %parameter:N,
         callOptions,
-        %headers:N
+        %headers:T()
       )
       """.trimIndent(),
       codeBlockMap
@@ -207,7 +219,7 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
         """
         Returns a [%flow:T] that, when collected, executes this RPC and emits responses from the
         server as they arrive.  That flow finishes normally if the server closes its response with
-        [`Status.OK`][%status:T], and fails by throwing a [%statusException:T] otherwise.  If
+        [`Status.OK`][%status:T], and fails by throwing a [%statusException:T] otherwise.  If 
         collecting the flow downstream fails exceptionally (including via cancellation), the RPC
         is cancelled with that exception as a cause.
         """.trimIndent()
@@ -225,8 +237,8 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
       MethodType.BIDI_STREAMING -> {
         kDocComponents.add(
           """
-          The [%flow:T] of requests is collected once each time the [%flow:T] of responses is
-          collected. If collection of the [%flow:T] of responses completes normally or
+          The [%flow:T] of requests is collected once each time the [%flow:T] of responses is 
+          collected. If collection of the [%flow:T] of responses completes normally or 
           exceptionally before collection of `%parameter:N` completes, the collection of
           `%parameter:N` is cancelled.  If the collection of `%parameter:N` completes
           exceptionally for any other reason, then the collection of the [%flow:T] of responses

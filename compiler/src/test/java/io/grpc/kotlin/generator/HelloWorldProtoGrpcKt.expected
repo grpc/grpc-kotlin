@@ -34,10 +34,8 @@ object GreeterGrpcKt {
    * A stub for issuing RPCs to a(n) helloworld.Greeter service as suspending coroutines.
    */
   @StubFor(GreeterGrpc::class)
-  class GreeterCoroutineStub @JvmOverloads constructor(
-    channel: Channel,
-    callOptions: CallOptions = DEFAULT
-  ) : AbstractCoroutineStub<GreeterCoroutineStub>(channel, callOptions) {
+  class GreeterCoroutineStub @JvmOverloads constructor(channel: Channel, callOptions: CallOptions =
+      DEFAULT) : AbstractCoroutineStub<GreeterCoroutineStub>(channel, callOptions) {
     override fun build(channel: Channel, callOptions: CallOptions): GreeterCoroutineStub =
         GreeterCoroutineStub(channel, callOptions)
 
@@ -51,13 +49,12 @@ object GreeterGrpcKt {
      *
      * @return The single response from the server.
      */
-    suspend fun sayHello(request: HelloRequest, headers: Metadata = Metadata()): HelloReply =
-        unaryRpc(
+    suspend fun sayHello(request: HelloRequest): HelloReply = unaryRpc(
       channel,
       GreeterGrpc.getSayHelloMethod(),
       request,
       callOptions,
-      headers
+      Metadata()
     )
     /**
      * Executes this RPC and returns the response message, suspending until the RPC completes
@@ -75,13 +72,12 @@ object GreeterGrpcKt {
      *
      * @return The single response from the server.
      */
-    suspend fun clientStreamSayHello(requests: Flow<HelloRequest>, headers: Metadata = Metadata()):
-        HelloReply = clientStreamingRpc(
+    suspend fun clientStreamSayHello(requests: Flow<HelloRequest>): HelloReply = clientStreamingRpc(
       channel,
       GreeterGrpc.getClientStreamSayHelloMethod(),
       requests,
       callOptions,
-      headers
+      Metadata()
     )
     /**
      * Returns a [Flow] that, when collected, executes this RPC and emits responses from the
@@ -94,13 +90,12 @@ object GreeterGrpcKt {
      *
      * @return A flow that, when collected, emits the responses from the server.
      */
-    fun serverStreamSayHello(request: MultiHelloRequest, headers: Metadata = Metadata()):
-        Flow<HelloReply> = serverStreamingRpc(
+    fun serverStreamSayHello(request: MultiHelloRequest): Flow<HelloReply> = serverStreamingRpc(
       channel,
       GreeterGrpc.getServerStreamSayHelloMethod(),
       request,
       callOptions,
-      headers
+      Metadata()
     )
     /**
      * Returns a [Flow] that, when collected, executes this RPC and emits responses from the
@@ -120,21 +115,19 @@ object GreeterGrpcKt {
      *
      * @return A flow that, when collected, emits the responses from the server.
      */
-    fun bidiStreamSayHello(requests: Flow<HelloRequest>, headers: Metadata = Metadata()):
-        Flow<HelloReply> = bidiStreamingRpc(
+    fun bidiStreamSayHello(requests: Flow<HelloRequest>): Flow<HelloReply> = bidiStreamingRpc(
       channel,
       GreeterGrpc.getBidiStreamSayHelloMethod(),
       requests,
       callOptions,
-      headers
+      Metadata()
     )}
 
   /**
    * Skeletal implementation of the helloworld.Greeter service based on Kotlin coroutines.
    */
-  abstract class GreeterCoroutineImplBase(
-    coroutineContext: CoroutineContext = EmptyCoroutineContext
-  ) : AbstractCoroutineServerImpl(coroutineContext) {
+  abstract class GreeterCoroutineImplBase(coroutineContext: CoroutineContext =
+      EmptyCoroutineContext) : AbstractCoroutineServerImpl(coroutineContext) {
     /**
      * Returns the response to an RPC for helloworld.Greeter.SayHello.
      *
@@ -146,8 +139,10 @@ object GreeterGrpcKt {
      *
      * @param request The request from the client.
      */
-    open suspend fun sayHello(request: HelloRequest): HelloReply = throw
-        StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.SayHello is unimplemented"))
+    open suspend fun sayHello(request: HelloRequest): HelloReply {
+      throw
+          StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.SayHello is unimplemented"))
+    }
 
     /**
      * Returns the response to an RPC for helloworld.Greeter.ClientStreamSayHello.
@@ -163,8 +158,10 @@ object GreeterGrpcKt {
      * collect
      *        it more than once.
      */
-    open suspend fun clientStreamSayHello(requests: Flow<HelloRequest>): HelloReply = throw
-        StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ClientStreamSayHello is unimplemented"))
+    open suspend fun clientStreamSayHello(requests: Flow<HelloRequest>): HelloReply {
+      throw
+          StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ClientStreamSayHello is unimplemented"))
+    }
 
     /**
      * Returns a [Flow] of responses to an RPC for helloworld.Greeter.ServerStreamSayHello.
@@ -178,8 +175,10 @@ object GreeterGrpcKt {
      *
      * @param request The request from the client.
      */
-    open fun serverStreamSayHello(request: MultiHelloRequest): Flow<HelloReply> = throw
-        StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ServerStreamSayHello is unimplemented"))
+    open fun serverStreamSayHello(request: MultiHelloRequest): Flow<HelloReply> {
+      throw
+          StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.ServerStreamSayHello is unimplemented"))
+    }
 
     /**
      * Returns a [Flow] of responses to an RPC for helloworld.Greeter.BidiStreamSayHello.
@@ -196,27 +195,29 @@ object GreeterGrpcKt {
      * collect
      *        it more than once.
      */
-    open fun bidiStreamSayHello(requests: Flow<HelloRequest>): Flow<HelloReply> = throw
-        StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.BidiStreamSayHello is unimplemented"))
+    open fun bidiStreamSayHello(requests: Flow<HelloRequest>): Flow<HelloReply> {
+      throw
+          StatusException(UNIMPLEMENTED.withDescription("Method helloworld.Greeter.BidiStreamSayHello is unimplemented"))
+    }
 
     final override fun bindService(): ServerServiceDefinition = builder(getServiceDescriptor())
       .addMethod(unaryServerMethodDefinition(
-      scope = this,
+      context = this.context,
       descriptor = GreeterGrpc.getSayHelloMethod(),
       implementation = ::sayHello
     ))
       .addMethod(clientStreamingServerMethodDefinition(
-      scope = this,
+      context = this.context,
       descriptor = GreeterGrpc.getClientStreamSayHelloMethod(),
       implementation = ::clientStreamSayHello
     ))
       .addMethod(serverStreamingServerMethodDefinition(
-      scope = this,
+      context = this.context,
       descriptor = GreeterGrpc.getServerStreamSayHelloMethod(),
       implementation = ::serverStreamSayHello
     ))
       .addMethod(bidiStreamingServerMethodDefinition(
-      scope = this,
+      context = this.context,
       descriptor = GreeterGrpc.getBidiStreamSayHelloMethod(),
       implementation = ::bidiStreamSayHello
     )).build()
