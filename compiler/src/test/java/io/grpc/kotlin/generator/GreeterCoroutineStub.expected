@@ -19,8 +19,10 @@ import kotlinx.coroutines.flow.Flow
  * A stub for issuing RPCs to a(n) helloworld.Greeter service as suspending coroutines.
  */
 @StubFor(GreeterGrpc::class)
-class GreeterCoroutineStub @JvmOverloads constructor(channel: Channel, callOptions: CallOptions =
-    DEFAULT) : AbstractCoroutineStub<GreeterCoroutineStub>(channel, callOptions) {
+class GreeterCoroutineStub @JvmOverloads constructor(
+  channel: Channel,
+  callOptions: CallOptions = DEFAULT
+) : AbstractCoroutineStub<GreeterCoroutineStub>(channel, callOptions) {
   override fun build(channel: Channel, callOptions: CallOptions): GreeterCoroutineStub =
       GreeterCoroutineStub(channel, callOptions)
 
@@ -68,7 +70,6 @@ class GreeterCoroutineStub @JvmOverloads constructor(channel: Channel, callOptio
    * Returns a [Flow] that, when collected, executes this RPC and emits responses from the
    * server as they arrive.  That flow finishes normally if the server closes its response with
    * [`Status.OK`][io.grpc.Status], and fails by throwing a [io.grpc.StatusException] otherwise.  If
-   *
    * collecting the flow downstream fails exceptionally (including via cancellation), the RPC
    * is cancelled with that exception as a cause.
    *
@@ -87,7 +88,6 @@ class GreeterCoroutineStub @JvmOverloads constructor(channel: Channel, callOptio
    * Returns a [Flow] that, when collected, executes this RPC and emits responses from the
    * server as they arrive.  That flow finishes normally if the server closes its response with
    * [`Status.OK`][io.grpc.Status], and fails by throwing a [io.grpc.StatusException] otherwise.  If
-   *
    * collecting the flow downstream fails exceptionally (including via cancellation), the RPC
    * is cancelled with that exception as a cause.
    *

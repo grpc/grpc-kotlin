@@ -114,10 +114,3 @@ applicationDistribution.into('bin') {
     from(routeGuideServer)
     fileMode = 0755
 }
-
-test {
-    useJUnitPlatform()
-    testLogging {
-        showStandardStreams = true
-    }
-}

@@ -93,7 +93,7 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
       .addModifiers(KModifier.ABSTRACT)
       .addKdoc(
         """
-        Skeletal implementation of the %L service based on Kotlin coroutines. 
+        Skeletal implementation of the %L service based on Kotlin coroutines.
         """.trimIndent(),
         service.fullName
       )
@@ -219,7 +219,7 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
           If creating or collecting the returned flow fails with a [%statusException:T], the RPC
           will fail with the corresponding [%status:T].  If it fails with a
           [%cancellationException:T], the RPC will fail with status `Status.CANCELLED`.  If creating
-          or collecting the returned flow fails for any other reason, the RPC will fail with 
+          or collecting the returned flow fails for any other reason, the RPC will fail with
           `Status.UNKNOWN` with the exception as a cause.
         """.trimIndent()
       )

@@ -70,10 +70,3 @@ protobuf {
         }
     }
 }
-
-test {
-    useJUnitPlatform()
-    testLogging {
-        showStandardStreams = true
-    }
-}
