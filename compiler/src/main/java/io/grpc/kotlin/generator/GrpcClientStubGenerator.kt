@@ -219,7 +219,7 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
         """
         Returns a [%flow:T] that, when collected, executes this RPC and emits responses from the
         server as they arrive.  That flow finishes normally if the server closes its response with
-        [`Status.OK`][%status:T], and fails by throwing a [%statusException:T] otherwise.  If 
+        [`Status.OK`][%status:T], and fails by throwing a [%statusException:T] otherwise.  If
         collecting the flow downstream fails exceptionally (including via cancellation), the RPC
         is cancelled with that exception as a cause.
         """.trimIndent()
@@ -237,8 +237,8 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
       MethodType.BIDI_STREAMING -> {
         kDocComponents.add(
           """
-          The [%flow:T] of requests is collected once each time the [%flow:T] of responses is 
-          collected. If collection of the [%flow:T] of responses completes normally or 
+          The [%flow:T] of requests is collected once each time the [%flow:T] of responses is
+          collected. If collection of the [%flow:T] of responses completes normally or
           exceptionally before collection of `%parameter:N` completes, the collection of
           `%parameter:N` is cancelled.  If the collection of `%parameter:N` completes
           exceptionally for any other reason, then the collection of the [%flow:T] of responses

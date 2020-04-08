@@ -122,6 +122,12 @@ subprojects {
             }
         }
     }
+
+    test {
+        testLogging {
+            showStandardStreams = true
+        }
+    }
 }
 
 def artifactForGradlePlugin(MavenPublication pub, String os, String arch) {
