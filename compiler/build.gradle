@@ -11,6 +11,9 @@ plugins {
     // Provide convenience executables for trying out the examples.
     id 'application'
     id 'maven-publish'
+
+    id 'edu.sc.seis.launch4j' version '2.4.4'
+    id 'com.github.johnrengelman.shadow' version '4.0.2'
 }
 
 description = 'The protoc plugin for gRPC Kotlin'
@@ -38,9 +41,10 @@ dependencies {
     // Misc
     compile 'com.squareup:kotlinpoet:1.5.0'
     compile "org.jetbrains.kotlin:kotlin-reflect:1.3.61"
-    compile "com.google.truth:truth:1.0.1"
+    implementation "com.google.truth:truth:1.0.1"
 
     // Testing
+    testImplementation "junit:junit:4.12"
     testImplementation "com.google.guava:guava:28.2-jre"
     testImplementation "com.google.jimfs:jimfs:1.1"
     testImplementation 'com.google.protobuf:protobuf-gradle-plugin:0.8.11'
@@ -58,7 +62,7 @@ protobuf {
         }
         // Specify protoc to generate using our grpc kotlin plugin
         grpckt {
-            path = "$rootDir/compiler/build/install/protoc-gen-grpc-kotlin/bin/protoc-gen-grpc-kotlin"
+            path = "$buildDir/install/grpc-kotlin-compiler/bin/grpc-kotlin-compiler"
         }
     }
     generateProtoTasks {
@@ -75,3 +79,71 @@ protobuf {
         }
     }
 }
+
+task prependShellStub() {
+    doLast {
+        def stub = file("stub.sh")
+        def plugin = new File("${buildDir}/artifacts/protoc-gen-grpc-kotlin")
+        def tempScript = new File("${buildDir}/artifacts/protoc-gen-grpc-kotlin.stubbed")
+        tempScript.write('') // truncate output if needed
+        tempScript << stub.text.normalize() // remove carriage returns
+        tempScript << plugin.bytes
+        plugin.delete()
+        tempScript.renameTo(plugin)
+        plugin.setExecutable(true)
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+
+            // Removes all artifacts since grpc-kotlin-compiler doesn't generate any
+            artifacts = []
+            artifactId 'protoc-gen-grpc-kotlin'
+            artifact("$buildDir/artifacts/protoc-gen-grpc-kotlin" as File) {
+                classifier "osx-x86_64"
+                extension "exe"
+                builtBy prependShellStub
+            }
+            artifact("$buildDir/artifacts/protoc-gen-grpc-kotlin" as File) {
+                classifier "linux-x86_64"
+                extension "exe"
+                builtBy prependShellStub
+            }
+            artifact("$buildDir/artifacts/protoc-gen-grpc-kotlin-windows-x86_64.exe" as File) {
+                classifier "windows-x86_64"
+                extension "exe"
+                builtBy createExe
+            }
+        }
+    }
+}
+
+launch4j {
+    outfile = "protoc-gen-grpc-kotlin-windows-x86_64.exe"
+    mainClassName = mainClassName
+    outputDir = "artifacts"
+    jar = '../artifacts/protoc-gen-grpc-kotlin'
+}
+
+shadowJar {
+    mergeServiceFiles()
+
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+
+    manifest {
+        attributes("Main-Class": mainClassName,
+            "Implementation-Version": version)
+    }
+    archiveName = "protoc-gen-grpc-kotlin"
+    destinationDir = "$buildDir/artifacts" as File
+}
+
+createExe.dependsOn(shadowJar)
+prependShellStub.dependsOn(test)
+prependShellStub.dependsOn(shadowJar)
+prependShellStub.dependsOn(createExe)

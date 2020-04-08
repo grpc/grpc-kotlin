@@ -53,13 +53,13 @@ protobuf {
         }
         // Specify protoc to generate using our grpc kotlin plugin
         grpckt {
-            path = "$rootDir/compiler/build/install/protoc-gen-grpc-kotlin/bin/protoc-gen-grpc-kotlin"
+            path = "$rootDir/compiler/build/install/grpc-kotlin-compiler/bin/grpc-kotlin-compiler"
         }
     }
     generateProtoTasks {
         all().each { task ->
             if (task.name.startsWith('generateTestProto')) {
-                task.dependsOn { ':protoc-gen-grpc-kotlin:installDist' }
+                task.dependsOn { ':grpc-kotlin-compiler:installDist' }
             }
             task.plugins {
                 // Generate Java gRPC classes
@@ -67,6 +67,27 @@ protobuf {
                 // Generate Kotlin gRPC using the custom plugin from library
                 grpckt { }
             }
+        }
+    }
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+
+            artifact javadocJar
+            artifact sourcesJar
         }
     }
 }
