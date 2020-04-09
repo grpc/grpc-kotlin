@@ -7,6 +7,6 @@ project(':grpc-kotlin-stub').projectDir = "$rootDir/stub" as File
 if (settings.hasProperty('skipCodegen') && skipCodegen.toBoolean()) {
     println '*** Skipping the build of codegen and compilation of proto files because skipCodegen=true'
 } else {
-    include ":protoc-gen-grpc-kotlin"
-    project(':protoc-gen-grpc-kotlin').projectDir = "$rootDir/compiler" as File
+    include ":grpc-kotlin-compiler"
+    project(':grpc-kotlin-compiler').projectDir = "$rootDir/compiler" as File
 }

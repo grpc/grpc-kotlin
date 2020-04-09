@@ -12,10 +12,16 @@ ext {
 }
 
 subprojects {
+    apply plugin: 'java'
     apply plugin: 'org.jetbrains.kotlin.jvm'
-
     group = "io.grpc"
-    version = "0.1.0" // CURRENT_GRPC_KOTLIN_VERSION
+    version = "0.1.1" // CURRENT_GRPC_KOTLIN_VERSION
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        testImplementation "junit:junit:4.12"
+    }
 
     plugins.withId("org.jetbrains.dokka") {
         dokka {
@@ -79,51 +85,6 @@ subprojects {
                 }
             }
         }
-
-        plugins.withId("java") {
-            task javadocJar(type: Jar) {
-                classifier = 'javadoc'
-                from javadoc
-            }
-
-            task sourcesJar(type: Jar) {
-                classifier = 'sources'
-                from sourceSets.main.allSource
-            }
-
-            // Generate the jar file to be used by our custom plugin
-            task protocJar(type: Jar) {
-                classifier "protoc"
-                manifest {
-                    attributes 'Main-Class': 'io.grpc.kotlin.generator.GeneratorRunner'
-                }
-                baseName = project.name
-                from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-                with jar
-            }
-
-            publishing {
-                publications {
-                    maven {
-                        from components.java
-
-                        artifact javadocJar
-                        artifact sourcesJar
-
-                        if (project.name == 'protoc-gen-grpc-kotlin') {
-                            // Generate the artifacts expected by protobuf-gradle-plugin
-                            artifact protocJar
-                            artifactForGradlePlugin(it, 'linux', 'aarch_64')
-                            artifactForGradlePlugin(it, 'linux', 'x86_32')
-                            artifactForGradlePlugin(it, 'linux', 'x86_64')
-                            artifactForGradlePlugin(it, 'osx', 'x86_64')
-                            artifactForGradlePlugin(it, 'windows', 'x86_32')
-                            artifactForGradlePlugin(it, 'windows', 'x86_64')
-                        }
-                    }
-                }
-            }
-        }
     }
 
     tasks.withType(Test) {
@@ -160,20 +121,6 @@ subprojects {
                     println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
                 }
             }
-        }
-    }
-}
-
-def artifactForGradlePlugin(MavenPublication pub, String os, String arch) {
-    if (os == "windows") {
-        pub.artifact("src/main/dist/protoc-gen-grpc-kotlin.bat" as File) {
-            classifier os + "-" + arch
-            extension "exe"
-        }
-    } else {
-        pub.artifact("src/main/dist/protoc-gen-grpc-kotlin" as File) {
-            classifier os + "-" + arch
-            extension "exe"
         }
     }
 }

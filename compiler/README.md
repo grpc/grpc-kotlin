@@ -31,7 +31,7 @@ $ cd $GRPC_KOTLIN_ROOT/compiler
 To compile the plugin:
 
 ```
-$ ../gradlew :protoc-gen-grpc-kotlin:build./gradlew
+$ ../gradlew build
 ```
 
 To test the plugin with the compiler:
@@ -45,7 +45,7 @@ You will see a `PASS` if the test succeeds.
 To compile a proto file and generate Kotlin interfaces out of the service definitions:
 
 ```
-$ protoc --plugin=protoc-gen-grpc-kotlin=build/install/protoc-gen-grpc-kotlin/bin/protoc-gen-grpc-kotlin \
+$ protoc --plugin=protoc-gen-grpc-kotlin=build/artifacts/protoc-gen-grpc-kotlin \
   --grpckt_out="$OUTPUT_FILE" --proto_path="$DIR_OF_PROTO_FILE" "$PROTO_FILE"
 ```
 
