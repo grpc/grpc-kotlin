@@ -25,8 +25,8 @@ before_install:
   - echo "errorProne=true" >> $HOME/.gradle/gradle.properties
 
 install:
-  - ./gradlew build publishToMavenLocal
-  - pushd examples && ./gradlew build && popd
+  - ./gradlew --stacktrace build publishToMavenLocal
+  - pushd examples && ./gradlew --stacktrace build && popd
 
 before_script:
   - test -z "$(git status --porcelain)" || (git status && echo Error Working directory is not clean. Forget to commit generated files? && false)

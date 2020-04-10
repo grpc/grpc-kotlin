@@ -1,9 +1,14 @@
-# grpc-kotlin: Google's Kotlin bindings for gRPC
+# gRPC-Kotlin/JVM - An RPC library and framework
 
-> ## 🚧 WARNING 🚧
->
-> This is a **pre-release** of `grpc-kotlin`, which is **not** ready for general use.
->
-> The first release will be announced on the [grpc.io Google Group][].
->
-> [grpc.io Google Group]: https://groups.google.com/forum/#!forum/grpc-io
+A Kotlin/JVM implementation of [gRPC](https://grpc.io): A high performance, open
+source, general RPC framework that puts mobile and HTTP/2 first.
+
+For more information, see the following pages:
+
+- [gRPC Kotlin Quick Start][]
+- [gRPC Basics - Kotlin][] tutorial
+- [API Reference][]
+
+[API Reference]: https://grpc.io/grpc-kotlin/grpc-kotlin-stub
+[gRPC Kotlin Quick Start]: https://grpc.io/docs/quickstart/kotlin
+[gRPC Basics - Kotlin]: https://grpc.io/docs/tutorials/basic/kotlin
