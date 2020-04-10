@@ -27,7 +27,7 @@ apply plugin: 'application'
 
 dependencies {
   // This repo
-  compile project(':grpc-kotlin-stub')
+  implementation project(':grpc-kotlin-stub')
 
   implementation "org.jetbrains.kotlin:kotlin-test:${rootProject.ext.kotlinVersion}"
   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext.coroutinesVersion}"
