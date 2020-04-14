@@ -82,28 +82,28 @@ startScripts.enabled = false
 task helloWorldClient(type: CreateStartScripts) {
     mainClassName = 'io.grpc.examples.helloworld.HelloWorldClientKt'
     applicationName = 'hello-world-client'
-    outputDir = new File(project.buildDir, 'tmp')
+    outputDir = startScripts.outputDir
     classpath = startScripts.classpath
 }
 
 task helloWorldServer(type: CreateStartScripts) {
     mainClassName = 'io.grpc.examples.helloworld.HelloWorldServerKt'
     applicationName = 'hello-world-server'
-    outputDir = new File(project.buildDir, 'tmp')
+    outputDir = startScripts.outputDir
     classpath = startScripts.classpath
 }
 
 task routeGuideClient(type: CreateStartScripts) {
     mainClassName = 'io.grpc.examples.routeguide.RouteGuideClientKt'
     applicationName = 'route-guide-client'
-    outputDir = new File(project.buildDir, 'tmp')
+    outputDir = startScripts.outputDir
     classpath = startScripts.classpath
 }
 
 task routeGuideServer(type: CreateStartScripts) {
     mainClassName = 'io.grpc.examples.routeguide.RouteGuideServerKt'
     applicationName = 'route-guide-server'
-    outputDir = new File(project.buildDir, 'tmp')
+    outputDir = startScripts.outputDir
     classpath = startScripts.classpath
 }
 
