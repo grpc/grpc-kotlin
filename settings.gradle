@@ -1,6 +1,6 @@
-
 rootProject.name = "grpc-kotlin"
 
+include 'interop_testing'
 include ":grpc-kotlin-stub"
 project(':grpc-kotlin-stub').projectDir = "$rootDir/stub" as File
 
