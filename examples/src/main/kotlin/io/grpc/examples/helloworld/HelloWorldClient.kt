@@ -30,8 +30,8 @@ class HelloWorldClient constructor(
 
   suspend fun greet(name: String) = coroutineScope {
     val request = HelloRequest.newBuilder().setName(name).build()
-    val response = stub.sayHello(request)
-    println("Received: ${response.message}")
+    val response = async { stub.sayHello(request) }
+    println("Received: ${response.await().message}")
   }
 
   override fun close() {
