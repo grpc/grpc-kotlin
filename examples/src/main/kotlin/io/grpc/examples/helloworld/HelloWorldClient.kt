@@ -23,9 +23,9 @@ import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineStub
 import java.io.Closeable
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.asExecutor
+import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 
 class HelloWorldClient constructor(
@@ -35,12 +35,8 @@ class HelloWorldClient constructor(
 
   fun greet(name: String) = runBlocking {
     val request = HelloRequest.newBuilder().setName(name).build()
-    try {
-      val response = stub.sayHello(request)
-      println("Greeter client received: ${response.message}")
-    } catch (e: StatusException) {
-      println("RPC failed: ${e.status}")
-    }
+    val response = async { stub.sayHello(request) }
+    println("Received: ${response.await().message}")
   }
 
   override fun close() {
