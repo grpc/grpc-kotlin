@@ -16,27 +16,22 @@
 
 package io.grpc.examples.helloworld
 
-import io.grpc.StatusException
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineStub
+import kotlinx.coroutines.*
 import java.io.Closeable
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.asExecutor
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
 
 class HelloWorldClient constructor(
     private val channel: ManagedChannel
 ) : Closeable {
   private val stub: GreeterCoroutineStub = GreeterCoroutineStub(channel)
 
-  fun greet(name: String) = runBlocking {
+  suspend fun greet(name: String) = coroutineScope {
     val request = HelloRequest.newBuilder().setName(name).build()
-    val response = async { stub.sayHello(request) }
-    println("Received: ${response.await().message}")
+    val response = stub.sayHello(request)
+    println("Received: ${response.message}")
   }
 
   override fun close() {
@@ -49,17 +44,15 @@ class HelloWorldClient constructor(
  * Greeter, uses first argument as name to greet if present;
  * greets "world" otherwise.
  */
-fun main(args: Array<String>) {
+fun main(args: Array<String>) = runBlocking {
   val port = 50051
 
-  Executors.newFixedThreadPool(10).asCoroutineDispatcher().use { dispatcher ->
-    HelloWorldClient(
+  val client = HelloWorldClient(
         ManagedChannelBuilder.forAddress("localhost", port)
             .usePlaintext()
-            .executor(dispatcher.asExecutor()).build()
-    ).use {
-      val user = args.singleOrNull() ?: "world"
-      it.greet(user)
-    }
-  }
+            .executor(Dispatchers.Default.asExecutor())
+            .build())
+
+  val user = args.singleOrNull() ?: "world"
+  client.greet(user)
 }
