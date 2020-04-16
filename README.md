@@ -5,8 +5,8 @@ source, general RPC framework that puts mobile and HTTP/2 first.
 
 For more information, see the following pages:
 
-- [gRPC Kotlin Quick Start][]
-- [gRPC Basics - Kotlin][] tutorial
+- [gRPC Kotlin/JVM Quick Start][]
+- [gRPC Basics - Kotlin/JVM][] tutorial
 - [API Reference][]
 
 [API Reference]: https://grpc.io/grpc-kotlin/grpc-kotlin-stub
