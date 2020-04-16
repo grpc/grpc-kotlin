@@ -10,5 +10,5 @@ For more information, see the following pages:
 - [API Reference][]
 
 [API Reference]: https://grpc.io/grpc-kotlin/grpc-kotlin-stub
-[gRPC Kotlin Quick Start]: https://grpc.io/docs/quickstart/kotlin
-[gRPC Basics - Kotlin]: https://grpc.io/docs/tutorials/basic/kotlin
+[gRPC Kotlin/JVM Quick Start]: https://grpc.io/docs/quickstart/kotlin
+[gRPC Basics - Kotlin/JVM]: https://grpc.io/docs/tutorials/basic/kotlin
