@@ -253,7 +253,7 @@ object ServerCalls {
         is CancellationException -> Status.CANCELLED.withCause(failure)
         else -> Status.fromThrowable(failure)
       }
-      val trailers = Status.trailersFromThrowable(failure) ?: GrpcMetadata()
+      val trailers = failure?.let { Status.trailersFromThrowable(it) } ?: GrpcMetadata()
       call.close(closeStatus, trailers)
     }
 
