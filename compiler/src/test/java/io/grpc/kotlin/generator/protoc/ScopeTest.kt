@@ -40,7 +40,7 @@ class ScopeTest {
   @Test
   fun classScope() {
     val name =
-      ClassScope(ClassName(packageName = "com.foo.bar", simpleNames = listOf("Baz")))
+      ClassScope(ClassName("com.foo.bar", "Baz"))
         .nestedClass(ClassSimpleName("Quux"))
     assertThat(name).isEqualTo(
       ClassName("com.foo.bar", "Baz", "Quux")
