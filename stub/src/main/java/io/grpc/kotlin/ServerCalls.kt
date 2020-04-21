@@ -247,12 +247,14 @@ object ServerCalls {
     }
 
     rpcJob.invokeOnCompletion { cause ->
-      val closeStatus = when (val failure = cause ?: rpcJob.doneValue) {
+      val failure = cause ?: rpcJob.doneValue
+      val closeStatus = when (failure) {
         null -> Status.OK
         is CancellationException -> Status.CANCELLED.withCause(failure)
         else -> Status.fromThrowable(failure)
       }
-      call.close(closeStatus, GrpcMetadata())
+      val trailers = failure?.let { Status.trailersFromThrowable(it) } ?: GrpcMetadata()
+      call.close(closeStatus, trailers)
     }
 
     return object: ServerCall.Listener<RequestT>() {

@@ -162,6 +162,33 @@ class ServerCallsTest : AbstractCallsTest() {
   }
 
   @Test
+  fun unaryMethodFailedWithStatusWithTrailers() = runBlocking {
+    val key: Metadata.Key<String> = Metadata.Key.of("key", Metadata.ASCII_STRING_MARSHALLER)
+    val channel = makeChannel(
+      ServerCalls.unaryServerMethodDefinition(context, sayHelloMethod) {
+        val trailers = Metadata()
+        trailers.put(key, "value")
+        throw StatusException(Status.DATA_LOSS, trailers)
+      }
+    )
+    val call = channel.newCall(sayHelloMethod, CallOptions.DEFAULT)
+    val closeTrailers = CompletableDeferred<Metadata>()
+
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeTrailers.complete(trailers)
+        }
+      },
+      Metadata()
+    )
+    call.request(1)
+    call.sendMessage(helloRequest("Garnet"))
+    call.halfClose()
+    assertThat(closeTrailers.await()[key]).isEqualTo("value")
+  }
+
+  @Test
   fun unaryMethodReceivedNoRequests() = runBlocking {
     val channel = makeChannel(
       ServerCalls.unaryServerMethodDefinition(context, sayHelloMethod) {
