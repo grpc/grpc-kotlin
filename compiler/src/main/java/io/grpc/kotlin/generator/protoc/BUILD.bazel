@@ -1,0 +1,18 @@
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library")
+
+licenses(["notice"])
+
+package(
+    default_visibility = ["//:__subpackages__"],
+)
+
+kt_jvm_library(
+    name = "protoc",
+    srcs = glob(["*.kt"]),
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc/util/graph",
+        "@com_google_protobuf//:protobuf_java",
+        "@maven//:com_google_guava_guava",
+        "@maven//:com_squareup_kotlinpoet",
+    ],
+)

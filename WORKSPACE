@@ -43,7 +43,8 @@ maven_install(
     artifacts = [
         "com.google.api.grpc:grpc-google-cloud-pubsub-v1:0.1.24",
         "com.google.api.grpc:proto-google-cloud-pubsub-v1:0.1.24",
-        # Kotlin Coroutines
+        "com.google.guava:guava:29.0-jre",
+        "com.squareup:kotlinpoet:1.5.0",
         "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5",
     ] + IO_GRPC_GRPC_JAVA_ARTIFACTS,
     generate_compat_repositories = True,
