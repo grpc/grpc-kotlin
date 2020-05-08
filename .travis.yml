@@ -25,7 +25,7 @@ before_install:
   - echo "errorProne=true" >> $HOME/.gradle/gradle.properties
 
 install:
-  - ./gradlew --stacktrace build publishToMavenLocal
+  - ./gradlew --stacktrace --debug build publishToMavenLocal
   - pushd examples && ./gradlew --stacktrace build && popd
 
 before_script:
