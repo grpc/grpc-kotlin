@@ -13,6 +13,9 @@ import io.grpc.kotlin.generator.protoc.builder
 import io.grpc.kotlin.generator.protoc.declarations
 import io.grpc.kotlin.generator.protoc.methodName
 
+/**
+ * Generates top-level properties for the service descriptor and method descriptors.
+ */
 class TopLevelConstantsGenerator(config: GeneratorConfig): ServiceCodeGenerator(config) {
   override fun generate(service: Descriptors.ServiceDescriptor): Declarations = declarations {
     addProperty(
