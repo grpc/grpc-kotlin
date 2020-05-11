@@ -24,12 +24,8 @@ object TopologicalSortGraph {
     fun <N> topologicalOrdering(graph: Graph<N>): List<N> {
         checkArgument(graph.isDirected, "Cannot get topological ordering of an undirected graph.")
         val partialOrdering: PartialOrdering<N> = object : PartialOrdering<N> {
-            override fun getPredecessors(element: N): Set<N>? {
-                return graph.predecessors(element)
-            }
+            override fun getPredecessors(element: N): Set<N> = graph.predecessors(element)
         }
-        val nodeList: MutableList<N> = graph.nodes().toMutableList()
-        sortLexicographicallyLeast(nodeList, partialOrdering)
-        return nodeList.toList()
+        return sortLexicographicallyLeast(graph.nodes(), partialOrdering)
     }
 }
