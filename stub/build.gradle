@@ -71,9 +71,21 @@ protobuf {
     }
 }
 
-task javadocJar(type: Jar) {
+task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
-    from javadoc
+    duplicatesStrategy 'exclude'
+    includeEmptyDirs false
+    from javadoc.destinationDir
+}
+
+task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+    outputFormat = 'javadoc'
+    outputDirectory = "$buildDir/javadoc"
+}
+
+javadocJar {
+    dependsOn dokkaJavadoc
+    from dokkaJavadoc.outputDirectory
 }
 
 task sourcesJar(type: Jar) {
