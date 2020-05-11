@@ -98,7 +98,7 @@ publishing {
         maven(MavenPublication) {
             from components.java
             // Dokka 0.10.1 does not work for JDK 10+
-            if(JavaVersion.current() == JavaVersion.VERSION_1_8){
+            if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
                 artifact javadocJar
                 artifact sourcesJar
             }
