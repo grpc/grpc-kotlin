@@ -17,9 +17,6 @@
 package io.grpc.kotlin
 
 import io.grpc.BindableService
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -27,14 +24,16 @@ import kotlin.coroutines.EmptyCoroutineContext
  * Skeleton implementation of a coroutine-based gRPC server implementation.  Intended to be
  * subclassed by generated code.
  */
-abstract class AbstractCoroutineServerImpl private constructor(
-  private val delegateScope: CoroutineScope
-) : CoroutineScope, BindableService {
-
-  constructor(coroutineContext: CoroutineContext = EmptyCoroutineContext) :
-    this(CoroutineScope(coroutineContext + SupervisorJob(coroutineContext[Job])))
-  // We want a SupervisorJob so one failed RPC does not bring down the entire server.
-
-  final override val coroutineContext: CoroutineContext
-    get() = delegateScope.coroutineContext
+abstract class AbstractCoroutineServerImpl(
+  /** The context in which to run server coroutines. */
+  val context: CoroutineContext = EmptyCoroutineContext
+) : BindableService {
+  /*
+   * Each RPC is executed in its own coroutine scope built from [context].  We could have a parent
+   * scope, but it doesn't really add anything: we don't want users to be able to launch tasks
+   * in that scope easily, since almost all coroutines should be scoped to the RPC and cancelled
+   * if the RPC is cancelled.  Users who don't want that behavior should manage their own scope for
+   * it.  Additionally, gRPC server objects don't have their own notion of shutdown: shutting down
+   * a server means cancelling the RPCs, not calling a teardown on the server object.
+   */
 }

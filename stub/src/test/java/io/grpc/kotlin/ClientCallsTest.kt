@@ -694,6 +694,6 @@ class ClientCallsTest: AbstractCallsTest() {
     assertThat(
       ClientCalls.bidiStreamingRpc(channel, bidiStreamingSayHelloMethod, requests).take(2).toList()
     ).containsExactly(helloReply("Hello, Steven"), helloReply("Hello, Garnet")).inOrder()
-    assertThat(cancelled.isCompleted).isTrue()
+    cancelled.join()
   }
 }

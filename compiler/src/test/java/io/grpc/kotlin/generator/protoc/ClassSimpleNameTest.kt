@@ -35,7 +35,7 @@ class ClassSimpleNameTest {
 
   @Test
   fun asPeer() {
-    val className = ClassName(packageName = "com.google.protobuf", simpleNames = listOf("ByteString"))
+    val className = ClassName("com.google.protobuf", "ByteString")
     val peerName = ClassSimpleName("Peer").asPeer(className)
     assertThat(peerName.packageName).isEqualTo("com.google.protobuf")
     assertThat(peerName.simpleName).isEqualTo("Peer")

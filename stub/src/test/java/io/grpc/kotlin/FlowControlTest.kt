@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package io.grpc.kotlin
 
 import com.google.common.truth.Truth.assertThat
 import io.grpc.examples.helloworld.HelloRequest
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -40,6 +41,8 @@ import org.junit.runners.JUnit4
 /** Tests for the flow control of the Kotlin gRPC APIs. */
 @RunWith(JUnit4::class)
 class FlowControlTest : AbstractCallsTest() {
+  val context = CoroutineName("server context")
+
   private fun <T> Flow<T>.produceUnbuffered(scope: CoroutineScope): ReceiveChannel<T> {
     return scope.produce<T> {
       collect { send(it) }
@@ -51,7 +54,7 @@ class FlowControlTest : AbstractCallsTest() {
   fun bidiPingPongFlowControl() = runBlocking {
     val channel = makeChannel(
       ServerCalls.bidiStreamingServerMethodDefinition(
-        scope = this,
+        context = context,
         descriptor = bidiStreamingSayHelloMethod,
         implementation = { requests -> requests.map { helloReply("Hello, ${it.name}") } }
       )
@@ -79,7 +82,7 @@ class FlowControlTest : AbstractCallsTest() {
   fun bidiPingPongFlowControlExpandedServerBuffer() = runBlocking {
     val channel = makeChannel(
       ServerCalls.bidiStreamingServerMethodDefinition(
-        scope = this,
+        context = context,
         descriptor = bidiStreamingSayHelloMethod,
         implementation = {
           requests -> requests.buffer(Channel.RENDEZVOUS).map { helloReply("Hello, ${it.name}") }
@@ -121,7 +124,7 @@ class FlowControlTest : AbstractCallsTest() {
 
     val channel = makeChannel(
       ServerCalls.bidiStreamingServerMethodDefinition(
-        scope = this,
+        context = context,
         descriptor = bidiStreamingSayHelloMethod,
         implementation = { requests ->
           requests.pairOff().map { (a, b) -> helloReply("Hello, ${a.name} and ${b.name}") }
@@ -156,7 +159,7 @@ class FlowControlTest : AbstractCallsTest() {
   fun bidiPingPongFlowControlServerSendsMultipleResponses() = runBlocking {
     val channel = makeChannel(
       ServerCalls.bidiStreamingServerMethodDefinition(
-        scope = this,
+        context = context,
         descriptor = bidiStreamingSayHelloMethod,
         implementation = { requests ->
           requests.transform {

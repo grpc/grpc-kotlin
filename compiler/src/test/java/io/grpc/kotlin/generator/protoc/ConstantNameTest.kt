@@ -28,7 +28,7 @@ import org.junit.runners.JUnit4
 class ConstantNameTest {
   @Test
   fun memberConstantName() {
-    val className = ClassName(packageName = "com.google.protobuf", simpleNames = listOf("ByteString"))
+    val className = ClassName("com.google.protobuf", "ByteString")
     val memberName: MemberName = className.member(ConstantName("EMPTY"))
     assertThat(memberName.canonicalName).isEqualTo("com.google.protobuf.ByteString.EMPTY")
     assertThat(memberName.packageName).isEqualTo("com.google.protobuf")
