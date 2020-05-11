@@ -16,7 +16,10 @@
 
 package io.grpc.kotlin.generator.protoc.util.sort
 
-import java.util.*
+import java.util.ArrayList
+import java.util.Collections
+import java.util.HashMap
+import java.util.PriorityQueue
 
 /**
  * Topological sorting. The algorithm is an adaptation of the topological sorting algorithm
