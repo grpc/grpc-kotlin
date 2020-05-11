@@ -19,9 +19,15 @@ package io.grpc.kotlin.generator.protoc
 import com.google.common.base.Ascii
 import com.google.common.base.CaseFormat.LOWER_UNDERSCORE
 import com.google.common.base.CaseFormat.UPPER_CAMEL
-import com.google.protobuf.DescriptorProtos.*
-import com.google.protobuf.Descriptors.*
+import com.google.protobuf.DescriptorProtos.DescriptorProto
+import com.google.protobuf.DescriptorProtos.EnumDescriptorProto
+import com.google.protobuf.DescriptorProtos.FileDescriptorProto
+import com.google.protobuf.Descriptors.Descriptor
+import com.google.protobuf.Descriptors.EnumDescriptor
+import com.google.protobuf.Descriptors.FieldDescriptor
 import com.google.protobuf.Descriptors.FieldDescriptor.JavaType
+import com.google.protobuf.Descriptors.FileDescriptor
+import com.google.protobuf.Descriptors.OneofDescriptor
 import com.squareup.kotlinpoet.BOOLEAN
 import com.squareup.kotlinpoet.DOUBLE
 import com.squareup.kotlinpoet.FLOAT
