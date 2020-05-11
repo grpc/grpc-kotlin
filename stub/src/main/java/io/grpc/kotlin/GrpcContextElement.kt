@@ -16,11 +16,9 @@
 
 package io.grpc.kotlin
 
-import kotlinx.coroutines.CoroutineScope
-import io.grpc.Context as GrpcContext
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.ThreadContextElement
-import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
+import io.grpc.Context as GrpcContext
 
 /**
  * A [CoroutineContext] that propagates an associated [io.grpc.Context] to coroutines run using

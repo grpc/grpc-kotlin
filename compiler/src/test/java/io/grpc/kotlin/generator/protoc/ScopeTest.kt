@@ -28,22 +28,22 @@ class ScopeTest {
   @Test
   fun unqualifiedScope() {
     val name = UnqualifiedScope.nestedClass(ClassSimpleName("FooBar"))
-    assertThat(name).isEqualTo(ClassName(packageName = "", simpleNames = listOf("FooBar")))
+    assertThat(name).isEqualTo(ClassName("", "FooBar"))
   }
 
   @Test
   fun packageScope() {
     val name = PackageScope("com.foo.bar").nestedClass(ClassSimpleName("FooBar"))
-    assertThat(name).isEqualTo(ClassName(packageName = "com.foo.bar", simpleNames = listOf("FooBar")))
+    assertThat(name).isEqualTo(ClassName("com.foo.bar", "FooBar"))
   }
 
   @Test
   fun classScope() {
     val name =
-      ClassScope(ClassName(packageName = "com.foo.bar", simpleNames = listOf("Baz")))
+      ClassScope(ClassName("com.foo.bar", "Baz"))
         .nestedClass(ClassSimpleName("Quux"))
     assertThat(name).isEqualTo(
-      ClassName(packageName = "com.foo.bar", simpleNames = listOf("Baz", "Quux"))
+      ClassName("com.foo.bar", "Baz", "Quux")
     )
   }
 }

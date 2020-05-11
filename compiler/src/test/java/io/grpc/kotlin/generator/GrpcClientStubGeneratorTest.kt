@@ -18,10 +18,10 @@ package io.grpc.kotlin.generator
 
 import com.google.protobuf.Descriptors.MethodDescriptor
 import com.google.protobuf.Descriptors.ServiceDescriptor
-import io.grpc.examples.helloworld.HelloWorldProto
 import io.grpc.kotlin.generator.protoc.GeneratorConfig
 import io.grpc.kotlin.generator.protoc.JavaPackagePolicy
 import io.grpc.kotlin.generator.protoc.testing.assertThat
+import io.grpc.examples.helloworld.HelloWorldProto
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -56,12 +56,12 @@ class GrpcClientStubGeneratorTest {
        *
        * @return The single response from the server.
        */
-      suspend fun sayHello(request: io.grpc.examples.helloworld.HelloRequest, headers: io.grpc.Metadata = io.grpc.Metadata()): io.grpc.examples.helloworld.HelloReply = io.grpc.kotlin.ClientCalls.unaryRpc(
+      suspend fun sayHello(request: io.grpc.examples.helloworld.HelloRequest): io.grpc.examples.helloworld.HelloReply = io.grpc.kotlin.ClientCalls.unaryRpc(
         channel,
         io.grpc.examples.helloworld.GreeterGrpc.getSayHelloMethod(),
         request,
         callOptions,
-        headers
+        io.grpc.Metadata()
       )
       """.trimIndent()
     )
@@ -89,12 +89,12 @@ class GrpcClientStubGeneratorTest {
        *
        * @return A flow that, when collected, emits the responses from the server.
        */
-      fun bidiStreamSayHello(requests: kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloRequest>, headers: io.grpc.Metadata = io.grpc.Metadata()): kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloReply> = io.grpc.kotlin.ClientCalls.bidiStreamingRpc(
+      fun bidiStreamSayHello(requests: kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloRequest>): kotlinx.coroutines.flow.Flow<io.grpc.examples.helloworld.HelloReply> = io.grpc.kotlin.ClientCalls.bidiStreamingRpc(
         channel,
         io.grpc.examples.helloworld.GreeterGrpc.getBidiStreamSayHelloMethod(),
         requests,
         callOptions,
-        headers
+        io.grpc.Metadata()
       )
       """.trimIndent()
     )
@@ -109,7 +109,6 @@ class GrpcClientStubGeneratorTest {
       ),
       StandardCharsets.UTF_8
     )
-
     assertThat(generator.generate(greeterServiceDescriptor)).generatesEnclosed(
       expectedFileContents.joinToString("\n") + "\n"
     )

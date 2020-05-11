@@ -126,7 +126,8 @@ val FileDescriptorProto.outerClassSimpleName: ClassSimpleName
 
     val foundDuplicate =
       enumTypeList.any { it.enumClassSimpleName == defaultOuterClassName } ||
-        messageTypeList.any { it.anyHaveNameRecursive(defaultOuterClassName) }
+        messageTypeList.any { it.anyHaveNameRecursive(defaultOuterClassName) } ||
+        serviceList.any { it.serviceName.toClassSimpleName() == defaultOuterClassName }
 
     return if (foundDuplicate) {
       defaultOuterClassName.withSuffix("OuterClass")

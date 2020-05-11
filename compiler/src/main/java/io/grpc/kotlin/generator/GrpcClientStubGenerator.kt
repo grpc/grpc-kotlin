@@ -31,6 +31,8 @@ import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.asTypeName
 import io.grpc.CallOptions
+import io.grpc.Channel as GrpcChannel
+import io.grpc.Metadata as GrpcMetadata
 import io.grpc.MethodDescriptor.MethodType
 import io.grpc.Status
 import io.grpc.StatusException
@@ -48,8 +50,6 @@ import io.grpc.kotlin.generator.protoc.methodName
 import io.grpc.kotlin.generator.protoc.of
 import io.grpc.kotlin.generator.protoc.serviceName
 import kotlinx.coroutines.flow.Flow
-import io.grpc.Channel as GrpcChannel
-import io.grpc.Metadata as GrpcMetadata
 
 /**
  * Logic for generating gRPC stubs for Kotlin.
@@ -62,11 +62,6 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
     private val STREAMING_PARAMETER_NAME = MemberSimpleName("requests")
     private val GRPC_CHANNEL_PARAMETER_NAME = MemberSimpleName("channel")
     private val CALL_OPTIONS_PARAMETER_NAME = MemberSimpleName("callOptions")
-
-    private val HEADERS_PARAMETER: ParameterSpec = ParameterSpec
-      .builder("headers", GrpcMetadata::class)
-      .defaultValue("%T()", GrpcMetadata::class)
-      .build()
 
     val GRPC_CHANNEL_PARAMETER = ParameterSpec.of(GRPC_CHANNEL_PARAMETER_NAME, GrpcChannel::class)
     val CALL_OPTIONS_PARAMETER = ParameterSpec
@@ -177,7 +172,6 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
     val funSpecBuilder =
       funSpecBuilder(name)
         .addParameter(parameter)
-        .addParameter(HEADERS_PARAMETER)
         .returns(returnType)
         .addKdoc(rpcStubKDoc(method, parameter))
 
@@ -185,7 +179,7 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
       "helperMethod" to helperMethod,
       "methodDescriptor" to method.descriptorCode,
       "parameter" to parameter,
-      "headers" to HEADERS_PARAMETER
+      "headers" to GrpcMetadata::class
     )
 
     if (!method.isServerStreaming) {
@@ -199,7 +193,7 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
         %methodDescriptor:L,
         %parameter:N,
         callOptions,
-        %headers:N
+        %headers:T()
       )
       """.trimIndent(),
       codeBlockMap

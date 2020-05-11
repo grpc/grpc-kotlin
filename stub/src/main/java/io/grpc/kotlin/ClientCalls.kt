@@ -109,15 +109,13 @@ object ClientCalls {
     headers: suspend () -> GrpcMetadata = { GrpcMetadata() }
   ): (RequestT) -> Flow<ResponseT> = {
     flow {
-      emitAll(
-        serverStreamingRpc(
-          channel,
-          method,
-          it,
-          callOptions,
-          headers()
-        )
-      )
+      serverStreamingRpc(
+        channel,
+        method,
+        it,
+        callOptions,
+        headers()
+      ).collect { emit(it) }
     }
   }
 
@@ -207,15 +205,13 @@ object ClientCalls {
   ): (Flow<RequestT>) -> Flow<ResponseT> =
     {
       flow {
-        emitAll(
-          bidiStreamingRpc(
-            channel,
-            method,
-            it,
-            callOptions,
-            headers()
-          )
-        )
+        bidiStreamingRpc(
+          channel,
+          method,
+          it,
+          callOptions,
+          headers()
+        ).collect { emit(it) }
       }
     }
 

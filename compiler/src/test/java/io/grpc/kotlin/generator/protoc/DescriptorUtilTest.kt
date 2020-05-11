@@ -17,7 +17,7 @@
 package io.grpc.kotlin.generator.protoc
 
 import com.google.common.truth.Truth.assertThat
-import com.google.protos.testing.ProtoFileWithHyphen
+import io.grpc.testing.ProtoFileWithHyphen
 import io.grpc.kotlin.generator.protoc.testproto.Example3
 import io.grpc.kotlin.generator.protoc.testproto.Example3.ExampleEnum
 import io.grpc.kotlin.generator.protoc.testproto.Example3.ExampleMessage

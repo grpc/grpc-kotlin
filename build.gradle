@@ -1,3 +1,6 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 plugins {
     id 'org.jetbrains.kotlin.jvm' version'1.3.61' apply false
 }
@@ -5,14 +8,22 @@ plugins {
 ext {
     grpcVersion = '1.28.0' // CURRENT_GRPC_VERSION
     protobufVersion = '3.11.0'
+    kotlinVersion = '1.3.61'
     coroutinesVersion = '1.3.3'
+    googleauthVersion = '0.20.0'
 }
 
 subprojects {
+    apply plugin: 'java'
     apply plugin: 'org.jetbrains.kotlin.jvm'
-
     group = "io.grpc"
-    version = "0.1.0" // CURRENT_GRPC_KOTLIN_VERSION
+    version = "0.1.1" // CURRENT_GRPC_KOTLIN_VERSION
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        testImplementation "junit:junit:4.12"
+    }
 
     plugins.withId("org.jetbrains.dokka") {
         dokka {
@@ -76,64 +87,42 @@ subprojects {
                 }
             }
         }
-
-        plugins.withId("java") {
-            task javadocJar(type: Jar) {
-                classifier = 'javadoc'
-                from javadoc
-            }
-
-            task sourcesJar(type: Jar) {
-                classifier = 'sources'
-                from sourceSets.main.allSource
-            }
-
-            // Generate the jar file to be used by our custom plugin
-            task protocJar(type: Jar) {
-                classifier "protoc"
-                manifest {
-                    attributes 'Main-Class': 'io.grpc.kotlin.generator.GeneratorRunner'
-                }
-                baseName = project.name
-                from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-                with jar
-            }
-
-            publishing {
-                publications {
-                    maven {
-                        from components.java
-
-                        artifact javadocJar
-                        artifact sourcesJar
-
-                        if (project.name == 'protoc-gen-grpc-kotlin') {
-                            // Generate the artifacts expected by protobuf-gradle-plugin
-                            artifact protocJar
-                            artifactForGradlePlugin(it, 'linux', 'aarch_64')
-                            artifactForGradlePlugin(it, 'linux', 'x86_32')
-                            artifactForGradlePlugin(it, 'linux', 'x86_64')
-                            artifactForGradlePlugin(it, 'osx', 'x86_64')
-                            artifactForGradlePlugin(it, 'windows', 'x86_32')
-                            artifactForGradlePlugin(it, 'windows', 'x86_64')
-                        }
-                    }
-                }
-            }
-        }
     }
-}
 
-def artifactForGradlePlugin(MavenPublication pub, String os, String arch) {
-    if (os == "windows") {
-        pub.artifact("src/main/dist/protoc-gen-grpc-kotlin.bat" as File) {
-            classifier os + "-" + arch
-            extension "exe"
-        }
-    } else {
-        pub.artifact("src/main/dist/protoc-gen-grpc-kotlin" as File) {
-            classifier os + "-" + arch
-            extension "exe"
+    tasks.withType(Test) {
+        testLogging {
+            showStandardStreams = true
+            // set options for log level LIFECYCLE
+            events TestLogEvent.FAILED,
+                    TestLogEvent.PASSED,
+                    TestLogEvent.SKIPPED,
+                    TestLogEvent.STANDARD_OUT
+            exceptionFormat TestExceptionFormat.FULL
+            showExceptions true
+            showCauses true
+            showStackTraces true
+
+            // set options for log level DEBUG and INFO
+            debug {
+                events TestLogEvent.STARTED,
+                        TestLogEvent.FAILED,
+                        TestLogEvent.PASSED,
+                        TestLogEvent.SKIPPED,
+                        TestLogEvent.STANDARD_ERROR,
+                        TestLogEvent.STANDARD_OUT
+                exceptionFormat TestExceptionFormat.FULL
+            }
+            info.events = debug.events
+            info.exceptionFormat = debug.exceptionFormat
+
+            afterSuite { desc, result ->
+                if (!desc.parent) { // will match the outermost suite
+                    def output = "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+                    def startItem = '|  ', endItem = '  |'
+                    def repeatLength = startItem.length() + output.length() + endItem.length()
+                    println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
+                }
+            }
         }
     }
 }

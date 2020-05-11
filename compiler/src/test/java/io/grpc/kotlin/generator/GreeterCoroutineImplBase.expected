@@ -87,22 +87,22 @@ abstract class GreeterCoroutineImplBase(
 
   final override fun bindService(): ServerServiceDefinition = builder(getServiceDescriptor())
     .addMethod(unaryServerMethodDefinition(
-    scope = this,
+    context = this.context,
     descriptor = GreeterGrpc.getSayHelloMethod(),
     implementation = ::sayHello
   ))
     .addMethod(clientStreamingServerMethodDefinition(
-    scope = this,
+    context = this.context,
     descriptor = GreeterGrpc.getClientStreamSayHelloMethod(),
     implementation = ::clientStreamSayHello
   ))
     .addMethod(serverStreamingServerMethodDefinition(
-    scope = this,
+    context = this.context,
     descriptor = GreeterGrpc.getServerStreamSayHelloMethod(),
     implementation = ::serverStreamSayHello
   ))
     .addMethod(bidiStreamingServerMethodDefinition(
-    scope = this,
+    context = this.context,
     descriptor = GreeterGrpc.getBidiStreamSayHelloMethod(),
     implementation = ::bidiStreamSayHello
   )).build()

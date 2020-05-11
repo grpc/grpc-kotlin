@@ -64,7 +64,7 @@ class CoroutineServerImplGeneratorTest {
     """.trimIndent())
     assertThat(stub.serverMethodDef.toString()).isEqualTo("""
       io.grpc.kotlin.ServerCalls.unaryServerMethodDefinition(
-        scope = this,
+        context = this.context,
         descriptor = io.grpc.examples.helloworld.GreeterGrpc.getSayHelloMethod(),
         implementation = ::sayHello
       )
@@ -91,7 +91,7 @@ class CoroutineServerImplGeneratorTest {
     """.trimIndent())
     assertThat(stub.serverMethodDef.toString()).isEqualTo("""
       io.grpc.kotlin.ServerCalls.clientStreamingServerMethodDefinition(
-        scope = this,
+        context = this.context,
         descriptor = io.grpc.examples.helloworld.GreeterGrpc.getClientStreamSayHelloMethod(),
         implementation = ::clientStreamSayHello
       )
@@ -117,7 +117,7 @@ class CoroutineServerImplGeneratorTest {
     """.trimIndent())
     assertThat(stub.serverMethodDef.toString()).isEqualTo("""
       io.grpc.kotlin.ServerCalls.serverStreamingServerMethodDefinition(
-        scope = this,
+        context = this.context,
         descriptor = io.grpc.examples.helloworld.GreeterGrpc.getServerStreamSayHelloMethod(),
         implementation = ::serverStreamSayHello
       )
@@ -145,7 +145,7 @@ class CoroutineServerImplGeneratorTest {
     """.trimIndent())
     assertThat(stub.serverMethodDef.toString()).isEqualTo("""
       io.grpc.kotlin.ServerCalls.bidiStreamingServerMethodDefinition(
-        scope = this,
+        context = this.context,
         descriptor = io.grpc.examples.helloworld.GreeterGrpc.getBidiStreamSayHelloMethod(),
         implementation = ::bidiStreamSayHello
       )

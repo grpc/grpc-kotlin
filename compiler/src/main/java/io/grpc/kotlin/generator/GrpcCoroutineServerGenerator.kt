@@ -182,7 +182,7 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
       CodeBlock.of(
         """
           %M(
-            scope = this,
+            context = this.context,
             descriptor = %L,
             implementation = ::%N
           )
