@@ -20,6 +20,10 @@ This repo includes the sources for the following:
 - [grpc-kotlin-stub](stub): A Kotlin implementation of gRPC, providing runtime
   support for client-stubs and server-side code.
 
+- [grpc-kotlin-stub-lite](stub-lite): An implementation of `grpc-kotlin-stub`,
+  but with a dependency on `grpc-protobuf-lite` instead of `grpc-protobuf` for
+  Android projects.
+
 For more information, see the following pages:
 
 - [gRPC Kotlin/JVM Quick Start][]
