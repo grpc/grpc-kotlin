@@ -661,39 +661,4 @@ class ClientCallsTest: AbstractCallsTest() {
     assertThat(responses.single()).isEqualTo(helloReply("Hello, Sunstone"))
     assertThat(requestsEvaluations.get()).isEqualTo(2)
   }
-
-  @ExperimentalCoroutinesApi
-  @Test
-  fun bidiStreamingCancelResponsesCancelsRequests() = runBlocking {
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun bidiStreamSayHello(
-        responseObserver: StreamObserver<HelloReply>
-      ): StreamObserver<HelloRequest> {
-        return object : StreamObserver<HelloRequest> {
-          override fun onNext(value: HelloRequest) {
-            responseObserver.onNext(helloReply("Hello, ${value.name}"))
-          }
-
-          override fun onError(t: Throwable) = throw t
-
-          override fun onCompleted() {
-            responseObserver.onCompleted()
-          }
-        }
-      }
-    }
-
-    val channel = makeChannel(serverImpl)
-
-    val cancelled = Job()
-    val requests = flow {
-      emit(helloRequest("Steven"))
-      emit(helloRequest("Garnet"))
-      suspendUntilCancelled { cancelled.complete() }
-    }
-    assertThat(
-      ClientCalls.bidiStreamingRpc(channel, bidiStreamingSayHelloMethod, requests).take(2).toList()
-    ).containsExactly(helloReply("Hello, Steven"), helloReply("Hello, Garnet")).inOrder()
-    cancelled.join()
-  }
 }
