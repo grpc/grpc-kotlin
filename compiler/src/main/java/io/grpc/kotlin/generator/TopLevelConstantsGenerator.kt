@@ -20,6 +20,7 @@ class TopLevelConstantsGenerator(config: GeneratorConfig): ServiceCodeGenerator(
   override fun generate(service: Descriptors.ServiceDescriptor): Declarations = declarations {
     addProperty(
       PropertySpec.builder("serviceDescriptor", ServiceDescriptor::class)
+        .addAnnotation(JvmStatic::class)
         .getter(
           FunSpec.getterBuilder()
             .addStatement("return %T.getServiceDescriptor()", service.grpcClass)
@@ -41,6 +42,7 @@ class TopLevelConstantsGenerator(config: GeneratorConfig): ServiceCodeGenerator(
             )
             .getter(
               FunSpec.getterBuilder()
+                .addAnnotation(JvmStatic::class)
                 .addStatement("return %T.get%LMethod()", service.grpcClass, method.methodName)
                 .build()
             )
