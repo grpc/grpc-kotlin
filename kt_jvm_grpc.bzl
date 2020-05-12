@@ -41,7 +41,7 @@ def _kt_grpc_extensions_impl(ctx):
 
     gen_src_dir_name = "%s/ktgrpc" % name
     gen_src_dir = ctx.actions.declare_directory(gen_src_dir_name)
-    source_jar = ctx.actions.declare_file("some_jar.srcjar")
+    source_jar = ctx.actions.declare_file("%s.srcjar" % name)
 
     _invoke_generator(ctx, proto_dep, gen_src_dir)
     _build_srcjar(ctx, proto_dep, gen_src_dir, source_jar)
