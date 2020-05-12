@@ -20,6 +20,8 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
 import io.grpc.Status
 import io.grpc.StatusException
+import io.grpc.examples.helloworld.GreeterGrpc
+import io.grpc.examples.helloworld.GreeterGrpcKt
 import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineImplBase
 import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineStub
 import io.grpc.examples.helloworld.HelloReply
@@ -344,5 +346,15 @@ class GeneratedCodeTest : AbstractCallsTest() {
       stub.sayHello(helloRequest("Greg"))
     }
     assertThat(ex.status.code).isEqualTo(Status.Code.CANCELLED)
+  }
+
+  @Test
+  fun serviceDescriptor() {
+    assertThat(GreeterGrpcKt.serviceDescriptor).isEqualTo(GreeterGrpc.getServiceDescriptor())
+  }
+
+  @Test
+  fun methodDescriptor() {
+    assertThat(GreeterGrpcKt.sayHelloMethod).isEqualTo(GreeterGrpc.getSayHelloMethod())
   }
 }
