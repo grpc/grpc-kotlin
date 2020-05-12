@@ -123,10 +123,9 @@ def kt_jvm_grpc_library(
         kt_grpc_deps = [
             "@io_grpc_grpc_java//stub",
             "@io_grpc_grpc_java//context",
-            "//stub/src/main/java/io/grpc/kotlin:stub",
-            "//stub/src/main/java/io/grpc/kotlin:context",
+            "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:stub",
+            "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:context",
         ]
-
     elif flavor == "lite":
         fail("Android support is unimplemented")
     else:
