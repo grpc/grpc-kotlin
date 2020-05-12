@@ -20,3 +20,11 @@ java_grpc_library(
     srcs = [":hello_world_proto"],
     deps = [":hello_world_java_proto"],
 )
+
+load("//:kt_jvm_grpc.bzl", "kt_jvm_grpc_library")
+
+kt_jvm_grpc_library(
+    name = "foo",
+    srcs = [":hello_world_proto"],
+    deps = [":hello_world_java_proto"],
+)
