@@ -37,23 +37,10 @@ dependencies {
     implementation "javax.annotation:javax.annotation-api:1.2"
 }
 
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
 publishing {
     publications {
         maven(MavenPublication) {
             from components.java
-
-            artifact javadocJar
-            artifact sourcesJar
         }
     }
 }
