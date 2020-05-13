@@ -1,4 +1,3 @@
-load("@io_grpc_grpc_java//:java_grpc_library.bzl", "java_grpc_library")
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library")
 
 def _invoke_generator(ctx, proto_dep, output_dir):
@@ -88,18 +87,15 @@ def kt_jvm_grpc_library(
         flavor = None,
         deprecation = None,
         features = []):
-    """This rule compiles Kotlin APIs for gRPC services from the proto_library targets in deps.
+    """This rule compiles Kotlin APIs for gRPC services from the proto_library in srcs.
 
-    In particular, it builds the java_grpc_library for the target and then Kotlin extensions
-    atop that.  This rule can be depended on from Java and Kotlin targets, without conflicting with
-    a java_grpc_library for the same target.
+    The Kotlin gRPC code generator requires a java_proto_library for the proto_library,
+    which should be passed in deps.
 
     Args:
       name: a name for the target
       srcs: exactly one proto_library targets, to generate Kotlin APIs for
-      deps: exactly one JVM proto_library target for srcs: should be either java_proto_library,
-            java_lite_proto_library, kt_jvm_proto_library, or kt_jvm_lite_proto_library
-            targets
+      deps: exactly one java_grpc_library target for srcs[0]
       tags: A list of string tags passed to generated targets.
       testonly: Whether this target is intended only for tests.
       compatible_with: Standard attribute, see http://go/be-common#common.compatible_with
@@ -120,49 +116,29 @@ def kt_jvm_grpc_library(
         fail("Expected exactly one dep", "deps")
 
     if flavor == None or flavor == "normal":
-        kt_grpc_deps = [
-            "@io_grpc_grpc_java//stub",
-            "@io_grpc_grpc_java//context",
+        deps.extend([
             "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:stub",
             "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:context",
-        ]
+        ])
     elif flavor == "lite":
         fail("Android support is unimplemented")
     else:
         fail("Flavor must be normal or lite")
 
     kt_grpc_label = ":%s_DO_NOT_DEPEND_kt_grpc" % name
-    java_grpc_label = ":%s_DO_NOT_DEPEND_java_grpc" % name
-
     kt_grpc_name = kt_grpc_label[1:]
-    java_grpc_name = java_grpc_label[1:]
-
-    grpc_deps = [java_grpc_label] + kt_grpc_deps
-
-    java_grpc_library(
-        name = java_grpc_name,
-        srcs = srcs,
-        deps = deps,
-        compatible_with = compatible_with,
-        visibility = ["//visibility:private"],
-        flavor = flavor,
-        restricted_to = restricted_to,
-        testonly = testonly,
-        deprecation = deprecation,
-        features = features,
-    )
 
     _kt_grpc_library_helper(
         name = kt_grpc_name,
         proto_deps = srcs,
-        deps = grpc_deps,
+        deps = deps,
     )
 
     kt_jvm_library(
         name = name,
         srcs = [kt_grpc_label],
-        deps = grpc_deps,
-        exports = [java_grpc_label],
+        deps = deps,
+        exports = deps,
         compatible_with = compatible_with,
         restricted_to = restricted_to,
         testonly = testonly,
