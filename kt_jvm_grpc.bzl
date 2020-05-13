@@ -116,7 +116,10 @@ def kt_jvm_grpc_library(
         fail("Expected exactly one dep", "deps")
 
     if flavor == None or flavor == "normal":
-        pass
+        deps.extend([
+            "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:stub",
+            "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:context",
+        ])
     elif flavor == "lite":
         fail("Android support is unimplemented")
     else:
@@ -124,11 +127,6 @@ def kt_jvm_grpc_library(
 
     kt_grpc_label = ":%s_DO_NOT_DEPEND_kt_grpc" % name
     kt_grpc_name = kt_grpc_label[1:]
-
-    deps.extend([
-        "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:stub",
-        "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:context",
-    ])
 
     _kt_grpc_library_helper(
         name = kt_grpc_name,
