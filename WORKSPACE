@@ -10,19 +10,17 @@ http_archive(
 )
 
 load("@rules_jvm_external//:defs.bzl", "maven_install")
+
+# Repositories
 load(
     "//:repositories.bzl",
     "IO_GRPC_GRPC_KOTLIN_ARTIFACTS",
     "IO_GRPC_GRPC_KOTLIN_OVERRIDE_TARGETS",
     "grpc_kt_repositories",
+    "io_grpc_grpc_java",
 )
 
-http_archive(
-    name = "io_grpc_grpc_java",
-    sha256 = "e274597cc4de351b4f79e4c290de8175c51a403dc39f83f1dfc50a1d1c9e9a4f",
-    strip_prefix = "grpc-java-1.28.0",
-    url = "https://github.com/grpc/grpc-java/archive/v1.28.0.zip",
-)
+io_grpc_grpc_java()
 
 load(
     "@io_grpc_grpc_java//:repositories.bzl",
@@ -31,6 +29,7 @@ load(
     "grpc_java_repositories",
 )
 
+# Maven
 maven_install(
     artifacts = IO_GRPC_GRPC_KOTLIN_ARTIFACTS + IO_GRPC_GRPC_JAVA_ARTIFACTS,
     generate_compat_repositories = True,
@@ -47,14 +46,17 @@ load("@maven//:compat.bzl", "compat_repositories")
 
 compat_repositories()
 
+# gRPC
 grpc_kt_repositories()
 
 grpc_java_repositories()
 
+# Protocol Buffers
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
 
+# Kotlin
 load(
     "@io_bazel_rules_kotlin//kotlin:kotlin.bzl",
     "kotlin_repositories",
