@@ -25,6 +25,11 @@ subprojects {
         testImplementation "junit:junit:4.12"
     }
 
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_7
+        targetCompatibility = JavaVersion.VERSION_1_7
+    }
+
     plugins.withId("org.jetbrains.dokka") {
         dokka {
             outputFormat = 'javadoc'
