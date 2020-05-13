@@ -25,5 +25,5 @@ java_grpc_library(
 kt_jvm_grpc_library(
     name = "hello_world_kt_grpc",
     srcs = [":hello_world_proto"],
-    deps = [":hello_world_java_proto"],
+    deps = [":hello_world_java_grpc"],
 )
