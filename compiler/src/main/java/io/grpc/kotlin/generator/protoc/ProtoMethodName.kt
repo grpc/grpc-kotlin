@@ -22,8 +22,23 @@ import com.google.protobuf.Descriptors.MethodDescriptor
 
 /** Represents the unqualified name of an RPC method in a proto file, in UpperCamelCase. */
 data class ProtoMethodName(val name: String) : CharSequence by name {
-  fun toMemberSimpleName(): MemberSimpleName =
-    MemberSimpleName(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name))
+  fun toMemberSimpleName(): MemberSimpleName {
+    val name = MemberSimpleName(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name))
+    if (containsSpecialCharacters(name)) {
+      return handleSpecialCharacters(name)
+    }
+    return name
+  }
+
+  private fun containsSpecialCharacters(name: MemberSimpleName): Boolean {
+    return name.contains("_")
+  }
+
+  private fun handleSpecialCharacters(name: MemberSimpleName): MemberSimpleName {
+    return name.split("_")
+      .map(::MemberSimpleName)
+      .reduce { acc, simpleName -> acc + simpleName }
+  }
 
   override fun toString() = name
 }
