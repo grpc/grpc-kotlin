@@ -1,0 +1,7 @@
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library")
+
+kt_jvm_library(
+    name = "hello_world",
+    srcs = ["HelloWorldServer.kt"],
+    deps = ["//examples/src/main/proto:hello_world_kt_grpc"],
+)
