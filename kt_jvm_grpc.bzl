@@ -140,7 +140,7 @@ def kt_jvm_grpc_library(
         name = name,
         srcs = [kt_grpc_label],
         deps = deps,
-        exports = [deps[0]],
+        exports = deps,
         compatible_with = compatible_with,
         restricted_to = restricted_to,
         testonly = testonly,
