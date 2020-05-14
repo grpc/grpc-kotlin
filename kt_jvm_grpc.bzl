@@ -34,8 +34,8 @@ def _build_srcjar(ctx, proto_dep, input_dir, source_jar):
         progress_message = "Generating Kotlin gRPC srcjar for %s" % proto_dep.label,
     )
 
-def _kt_grpc_extensions_impl(ctx):
-    proto_dep = ctx.attr.proto_deps[0]
+def _kt_grpc_generate_code_impl(ctx):
+    proto_dep = ctx.attr.srcs[0]
     name = ctx.label.name
 
     gen_src_dir_name = "%s/ktgrpc" % name
@@ -50,9 +50,9 @@ def _kt_grpc_extensions_impl(ctx):
 
     return [java_info, default_info]
 
-_kt_grpc_library_helper = rule(
+_kt_grpc_generate_code = rule(
     attrs = dict(
-        proto_deps = attr.label_list(
+        srcs = attr.label_list(
             providers = [ProtoInfo],
         ),
         deps = attr.label_list(
@@ -72,7 +72,7 @@ _kt_grpc_library_helper = rule(
     ),
     fragments = ["java"],
     provides = [JavaInfo],
-    implementation = _kt_grpc_extensions_impl,
+    implementation = _kt_grpc_generate_code_impl,
 )
 
 def kt_jvm_grpc_library(
@@ -89,13 +89,10 @@ def kt_jvm_grpc_library(
         features = []):
     """This rule compiles Kotlin APIs for gRPC services from the proto_library in srcs.
 
-    The Kotlin gRPC code generator requires a java_proto_library for the proto_library,
-    which should be passed in deps.
-
     Args:
-      name: a name for the target
-      srcs: exactly one proto_library targets, to generate Kotlin APIs for
-      deps: exactly one java_grpc_library target for srcs[0]
+      name: A name for the target
+      srcs: Exactly one proto_library target to generate Kotlin APIs for
+      deps: Exactly one java_grpc_library target for srcs[0]
       tags: A list of string tags passed to generated targets.
       testonly: Whether this target is intended only for tests.
       compatible_with: Standard attribute, see http://go/be-common#common.compatible_with
@@ -128,9 +125,9 @@ def kt_jvm_grpc_library(
     kt_grpc_label = ":%s_DO_NOT_DEPEND_kt_grpc" % name
     kt_grpc_name = kt_grpc_label[1:]
 
-    _kt_grpc_library_helper(
+    _kt_grpc_generate_code(
         name = kt_grpc_name,
-        proto_deps = srcs,
+        srcs = srcs,
         deps = deps,
     )
 
