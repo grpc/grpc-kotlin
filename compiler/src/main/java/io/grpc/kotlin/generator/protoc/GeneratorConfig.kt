@@ -16,7 +16,9 @@
 
 package io.grpc.kotlin.generator.protoc
 
-import com.google.protobuf.Descriptors.*
+import com.google.protobuf.Descriptors.Descriptor
+import com.google.protobuf.Descriptors.EnumDescriptor
+import com.google.protobuf.Descriptors.FileDescriptor
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier

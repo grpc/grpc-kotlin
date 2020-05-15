@@ -1,0 +1,46 @@
+plugins {
+    id 'com.google.protobuf' version '0.8.11'
+    id 'org.jetbrains.dokka' version '0.10.1'
+
+    // Generate IntelliJ IDEA's .idea & .iml project files
+    // Starting with 0.8.4 of protobuf-gradle-plugin, *.proto and the gen output files are added
+    // to IntelliJ as sources. It is no longer necessary to add them manually to the idea {} block
+    // to jump to definitions from Java and Kotlin files.
+    // For best results, install the Protobuf and Kotlin plugins for IntelliJ.
+    id 'idea'
+
+    // Provide convenience executables for trying out the examples.
+    id 'application'
+    id 'maven-publish'
+}
+
+description = 'gRPC Kotlin: Stub Lite'
+mainClassName = ''
+
+repositories {
+    google()
+    jcenter()
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    // Kotlin
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext.coroutinesVersion}"
+
+    // Grpc and Protobuf
+    implementation "io.grpc:grpc-protobuf-lite:${rootProject.ext.grpcVersion}"
+    implementation "io.grpc:grpc-stub:${rootProject.ext.grpcVersion}"
+    implementation "io.grpc:grpc-kotlin-stub:$version"
+
+    // Java
+    implementation "javax.annotation:javax.annotation-api:1.2"
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}

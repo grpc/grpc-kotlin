@@ -17,7 +17,11 @@
 package io.grpc.kotlin.generator.protoc
 
 import com.google.common.truth.Truth.assertThat
-import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.INT
+import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.TypeSpec
 import io.grpc.kotlin.generator.protoc.testing.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith

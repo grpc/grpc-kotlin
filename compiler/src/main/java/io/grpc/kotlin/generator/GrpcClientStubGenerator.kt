@@ -19,16 +19,6 @@ package io.grpc.kotlin.generator
 import com.google.common.annotations.VisibleForTesting
 import com.google.protobuf.Descriptors.MethodDescriptor
 import com.google.protobuf.Descriptors.ServiceDescriptor
-import io.grpc.kotlin.generator.protoc.Declarations
-import io.grpc.kotlin.generator.protoc.GeneratorConfig
-import io.grpc.kotlin.generator.protoc.MemberSimpleName
-import io.grpc.kotlin.generator.protoc.builder
-import io.grpc.kotlin.generator.protoc.classBuilder
-import io.grpc.kotlin.generator.protoc.declarations
-import io.grpc.kotlin.generator.protoc.member
-import io.grpc.kotlin.generator.protoc.methodName
-import io.grpc.kotlin.generator.protoc.of
-import io.grpc.kotlin.generator.protoc.serviceName
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FunSpec
@@ -49,6 +39,16 @@ import io.grpc.StatusException
 import io.grpc.kotlin.AbstractCoroutineStub
 import io.grpc.kotlin.ClientCalls
 import io.grpc.kotlin.StubFor
+import io.grpc.kotlin.generator.protoc.Declarations
+import io.grpc.kotlin.generator.protoc.GeneratorConfig
+import io.grpc.kotlin.generator.protoc.MemberSimpleName
+import io.grpc.kotlin.generator.protoc.builder
+import io.grpc.kotlin.generator.protoc.classBuilder
+import io.grpc.kotlin.generator.protoc.declarations
+import io.grpc.kotlin.generator.protoc.member
+import io.grpc.kotlin.generator.protoc.methodName
+import io.grpc.kotlin.generator.protoc.of
+import io.grpc.kotlin.generator.protoc.serviceName
 import kotlinx.coroutines.flow.Flow
 
 /**

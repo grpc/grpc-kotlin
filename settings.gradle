@@ -3,6 +3,8 @@ rootProject.name = "grpc-kotlin"
 include 'interop_testing'
 include ":grpc-kotlin-stub"
 project(':grpc-kotlin-stub').projectDir = "$rootDir/stub" as File
+include ":grpc-kotlin-stub-lite"
+project(':grpc-kotlin-stub-lite').projectDir = "$rootDir/stub-lite" as File
 
 if (settings.hasProperty('skipCodegen') && skipCodegen.toBoolean()) {
     println '*** Skipping the build of codegen and compilation of proto files because skipCodegen=true'

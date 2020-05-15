@@ -408,58 +408,6 @@ class ClientCallsTest: AbstractCallsTest() {
 
   @FlowPreview
   @Test
-  fun clientStreamingRpcCancellation() = runBlocking {
-    val serverCancelled = Job()
-    val serverReceived = Job()
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun clientStreamSayHello(
-        responseObserver: StreamObserver<HelloReply>
-      ): StreamObserver<HelloRequest> {
-        return object : StreamObserver<HelloRequest> {
-          private val names = mutableListOf<String>()
-
-          override fun onNext(value: HelloRequest) {
-            whenContextIsCancelled { serverCancelled.complete() }
-            Context.current().withCancellation().addListener(
-              Context.CancellationListener {
-                serverCancelled.complete()
-              },
-              directExecutor()
-            )
-            serverReceived.complete()
-            names += value.name
-          }
-
-          override fun onError(t: Throwable) = throw t
-
-          override fun onCompleted() {
-            responseObserver.onNext(
-              helloReply(names.joinToString(prefix = "Hello, ", separator = ", "))
-            )
-            responseObserver.onCompleted()
-          }
-        }
-      }
-    }
-
-    channel = makeChannel(serverImpl)
-
-    val requests = Channel<HelloRequest>()
-    val rpc = async {
-      ClientCalls.clientStreamingRpc(
-        channel = channel,
-        method = clientStreamingSayHelloMethod,
-        requests = requests.consumeAsFlow()
-      )
-    }
-    requests.send(helloRequest("Tim"))
-    serverReceived.join()
-    rpc.cancel(CancellationException("no longer needed"))
-    serverCancelled.join()
-  }
-
-  @FlowPreview
-  @Test
   fun clientStreamingRpcCancelled() = runBlocking {
     val serverImpl = object : GreeterGrpc.GreeterImplBase() {
       override fun clientStreamSayHello(
@@ -660,40 +608,5 @@ class ClientCallsTest: AbstractCallsTest() {
     assertThat(responses.single()).isEqualTo(helloReply("Hello, Sunstone"))
     assertThat(responses.single()).isEqualTo(helloReply("Hello, Sunstone"))
     assertThat(requestsEvaluations.get()).isEqualTo(2)
-  }
-
-  @ExperimentalCoroutinesApi
-  @Test
-  fun bidiStreamingCancelResponsesCancelsRequests() = runBlocking {
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun bidiStreamSayHello(
-        responseObserver: StreamObserver<HelloReply>
-      ): StreamObserver<HelloRequest> {
-        return object : StreamObserver<HelloRequest> {
-          override fun onNext(value: HelloRequest) {
-            responseObserver.onNext(helloReply("Hello, ${value.name}"))
-          }
-
-          override fun onError(t: Throwable) = throw t
-
-          override fun onCompleted() {
-            responseObserver.onCompleted()
-          }
-        }
-      }
-    }
-
-    val channel = makeChannel(serverImpl)
-
-    val cancelled = Job()
-    val requests = flow {
-      emit(helloRequest("Steven"))
-      emit(helloRequest("Garnet"))
-      suspendUntilCancelled { cancelled.complete() }
-    }
-    assertThat(
-      ClientCalls.bidiStreamingRpc(channel, bidiStreamingSayHelloMethod, requests).take(2).toList()
-    ).containsExactly(helloReply("Hello, Steven"), helloReply("Hello, Garnet")).inOrder()
-    cancelled.join()
   }
 }

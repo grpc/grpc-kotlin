@@ -30,7 +30,11 @@ object GeneratorRunner: AbstractGeneratorRunner() {
   private val config = GeneratorConfig(JavaPackagePolicy.OPEN_SOURCE, false)
 
   val generator = ProtoFileCodeGenerator(
-    generators = listOf(::GrpcClientStubGenerator, ::GrpcCoroutineServerGenerator),
+    generators = listOf(
+      ::GrpcClientStubGenerator,
+      ::GrpcCoroutineServerGenerator,
+      ::TopLevelConstantsGenerator
+    ),
     config = config,
     topLevelSuffix = "GrpcKt"
   )
