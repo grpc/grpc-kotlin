@@ -1,0 +1,143 @@
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_test")
+
+licenses(["notice"])
+
+package(default_visibility = ["//compiler/src/test:__subpackages__"])
+
+kt_jvm_test(
+    name = "ClassSimpleNameTest",
+    srcs = ["ClassSimpleNameTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.ClassSimpleNameTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc/testing",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+kt_jvm_test(
+    name = "ConstantNameTest",
+    srcs = ["ConstantNameTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.ConstantNameTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+kt_jvm_test(
+    name = "DeclarationsTest",
+    srcs = ["DeclarationsTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.DeclarationsTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc/testing",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+kt_jvm_test(
+    name = "DescriptorUtilTest",
+    srcs = ["DescriptorUtilTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.DescriptorUtilTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "//compiler/src/test/proto/testing:example3_java_proto",
+        "//compiler/src/test/proto/testing:has_explicit_outer_class_name_java_proto",
+        "//compiler/src/test/proto/testing:has_nested_class_name_conflict_java_proto",
+        "//compiler/src/test/proto/testing:has_outer_class_name_conflict_java_proto",
+        "//compiler/src/test/proto/testing:proto-file-with-hyphen_java_proto",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+kt_jvm_test(
+    name = "GeneratorConfigTest",
+    srcs = ["GeneratorConfigTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.GeneratorConfigTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "//compiler/src/test/proto/testing:example3_java_proto",
+        "//compiler/src/test/proto/testing:has_explicit_outer_class_name_java_proto",
+        "//compiler/src/test/proto/testing:has_outer_class_name_conflict_java_proto",
+        "//compiler/src/test/proto/testing:implicit_java_package_java_proto",
+        "//compiler/src/test/proto/testing:service_name_conflicts_with_file_java_proto",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+kt_jvm_test(
+    name = "JavaPackagePolicyTest",
+    srcs = ["JavaPackagePolicyTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.JavaPackagePolicyTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "//compiler/src/test/proto/testing:example3_java_proto",
+        "//compiler/src/test/proto/testing:implicit_java_package_java_proto",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+kt_jvm_test(
+    name = "MemberSimpleNameTest",
+    srcs = ["MemberSimpleNameTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.MemberSimpleNameTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+kt_jvm_test(
+    name = "ProtoEnumValueNameTest",
+    srcs = ["ProtoEnumValueNameTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.ProtoEnumValueNameTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "//compiler/src/test/proto/testing:example3_java_proto",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+kt_jvm_test(
+    name = "ProtoFieldNameTest",
+    srcs = ["ProtoFieldNameTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.ProtoFieldNameTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "//compiler/src/test/proto/testing:example3_java_proto",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+kt_jvm_test(
+    name = "ProtoFileNameTest",
+    srcs = ["ProtoFileNameTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.ProtoFileNameTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "//compiler/src/test/proto/testing:example3_java_proto",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+kt_jvm_test(
+    name = "ProtoTypeSimpleNameTest",
+    srcs = ["ProtoTypeSimpleNameTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.ProtoTypeSimpleNameTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "//compiler/src/test/proto/testing:example3_java_proto",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+kt_jvm_test(
+    name = "ScopeTest",
+    srcs = ["ScopeTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.ScopeTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "@maven//:com_google_truth_truth",
+    ],
+)
