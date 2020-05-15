@@ -1,0 +1,48 @@
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_test")
+
+licenses(["notice"])
+
+package(default_visibility = ["//compiler/src/test:__subpackages__"])
+
+kt_jvm_test(
+    name = "CoroutineServerImplGeneratorTest",
+    srcs = ["CoroutineServerImplGeneratorTest.kt"],
+    data = ["GreeterCoroutineImplBase.expected"],
+    test_class = "io.grpc.kotlin.generator.CoroutineServerImplGeneratorTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator",
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc/testing",
+        "//compiler/src/test/proto/helloworld:hello_world_java_proto",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+kt_jvm_test(
+    name = "GeneratorRunnerTest",
+    srcs = ["GeneratorRunnerTest.kt"],
+    data = ["HelloWorldProtoGrpcKt.expected"],
+    test_class = "io.grpc.kotlin.generator.GeneratorRunnerTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator",
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc/testing",
+        "//compiler/src/test/proto/helloworld:hello_world_java_proto",
+        "@maven//:com_google_jimfs_jimfs",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+kt_jvm_test(
+    name = "GrpcClientStubGeneratorTest",
+    srcs = ["GrpcClientStubGeneratorTest.kt"],
+    data = ["GreeterCoroutineStub.expected"],
+    test_class = "io.grpc.kotlin.generator.GrpcClientStubGeneratorTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator",
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc/testing",
+        "//compiler/src/test/proto/helloworld:hello_world_java_proto",
+        "@maven//:com_google_truth_truth",
+    ],
+)

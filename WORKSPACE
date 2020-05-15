@@ -32,6 +32,7 @@ load(
 # Maven
 maven_install(
     artifacts = [
+        "com.google.jimfs:jimfs:1.1",
         "com.google.truth.extensions:truth-proto-extension:1.0.1",
     ] + IO_GRPC_GRPC_KOTLIN_ARTIFACTS + IO_GRPC_GRPC_JAVA_ARTIFACTS,
     generate_compat_repositories = True,

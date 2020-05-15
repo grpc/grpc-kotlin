@@ -28,6 +28,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.nio.file.NoSuchFileException
 import java.nio.file.Paths
 
 @RunWith(JUnit4::class)
@@ -155,13 +156,25 @@ class CoroutineServerImplGeneratorTest {
   @Test
   fun fullImpl() {
     val type = generator.generate(serviceDescriptor)
-    val expectedFileContents = Files.readAllLines(
-      Paths.get(
-        "src/test/java/io/grpc/kotlin/generator",
-        "GreeterCoroutineImplBase.expected"
-      ),
-      StandardCharsets.UTF_8
-    )
+    val expectedFileContents = try {
+      // This is where Gradle puts the data files.
+      Files.readAllLines(
+        Paths.get(
+          "src/test/java/io/grpc/kotlin/generator",
+          "GreeterCoroutineImplBase.expected"
+        ),
+        StandardCharsets.UTF_8
+      )
+    } catch (_: NoSuchFileException) {
+      // This is where Bazel puts the data files.
+      Files.readAllLines(
+        Paths.get(
+          "compiler/src/test/java/io/grpc/kotlin/generator",
+          "GreeterCoroutineImplBase.expected"
+        ),
+        StandardCharsets.UTF_8
+      )
+    }
     assertThat(type).generatesEnclosed(
       expectedFileContents.joinToString("\n") + "\n"
     )

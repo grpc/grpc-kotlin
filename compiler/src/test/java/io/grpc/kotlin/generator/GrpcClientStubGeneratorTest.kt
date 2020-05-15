@@ -27,6 +27,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.nio.file.NoSuchFileException
 import java.nio.file.Paths
 
 @RunWith(JUnit4::class)
@@ -102,13 +103,23 @@ class GrpcClientStubGeneratorTest {
 
   @Test
   fun generateServiceStub() {
-    val expectedFileContents = Files.readAllLines(
-      Paths.get(
-        "src/test/java/io/grpc/kotlin/generator",
-        "GreeterCoroutineStub.expected"
-      ),
-      StandardCharsets.UTF_8
-    )
+    val expectedFileContents = try {
+      Files.readAllLines(
+        Paths.get(
+          "src/test/java/io/grpc/kotlin/generator",
+          "GreeterCoroutineStub.expected"
+        ),
+        StandardCharsets.UTF_8
+      )
+    } catch (_: NoSuchFileException) {
+      Files.readAllLines(
+        Paths.get(
+          "compiler/src/test/java/io/grpc/kotlin/generator",
+          "GreeterCoroutineStub.expected"
+        ),
+        StandardCharsets.UTF_8
+      )
+    }
     assertThat(generator.generate(greeterServiceDescriptor)).generatesEnclosed(
       expectedFileContents.joinToString("\n") + "\n"
     )

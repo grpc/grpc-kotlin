@@ -30,6 +30,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.nio.file.NoSuchFileException
 import java.nio.file.Paths
 
 @RunWith(JUnit4::class)
@@ -63,13 +64,23 @@ class GeneratorRunnerTest {
       fileSystem
     )
 
-    val expectedFileContents = Files.readAllLines(
-      Paths.get(
-        "src/test/java/io/grpc/kotlin/generator",
-        "HelloWorldProtoGrpcKt.expected"
-      ),
-      StandardCharsets.UTF_8
-    )
+    val expectedFileContents = try {
+      Files.readAllLines(
+        Paths.get(
+          "src/test/java/io/grpc/kotlin/generator",
+          "HelloWorldProtoGrpcKt.expected"
+        ),
+        StandardCharsets.UTF_8
+      )
+    } catch (_: NoSuchFileException) {
+      Files.readAllLines(
+        Paths.get(
+          "compiler/src/test/java/io/grpc/kotlin/generator",
+          "HelloWorldProtoGrpcKt.expected"
+        ),
+        StandardCharsets.UTF_8
+      )
+    }
 
     val outputFile =
       fileSystem
@@ -91,13 +102,23 @@ class GeneratorRunnerTest {
         .newInput(),
       output
     )
-    val expectedFileContents = Files.readAllLines(
-      Paths.get(
-        "src/test/java/io/grpc/kotlin/generator",
-        "HelloWorldProtoGrpcKt.expected"
-      ),
-      StandardCharsets.UTF_8
-    )
+    val expectedFileContents = try {
+      Files.readAllLines(
+        Paths.get(
+          "src/test/java/io/grpc/kotlin/generator",
+          "HelloWorldProtoGrpcKt.expected"
+        ),
+        StandardCharsets.UTF_8
+      )
+    } catch (_: NoSuchFileException) {
+      Files.readAllLines(
+        Paths.get(
+          "compiler/src/test/java/io/grpc/kotlin/generator",
+          "HelloWorldProtoGrpcKt.expected"
+        ),
+        StandardCharsets.UTF_8
+      )
+    }
 
     val result = CodeGeneratorResponse.parseFrom(output.toByteString())
     assertThat(result.fileList.single().content.removeTrailingWhitespace())
