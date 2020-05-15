@@ -30,5 +30,5 @@ interface PartialOrdering<T> {
      * includes `c`, it is not necessary to include `c` in `getPredecessors(a)`.
      * `c` is not a "direct" predecessor of `a`.
      */
-    fun getPredecessors(element: T): Set<T>?
+    fun getPredecessors(element: T): Set<T>
 }

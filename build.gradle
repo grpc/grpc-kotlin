@@ -27,7 +27,7 @@ subprojects {
 
     plugins.withId("org.jetbrains.dokka") {
         dokka {
-            outputFormat = 'html'
+            outputFormat = 'javadoc'
             outputDirectory = "$buildDir/dokka"
             configuration {
                 externalDocumentationLink {

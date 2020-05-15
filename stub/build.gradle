@@ -71,9 +71,21 @@ protobuf {
     }
 }
 
-task javadocJar(type: Jar) {
+task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
-    from javadoc
+    duplicatesStrategy 'exclude'
+    includeEmptyDirs false
+    from javadoc.destinationDir
+}
+
+task dokkaJavadoc(type: org.jetbrains.dokka.gradle.DokkaTask) {
+    outputFormat = 'javadoc'
+    outputDirectory = "$buildDir/javadoc"
+}
+
+javadocJar {
+    dependsOn dokkaJavadoc
+    from dokkaJavadoc.outputDirectory
 }
 
 task sourcesJar(type: Jar) {
@@ -85,9 +97,11 @@ publishing {
     publications {
         maven(MavenPublication) {
             from components.java
-
-            artifact javadocJar
-            artifact sourcesJar
+            // Dokka 0.10.1 does not work for JDK 10+
+            if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
+                artifact javadocJar
+                artifact sourcesJar
+            }
         }
     }
 }

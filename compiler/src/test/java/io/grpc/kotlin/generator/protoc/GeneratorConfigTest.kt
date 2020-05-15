@@ -18,7 +18,11 @@ package io.grpc.kotlin.generator.protoc
 
 import com.google.common.truth.Truth.assertThat
 import com.google.protobuf.Descriptors.FileDescriptor
-import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.INT
+import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.asClassName
 import io.grpc.kotlin.generator.protoc.testproto.Example3
 import io.grpc.kotlin.generator.protoc.testproto.HasOuterClassNameConflictOuterClass
 import io.grpc.kotlin.generator.protoc.testproto.MyExplicitOuterClassName

@@ -16,7 +16,12 @@
 
 package io.grpc.kotlin.generator.protoc
 
-import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.MemberName
+import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.TypeName
+import com.squareup.kotlinpoet.asClassName
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.reflect.KClass
