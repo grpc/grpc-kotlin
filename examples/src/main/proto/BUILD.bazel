@@ -27,3 +27,26 @@ kt_jvm_grpc_library(
     srcs = [":hello_world_proto"],
     deps = [":hello_world_java_grpc"],
 )
+
+proto_library(
+    name = "route_guide_proto",
+    srcs = ["route_guide.proto"],
+    deps = ["@com_google_protobuf//:duration_proto"],
+)
+
+java_proto_library(
+    name = "route_guide_java_proto",
+    deps = [":route_guide_proto"],
+)
+
+java_grpc_library(
+    name = "route_guide_java_grpc",
+    srcs = [":route_guide_proto"],
+    deps = [":route_guide_java_proto"],
+)
+
+kt_jvm_grpc_library(
+    name = "route_guide_kt_grpc",
+    srcs = [":route_guide_proto"],
+    deps = [":route_guide_java_grpc"],
+)

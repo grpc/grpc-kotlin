@@ -1,0 +1,8 @@
+licenses(["notice"])
+
+package(default_visibility = ["//examples/src:__subpackages__"])
+
+filegroup(
+    name = "route_guide_db",
+    srcs = ["route_guide_db.json"],
+)

@@ -1,0 +1,38 @@
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_binary")
+
+licenses(["notice"])
+
+package(default_visibility = ["//examples/src:__subpackages__"])
+
+kt_jvm_binary(
+    name = "route_guide_client",
+    srcs = [
+        "Database.kt",
+        "Points.kt",
+        "RouteGuideClient.kt",
+        "RouteGuideServer.kt",
+    ],
+    main_class = "io.grpc.examples.routeguide.RouteGuideClientKt",
+    resources = ["//examples/src/main/resources/io/grpc/examples/routeguide:route_guide_db"],
+    deps = [
+        "//examples/src/main/proto:route_guide_kt_grpc",
+        "@com_google_protobuf//:protobuf_java_util",
+        "@io_grpc_grpc_java//netty",
+    ],
+)
+
+kt_jvm_binary(
+    name = "route_guide_server",
+    srcs = [
+        "Database.kt",
+        "Points.kt",
+        "RouteGuideServer.kt",
+    ],
+    main_class = "io.grpc.examples.routeguide.RouteGuideServerKt",
+    resources = ["//examples/src/main/resources/io/grpc/examples/routeguide:route_guide_db"],
+    deps = [
+        "//examples/src/main/proto:route_guide_kt_grpc",
+        "@com_google_protobuf//:protobuf_java_util",
+        "@io_grpc_grpc_java//netty",
+    ],
+)
