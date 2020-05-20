@@ -99,7 +99,7 @@ def kt_jvm_grpc_library(
       tags: A list of string tags passed to generated targets.
       testonly: Whether this target is intended only for tests.
       compatible_with: Standard attribute
-      restricted_to: Standard attribut
+      restricted_to: Standard attribute
       visibility: A list of targets allowed to depend on this rule.
       flavor: "normal" (default) for normal proto runtime, or "lite" for the lite runtime
         (for Android usage)
