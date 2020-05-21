@@ -80,7 +80,7 @@ def kt_jvm_grpc_library(
         srcs = None,
         deps = None,
         tags = None,
-        testonly = None,  # None to not override Blaze's default for //javatests, b/112708042
+        testonly = None,  # None to not override Bazel's default
         compatible_with = None,
         restricted_to = None,
         visibility = None,
@@ -89,18 +89,21 @@ def kt_jvm_grpc_library(
         features = []):
     """This rule compiles Kotlin APIs for gRPC services from the proto_library in srcs.
 
+    For standard attributes, see:
+      https://docs.bazel.build/versions/master/be/common-definitions.html#common-attributes
+
     Args:
       name: A name for the target
       srcs: Exactly one proto_library target to generate Kotlin APIs for
       deps: Exactly one java_grpc_library target for srcs[0]
       tags: A list of string tags passed to generated targets.
       testonly: Whether this target is intended only for tests.
-      compatible_with: Standard attribute, see http://go/be-common#common.compatible_with
-      restricted_to: Standard attribute, see http://go/be-common#common.restricted_to
+      compatible_with: Standard attribute
+      restricted_to: Standard attribute
       visibility: A list of targets allowed to depend on this rule.
       flavor: "normal" (default) for normal proto runtime, or "lite" for the lite runtime
         (for Android usage)
-      deprecation: Standard attribute, see http://go/be-common#common.deprecation
+      deprecation: Standard attribute
       features: Features enabled.
     """
 
