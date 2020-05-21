@@ -47,9 +47,9 @@ def io_bazel_rules_kotlin():
 def com_google_protobuf():
     http_archive(
         name = "com_google_protobuf",
-        sha256 = "60d2012e3922e429294d3a4ac31f336016514a91e5a63fd33f35743ccfe1bd7d",
-        strip_prefix = "protobuf-3.11.0",
-        urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.0.zip"],
+        sha256 = "b37e96e81842af659605908a421960a5dc809acbc888f6b947bc320f8628e5b1",
+        strip_prefix = "protobuf-3.12.0",
+        urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.12.0.zip"],
     )
 
 def io_grpc_grpc_java():

@@ -1,4 +1,5 @@
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library")
+load("@io_grpc_grpc_java//:java_grpc_library.bzl", "java_grpc_library")
 
 def _invoke_generator(ctx, proto_dep, output_dir):
     direct_descriptor_set = depset([proto_dep[ProtoInfo].direct_descriptor_set])
@@ -95,7 +96,7 @@ def kt_jvm_grpc_library(
     Args:
       name: A name for the target
       srcs: Exactly one proto_library target to generate Kotlin APIs for
-      deps: Exactly one java_grpc_library target for srcs[0]
+      deps: Exactly one java_proto_library target for srcs[0]
       tags: A list of string tags passed to generated targets.
       testonly: Whether this target is intended only for tests.
       compatible_with: Standard attribute
@@ -106,27 +107,39 @@ def kt_jvm_grpc_library(
       deprecation: Standard attribute
       features: Features enabled.
     """
-
     srcs = srcs or []
     deps = deps or []
+    kt_deps = []
 
     if len(srcs) != 1:
         fail("Expected exactly one src", "srcs")
     if len(deps) != 1:
         fail("Expected exactly one dep", "deps")
 
-    if flavor == None or flavor == "normal":
-        deps.extend([
-            "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:stub",
-            "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:context",
-        ])
-    elif flavor == "lite":
-        fail("Android support is unimplemented")
-    else:
-        fail("Flavor must be normal or lite")
+    kt_deps.extend([
+        "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:stub",
+        "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:context",
+    ])
 
     kt_grpc_label = ":%s_DO_NOT_DEPEND_kt_grpc" % name
     kt_grpc_name = kt_grpc_label[1:]
+
+    java_grpc_label = ":%s_DO_NOT_DEPEND_java_grpc" % name
+    java_grpc_name = java_grpc_label[1:]
+
+    java_grpc_library(
+        name = java_grpc_name,
+        srcs = srcs,
+        deps = deps,
+        flavor = flavor,
+        compatible_with = compatible_with,
+        restricted_to = restricted_to,
+        testonly = testonly,
+        visibility = visibility,
+        deprecation = deprecation,
+        features = features,
+    )
+    kt_deps.append(java_grpc_label)
 
     _kt_grpc_generate_code(
         name = kt_grpc_name,
@@ -137,8 +150,8 @@ def kt_jvm_grpc_library(
     kt_jvm_library(
         name = name,
         srcs = [kt_grpc_label],
-        deps = deps,
-        exports = deps,
+        deps = kt_deps,
+        exports = kt_deps,
         compatible_with = compatible_with,
         restricted_to = restricted_to,
         testonly = testonly,
