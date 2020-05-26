@@ -3,6 +3,7 @@
 The active maintainers of this repository (in alphabetical order) are:
 
 - [bshaffer](https://github.com/bshaffer), Google LLC
+- [jamesward](https://github.com/jamesward), Google LLC
 - [lowasser](https://github.com/lowasser), Google LLC
 
 # Emeritus maintainers
