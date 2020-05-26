@@ -30,7 +30,7 @@ For more information, see the following pages:
 - [gRPC Basics - Kotlin/JVM][] tutorial
 - [API Reference][]
 
-[API Reference]: https://grpc.io/grpc-kotlin/grpc-kotlin-stub
+[API Reference]: https://javadocs.dev/io.grpc/grpc-kotlin-stub/latest
 [Build Status]: https://travis-ci.org/grpc/grpc-kotlin.svg?branch=master
 [gen-java]: https://github.com/grpc/grpc-java/tree/master/compiler
 [gRPC Kotlin/JVM Quick Start]: https://grpc.io/docs/quickstart/kotlin
