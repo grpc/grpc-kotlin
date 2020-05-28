@@ -27,7 +27,6 @@ import io.grpc.ServerMethodDefinition
 import io.grpc.Status
 import io.grpc.StatusException
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
@@ -194,9 +193,11 @@ object ServerCalls {
     context: CoroutineContext,
     implementation: (Flow<RequestT>) -> Flow<ResponseT>
   ): ServerCallHandler<RequestT, ResponseT> =
-    ServerCallHandler {
-      call, _ -> serverCallListener(
-        context + GrpcContextElement.current(),
+    ServerCallHandler { call, _ ->
+      serverCallListener(
+            context
+            + CoroutineContextServerInterceptor.COROUTINE_CONTEXT_KEY.get()
+            + GrpcContextElement.current(),
         call,
         implementation
       )
@@ -233,11 +234,9 @@ object ServerCalls {
         throw e
       }
     }
-
+    
     val rpcScope = CoroutineScope(context)
-    val rpcJob = rpcScope.async(
-      CoroutineName("${call.methodDescriptor.fullMethodName} implementation")
-    ) {
+    val rpcJob = rpcScope.async {
       runCatching {
         implementation(requests).collect {
           readiness.suspendUntilReady()
@@ -257,7 +256,7 @@ object ServerCalls {
       call.close(closeStatus, trailers)
     }
 
-    return object: ServerCall.Listener<RequestT>() {
+    return object : ServerCall.Listener<RequestT>() {
       var isReceiving = true
 
       override fun onCancel() {

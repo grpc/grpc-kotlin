@@ -19,7 +19,7 @@ package io.grpc.kotlin.generator.protoc
 import com.google.common.annotations.VisibleForTesting
 import com.google.protobuf.DescriptorProtos.FileDescriptorSet
 import com.google.protobuf.Descriptors.FileDescriptor
-import com.google.protobuf.compiler.PluginProtos
+import com.google.protobuf.compiler.PluginProtosProtos
 import com.squareup.kotlinpoet.FileSpec
 import java.io.IOException
 import java.io.InputStream
@@ -34,7 +34,7 @@ abstract class AbstractGeneratorRunner {
   abstract fun generateCodeForFile(file: FileDescriptor): List<FileSpec>
 
   @VisibleForTesting
-  fun mainAsProtocPlugin(input: InputStream, output: OutputStream) {
+  fun mainAsProtocPluginProtos(input: InputStream, output: OutputStream) {
     val generatorRequest = try {
       input.buffered().use {
         PluginProtos.CodeGeneratorRequest.parseFrom(it)
@@ -84,7 +84,7 @@ abstract class AbstractGeneratorRunner {
 
   fun doMain(args: Array<String>) {
     if (args.isEmpty()) {
-      mainAsProtocPlugin(System.`in`, System.out)
+      mainAsProtocPluginProtos(System.`in`, System.out)
     } else {
       mainAsCommandLine(args, FileSystems.getDefault())
     }

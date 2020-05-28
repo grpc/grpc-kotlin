@@ -18,7 +18,7 @@ package io.grpc.kotlin.generator.protoc
 
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto
 import com.google.protobuf.Descriptors.FileDescriptor
-import com.google.protobuf.compiler.PluginProtos
+import com.google.protobuf.compiler.PluginProtosProtos
 
 /**
  * Represents the name of a proto file, relative to the root of the source tree, with
