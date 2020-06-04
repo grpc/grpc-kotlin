@@ -8,8 +8,8 @@ jobs:
   gradle:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        java: [8, 11]
+        os: [ubuntu-latest, macos-latest]
+        java: [1.8, 1.11]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v1
