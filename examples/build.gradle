@@ -3,7 +3,7 @@ buildscript {
   ext.coroutines_version = "1.3.3"
   ext.protobuf_version = "3.11.1"
   ext.grpc_version = "1.28.1" // CURRENT_GRPC_VERSION
-  ext.grpc_kotlin_version = "0.1.2" // CURRENT_GRPC_KOTLIN_VERSION
+  ext.grpc_kotlin_version = "0.1.3" // CURRENT_GRPC_KOTLIN_VERSION
 
   repositories {
     mavenCentral()
