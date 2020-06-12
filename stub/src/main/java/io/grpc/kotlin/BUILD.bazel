@@ -1,0 +1,30 @@
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library")
+
+licenses(["notice"])
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+kt_jvm_library(
+    name = "stub",
+    srcs = glob(
+        ["*.kt"],
+        exclude = ["GrpcContextElement.kt"],
+    ),
+    deps = [
+        ":context",
+        "@io_grpc_grpc_java//core",
+        "@io_grpc_grpc_java//stub",
+        "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+    ],
+)
+
+kt_jvm_library(
+    name = "context",
+    srcs = ["GrpcContextElement.kt"],
+    deps = [
+        "@io_grpc_grpc_java//context",
+        "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+    ],
+)

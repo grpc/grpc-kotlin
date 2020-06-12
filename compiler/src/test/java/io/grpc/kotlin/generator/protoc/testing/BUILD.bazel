@@ -1,0 +1,44 @@
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_test")
+
+licenses(["notice"])
+
+package(default_visibility = ["//compiler/src/test:__subpackages__"])
+
+kt_jvm_test(
+    name = "DeclarationsSubjectTest",
+    srcs = ["DeclarationsSubjectTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.testing.DeclarationsSubjectTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc/testing",
+        "@maven//:com_google_truth_truth",
+        "@maven//:com_squareup_kotlinpoet",
+        "@maven//:junit_junit",
+    ],
+)
+
+kt_jvm_test(
+    name = "FileSpecSubjectTest",
+    srcs = ["FileSpecSubjectTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.testing.FileSpecSubjectTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc/testing",
+    ],
+)
+
+kt_jvm_test(
+    name = "FunSpecSubjectTest",
+    srcs = ["FunSpecSubjectTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.testing.FunSpecSubjectTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc/testing",
+    ],
+)
+
+kt_jvm_test(
+    name = "TypeSpecSubjectTest",
+    srcs = ["TypeSpecSubjectTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.testing.TypeSpecSubjectTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc/testing",
+    ],
+)
