@@ -95,7 +95,6 @@ public class Http2OkHttpTest extends AbstractInteropTest {
     OkHttpChannelBuilder builder = OkHttpChannelBuilder.forAddress("localhost", port)
         .maxInboundMessageSize(AbstractInteropTest.MAX_MESSAGE_SIZE)
         .connectionSpec(new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-            .cipherSuites(TestUtils.preferredTestCiphers().toArray(new String[0]))
             .build())
         .overrideAuthority(Util.authorityFromHostAndPort(
             TestUtils.TEST_SERVER_HOST, port));
