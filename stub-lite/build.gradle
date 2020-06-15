@@ -31,7 +31,9 @@ dependencies {
     // Grpc and Protobuf
     implementation "io.grpc:grpc-protobuf-lite:${rootProject.ext.grpcVersion}"
     implementation "io.grpc:grpc-stub:${rootProject.ext.grpcVersion}"
-    implementation "io.grpc:grpc-kotlin-stub:$version"
+    implementation ("io.grpc:grpc-kotlin-stub:$version") {
+        exclude group: 'io.grpc', module: 'grpc-protobuf'
+    }
 
     // Java
     implementation "javax.annotation:javax.annotation-api:1.2"
