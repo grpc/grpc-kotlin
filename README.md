@@ -1,6 +1,7 @@
 # gRPC-Kotlin/JVM - An RPC library and framework
 
-[![Build Status][]](https://travis-ci.org/grpc/grpc-kotlin)
+[![Gradle Build Status][]](https://github.com/grpc/grpc-kotlin/actions?query=workflow%3A%22Gradle+Build%22)
+[![Bazel Build Status][]](https://github.com/grpc/grpc-kotlin/actions?query=workflow%3A%22Bazel+Build%22)
 
 [![grpc-kotlin-stub][label:stub]][maven:stub]
 [![protoc-gen-grpc-kotlin][label:plugin]][maven:plugin]
@@ -33,7 +34,8 @@ For more information, see the following pages:
 - [API Reference][]
 
 [API Reference]: https://javadocs.dev/io.grpc/grpc-kotlin-stub/latest
-[Build Status]: https://travis-ci.org/grpc/grpc-kotlin.svg?branch=master
+[Gradle Build Status]: https://github.com/grpc/grpc-kotlin/workflows/Gradle%20Build/badge.svg
+[Bazel Build Status]: https://github.com/grpc/grpc-kotlin/workflows/Bazel%20Build/badge.svg
 [gen-java]: https://github.com/grpc/grpc-java/tree/master/compiler
 [gRPC Kotlin/JVM Quick Start]: https://grpc.io/docs/quickstart/kotlin
 [gRPC Basics - Kotlin/JVM]: https://grpc.io/docs/tutorials/basic/kotlin
