@@ -2,8 +2,10 @@
 
 [![Gradle Build Status][]](https://github.com/grpc/grpc-kotlin/actions?query=workflow%3A%22Gradle+Build%22)
 [![Bazel Build Status][]](https://github.com/grpc/grpc-kotlin/actions?query=workflow%3A%22Bazel+Build%22)
+
 [![grpc-kotlin-stub][label:stub]][maven:stub]
 [![protoc-gen-grpc-kotlin][label:plugin]][maven:plugin]
+[![grpc-kotlin-stub-lite][label:stub-lite]][maven:stub-lite]
 
 A Kotlin/JVM implementation of [gRPC](https://grpc.io): A high performance, open
 source, general RPC framework that puts mobile and HTTP/2 first.
@@ -39,7 +41,9 @@ For more information, see the following pages:
 [gRPC Basics - Kotlin/JVM]: https://grpc.io/docs/tutorials/basic/kotlin
 [label:plugin]: https://img.shields.io/maven-central/v/io.grpc/protoc-gen-grpc-kotlin.svg?label=protoc-gen-grpc-kotlin
 [label:stub]: https://img.shields.io/maven-central/v/io.grpc/grpc-kotlin-stub.svg?label=grpc-kotlin-stub
+[label:stub-lite]: https://img.shields.io/maven-central/v/io.grpc/grpc-kotlin-stub-lite.svg?label=grpc-kotlin-stub-lite
 [maven:plugin]: https://search.maven.org/search?q=g:%22io.grpc%22%20AND%20a:%22protoc-gen-grpc-kotlin%22
 [maven:stub]: https://search.maven.org/search?q=g:%22io.grpc%22%20AND%20a:%22grpc-kotlin-stub%22
+[maven:stub-lite]: https://search.maven.org/search?q=g:%22io.grpc%22%20AND%20a:%22grpc-kotlin-stub-lite%22
 [protoc]: https://github.com/protocolbuffers/protobuf#protocol-compiler-installation
 [protocolbuffers/protobuf#3742]: https://github.com/protocolbuffers/protobuf/issues/3742
