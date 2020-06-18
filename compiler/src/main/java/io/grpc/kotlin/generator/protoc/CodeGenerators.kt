@@ -20,7 +20,7 @@ import com.google.common.base.Throwables
 import com.google.common.graph.GraphBuilder
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto
 import com.google.protobuf.Descriptors.FileDescriptor
-import com.google.protobuf.compiler.PluginProtosProtos
+import com.google.protobuf.compiler.PluginProtos
 import com.squareup.kotlinpoet.FileSpec
 import io.grpc.kotlin.generator.protoc.util.graph.TopologicalSortGraph
 
