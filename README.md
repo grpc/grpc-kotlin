@@ -33,6 +33,13 @@ For more information, see the following [Kotlin pages from grpc.io][]:
 - [gRPC Basics - Kotlin/JVM][] tutorial
 - [API Reference][]
 
+How-to pages from this repo:
+
+- [Contributing](CONTRIBUTING.md)
+- [Building gRPC-Kotlin](BUILDING.md)
+
+Note that [official releases][] are [published to Maven Central][].
+
 [API Reference]: https://grpc.io/docs/languages/kotlin/api
 [Gradle Build Status]: https://github.com/grpc/grpc-kotlin/workflows/Gradle%20Build/badge.svg
 [Bazel Build Status]: https://github.com/grpc/grpc-kotlin/workflows/Bazel%20Build/badge.svg
@@ -46,5 +53,7 @@ For more information, see the following [Kotlin pages from grpc.io][]:
 [maven:plugin]: https://search.maven.org/search?q=g:%22io.grpc%22%20AND%20a:%22protoc-gen-grpc-kotlin%22
 [maven:stub]: https://search.maven.org/search?q=g:%22io.grpc%22%20AND%20a:%22grpc-kotlin-stub%22
 [maven:stub-lite]: https://search.maven.org/search?q=g:%22io.grpc%22%20AND%20a:%22grpc-kotlin-stub-lite%22
+[official releases]: https://github.com/grpc/grpc-kotlin/releases
 [protoc]: https://github.com/protocolbuffers/protobuf#protocol-compiler-installation
 [protocolbuffers/protobuf#3742]: https://github.com/protocolbuffers/protobuf/issues/3742
+[published to Maven Central]: https://search.maven.org/search?q=g:io.grpc%20AND%20grpc-kotlin
