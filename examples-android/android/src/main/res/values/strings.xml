@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="name_hint">name</string>
+    <string name="say_hello">say hello</string>
+    <string name="app_label">gRPC Kotlin Android</string>
+</resources>
