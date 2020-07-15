@@ -196,7 +196,9 @@ object ServerCalls {
   ): ServerCallHandler<RequestT, ResponseT> =
     ServerCallHandler {
       call, _ -> serverCallListener(
-        context + GrpcContextElement.current(),
+        context
+          + CoroutineContextServerInterceptor.COROUTINE_CONTEXT_KEY.get()
+          + GrpcContextElement.current(),
         call,
         implementation
       )
@@ -235,9 +237,7 @@ object ServerCalls {
     }
 
     val rpcScope = CoroutineScope(context)
-    val rpcJob = rpcScope.async(
-      CoroutineName("${call.methodDescriptor.fullMethodName} implementation")
-    ) {
+    val rpcJob = rpcScope.async {
       runCatching {
         implementation(requests).collect {
           readiness.suspendUntilReady()
