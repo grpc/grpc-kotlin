@@ -16,7 +16,6 @@ import kotlin.coroutines.coroutineContext
 import io.grpc.Metadata as GrpcMetadata
 
 /** Tests for [CoroutineContextServerInterceptor]. */
-@RunWith(JUnit4::class) /* inserted by Copybara: */ @com.google.testing.testsize.MediumTest
 class CoroutineContextServerInterceptorTest : AbstractCallsTest() {
   class ArbitraryContextElement(val message: String = "") : CoroutineContext.Element {
     companion object Key : CoroutineContext.Key<ArbitraryContextElement>
