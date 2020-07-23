@@ -53,44 +53,68 @@ subprojects {
         }
     }
 
-    plugins.withId("maven-publish") {
-        publishing {
-            publications {
-                maven(MavenPublication) {
-                    pom {
-                        name = project.group + ":" + project.name
-                        url = 'https://github.com/grpc/grpc-kotlin'
-                        afterEvaluate {
-                            // description is not available until evaluated.
-                            description = project.description
-                        }
+    if (
+        project.name == "grpc-kotlin-stub"
+        || project.name == "grpc-kotlin-compiler"
+        || project.name == "grpc-kotlin-stub-lite"
+    ) {
+        apply plugin: 'maven-publish'
+        apply plugin: 'signing'
 
-                        scm {
-                            connection = 'scm:git:https://github.com/grpc/grpc-kotlin.git'
-                            developerConnection = 'scm:git:git@github.com:grpc/grpc-kotlin.git'
+        plugins.withId("maven-publish") {
+            publishing {
+                publications {
+                    maven(MavenPublication) {
+                        // from components.java
+
+                        pom {
+                            name = project.group + ":" + project.name
                             url = 'https://github.com/grpc/grpc-kotlin'
-                        }
-
-                        licenses {
-                            license {
-                                name = 'Apache 2.0'
-                                url = 'https://opensource.org/licenses/Apache-2.0'
+                            afterEvaluate {
+                                // description is not available until evaluated.
+                                description = project.description
                             }
-                        }
 
-                        developers {
-                            developer {
-                                id = "grpc.io"
-                                name = "gRPC Contributors"
-                                email = "grpc-io@googlegroups.com"
-                                url = "https://grpc.io/"
-                                organization = "gRPC Authors"
-                                organizationUrl = "https://www.google.com"
+                            scm {
+                                connection = 'scm:git:https://github.com/grpc/grpc-kotlin.git'
+                                developerConnection = 'scm:git:git@github.com:grpc/grpc-kotlin.git'
+                                url = 'https://github.com/grpc/grpc-kotlin'
+                            }
+
+                            licenses {
+                                license {
+                                    name = 'Apache 2.0'
+                                    url = 'https://opensource.org/licenses/Apache-2.0'
+                                }
+                            }
+
+                            developers {
+                                developer {
+                                    id = "grpc.io"
+                                    name = "gRPC Contributors"
+                                    email = "grpc-io@googlegroups.com"
+                                    url = "https://grpc.io/"
+                                    organization = "gRPC Authors"
+                                    organizationUrl = "https://www.google.com"
+                                }
                             }
                         }
                     }
                 }
+                repositories {
+                    maven {
+                        url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+                        credentials {
+                            username project.findProperty("sonatypeUsername") ?: ""
+                            password project.findProperty("sonatypePassword") ?: ""
+                        }
+                    }
+                }
             }
+        }
+
+        signing {
+            sign publishing.publications
         }
     }
 
