@@ -7,21 +7,24 @@ import com.google.protobuf.gradle.protoc
 
 plugins {
     kotlin("jvm")
-    id("com.google.protobuf") version "0.8.13"
+    id("com.google.protobuf")
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
+    protobuf(project(":protos"))
+
+    implementation(kotlin("stdlib-jdk8"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
-    api("io.grpc:grpc-protobuf-lite:${rootProject.ext["grpcVersion"]}")
+
+    api("com.google.protobuf:protobuf-java:${rootProject.ext["protobufVersion"]}")
     api("io.grpc:grpc-stub:${rootProject.ext["grpcVersion"]}")
-    api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}") {
-        exclude("io.grpc", "grpc-protobuf")
-    }
+    api("io.grpc:grpc-protobuf:${rootProject.ext["grpcVersion"]}")
+    api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}")
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_7
+    sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
 protobuf {
@@ -38,18 +41,9 @@ protobuf {
     }
     generateProtoTasks {
         ofSourceSet("main").forEach {
-            it.builtins {
-                named("java") {
-                    option("lite")
-                }
-            }
             it.plugins {
-                id("grpc") {
-                    option("lite")
-                }
-                id("grpckt") {
-                    option("lite")
-                }
+                id("grpc")
+                id("grpckt")
             }
         }
     }

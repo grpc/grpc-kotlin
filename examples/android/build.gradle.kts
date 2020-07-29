@@ -7,7 +7,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation("androidx.appcompat:appcompat:1.1.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.7")
-    implementation(project(":common"))
+    implementation(project(":stub-lite"))
     runtimeOnly("io.grpc:grpc-okhttp:${rootProject.ext["grpcVersion"]}")
 }
 
