@@ -330,25 +330,6 @@ class GeneratedCodeTest : AbstractCallsTest() {
   }
 
   @Test
-  fun serverScopeCancelledBeforeRpc() = runBlocking {
-    val serverJob = Job()
-    val channel = makeChannel(
-      object : GreeterCoroutineImplBase(serverJob) {
-        override suspend fun sayHello(request: HelloRequest): HelloReply {
-          suspendUntilCancelled { /* do nothing */ }
-        }
-      }
-    )
-
-    serverJob.cancel()
-    val stub = GreeterCoroutineStub(channel)
-    val ex = assertThrows<StatusException> {
-      stub.sayHello(helloRequest("Greg"))
-    }
-    assertThat(ex.status.code).isEqualTo(Status.Code.CANCELLED)
-  }
-
-  @Test
   fun serviceDescriptor() {
     assertThat(GreeterGrpcKt.serviceDescriptor).isEqualTo(GreeterGrpc.getServiceDescriptor())
   }

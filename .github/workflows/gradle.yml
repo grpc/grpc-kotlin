@@ -1,0 +1,28 @@
+name: Gradle Build
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  gradle:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        java: [1.8, 1.11]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+    - name: Build Library
+      uses: eskatos/gradle-command-action@v1
+      with:
+        arguments: build
+    - name: Build Examples
+      uses: eskatos/gradle-command-action@v1
+      with:
+        arguments: build
+        build-root-directory: examples
+        wrapper-directory: examples

@@ -149,14 +149,17 @@ abstract class AbstractCallsTest {
   }
 
   /** Generates a channel to a Greeter server with the specified implementation. */
-  fun makeChannel(impl: BindableService): ManagedChannel {
+  fun makeChannel(impl: BindableService, vararg interceptors: ServerInterceptor): ManagedChannel =
+    makeChannel(ServerInterceptors.intercept(impl, *interceptors))
+
+  fun makeChannel(serverServiceDefinition: ServerServiceDefinition): ManagedChannel {
     val serverName = InProcessServerBuilder.generateName()
 
     grpcCleanup.register(
       InProcessServerBuilder.forName(serverName)
         .run { this as ServerBuilder<*> } // workaround b/123879662
         .executor(executor)
-        .addService(impl)
+        .addService(serverServiceDefinition)
         .build()
         .start()
     )
@@ -173,20 +176,17 @@ abstract class AbstractCallsTest {
   fun makeChannel(
     impl: ServerMethodDefinition<*, *>,
     vararg interceptors: ServerInterceptor
-  ): ManagedChannel =
-    makeChannel(
-      BindableService {
-        val builder = ServerServiceDefinition.builder(greeterService)
-        for (method in greeterService.methods) {
-          if (method == impl.methodDescriptor) {
-            builder.addMethod(impl)
-          } else {
-            builder.addMethod(method, ServerCallHandler { _, _ -> TODO() })
-          }
-        }
-        ServerInterceptors.intercept(builder.build(), *interceptors)
+  ): ManagedChannel {
+    val builder = ServerServiceDefinition.builder(greeterService)
+    for (method in greeterService.methods) {
+      if (method == impl.methodDescriptor) {
+        builder.addMethod(impl)
+      } else {
+        builder.addMethod(method, ServerCallHandler { _, _ -> TODO() })
       }
-    )
+    }
+    return makeChannel(ServerInterceptors.intercept(builder.build(), *interceptors))
+  }
 
   fun <R> runBlocking(block: suspend CoroutineScope.() -> R): Unit =
     kotlinx.coroutines.runBlocking(context) {

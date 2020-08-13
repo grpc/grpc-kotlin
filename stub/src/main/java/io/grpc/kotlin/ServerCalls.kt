@@ -36,6 +36,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 import io.grpc.Metadata as GrpcMetadata
@@ -196,7 +198,9 @@ object ServerCalls {
   ): ServerCallHandler<RequestT, ResponseT> =
     ServerCallHandler {
       call, _ -> serverCallListener(
-        context + GrpcContextElement.current(),
+        context
+          + CoroutineContextServerInterceptor.COROUTINE_CONTEXT_KEY.get()
+          + GrpcContextElement.current(),
         call,
         implementation
       )
@@ -235,26 +239,21 @@ object ServerCalls {
     }
 
     val rpcScope = CoroutineScope(context)
-    val rpcJob = rpcScope.async(
-      CoroutineName("${call.methodDescriptor.fullMethodName} implementation")
-    ) {
-      runCatching {
+    rpcScope.async {
+      val mutex = Mutex()
+      val failure = runCatching {
         implementation(requests).collect {
           readiness.suspendUntilReady()
-          call.sendMessage(it)
+          mutex.withLock { call.sendMessage(it) }
         }
       }.exceptionOrNull()
-    }
-
-    rpcJob.invokeOnCompletion { cause ->
-      val failure = cause ?: rpcJob.doneValue
       val closeStatus = when (failure) {
         null -> Status.OK
         is CancellationException -> Status.CANCELLED.withCause(failure)
         else -> Status.fromThrowable(failure)
       }
       val trailers = failure?.let { Status.trailersFromThrowable(it) } ?: GrpcMetadata()
-      call.close(closeStatus, trailers)
+      mutex.withLock { call.close(closeStatus, trailers) }
     }
 
     return object: ServerCall.Listener<RequestT>() {

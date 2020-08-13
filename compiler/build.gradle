@@ -133,6 +133,7 @@ launch4j {
     mainClassName = mainClassName
     outputDir = "artifacts"
     jar = '../artifacts/protoc-gen-grpc-kotlin'
+    jreMinVersion = JavaVersion.VERSION_1_7
 }
 
 shadowJar {

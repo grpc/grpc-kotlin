@@ -43,7 +43,13 @@ class TopLevelConstantsGenerator(config: GeneratorConfig): ServiceCodeGenerator(
             .getter(
               FunSpec.getterBuilder()
                 .addAnnotation(JvmStatic::class)
-                .addStatement("return %T.get%LMethod()", service.grpcClass, method.methodName)
+                .addStatement("return %T.%L()",
+                  service.grpcClass,
+                  method.methodName
+                    .toMemberSimpleName()
+                    .withPrefix("get")
+                    .withSuffix("Method")
+                )
                 .build()
             )
             .build()

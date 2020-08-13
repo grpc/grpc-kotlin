@@ -6,7 +6,7 @@ plugins {
 }
 
 ext {
-    grpcVersion = '1.28.0' // CURRENT_GRPC_VERSION
+    grpcVersion = '1.29.0' // CURRENT_GRPC_VERSION
     protobufVersion = '3.11.0'
     kotlinVersion = '1.3.61'
     coroutinesVersion = '1.3.3'
@@ -17,12 +17,17 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'org.jetbrains.kotlin.jvm'
     group = "io.grpc"
-    version = "0.1.1" // CURRENT_GRPC_KOTLIN_VERSION
+    version = "0.1.4" // CURRENT_GRPC_KOTLIN_VERSION
     repositories {
         mavenCentral()
     }
     dependencies {
         testImplementation "junit:junit:4.12"
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_7
+        targetCompatibility = JavaVersion.VERSION_1_7
     }
 
     plugins.withId("org.jetbrains.dokka") {
@@ -48,44 +53,68 @@ subprojects {
         }
     }
 
-    plugins.withId("maven-publish") {
-        publishing {
-            publications {
-                maven(MavenPublication) {
-                    pom {
-                        name = project.group + ":" + project.name
-                        url = 'https://github.com/grpc/grpc-kotlin'
-                        afterEvaluate {
-                            // description is not available until evaluated.
-                            description = project.description
-                        }
+    if (
+        project.name == "grpc-kotlin-stub"
+        || project.name == "grpc-kotlin-compiler"
+        || project.name == "grpc-kotlin-stub-lite"
+    ) {
+        apply plugin: 'maven-publish'
+        apply plugin: 'signing'
 
-                        scm {
-                            connection = 'scm:git:https://github.com/grpc/grpc-kotlin.git'
-                            developerConnection = 'scm:git:git@github.com:grpc/grpc-kotlin.git'
+        plugins.withId("maven-publish") {
+            publishing {
+                publications {
+                    maven(MavenPublication) {
+                        // from components.java
+
+                        pom {
+                            name = project.group + ":" + project.name
                             url = 'https://github.com/grpc/grpc-kotlin'
-                        }
-
-                        licenses {
-                            license {
-                                name = 'Apache 2.0'
-                                url = 'https://opensource.org/licenses/Apache-2.0'
+                            afterEvaluate {
+                                // description is not available until evaluated.
+                                description = project.description
                             }
-                        }
 
-                        developers {
-                            developer {
-                                id = "grpc.io"
-                                name = "gRPC Contributors"
-                                email = "grpc-io@googlegroups.com"
-                                url = "https://grpc.io/"
-                                organization = "gRPC Authors"
-                                organizationUrl = "https://www.google.com"
+                            scm {
+                                connection = 'scm:git:https://github.com/grpc/grpc-kotlin.git'
+                                developerConnection = 'scm:git:git@github.com:grpc/grpc-kotlin.git'
+                                url = 'https://github.com/grpc/grpc-kotlin'
+                            }
+
+                            licenses {
+                                license {
+                                    name = 'Apache 2.0'
+                                    url = 'https://opensource.org/licenses/Apache-2.0'
+                                }
+                            }
+
+                            developers {
+                                developer {
+                                    id = "grpc.io"
+                                    name = "gRPC Contributors"
+                                    email = "grpc-io@googlegroups.com"
+                                    url = "https://grpc.io/"
+                                    organization = "gRPC Authors"
+                                    organizationUrl = "https://www.google.com"
+                                }
                             }
                         }
                     }
                 }
+                repositories {
+                    maven {
+                        url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+                        credentials {
+                            username project.findProperty("sonatypeUsername") ?: ""
+                            password project.findProperty("sonatypePassword") ?: ""
+                        }
+                    }
+                }
             }
+        }
+
+        signing {
+            sign publishing.publications
         }
     }
 

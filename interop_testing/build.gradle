@@ -78,7 +78,9 @@ protobuf {
                 // Generate Java gRPC classes
                 grpc { }
                 // Generate Kotlin gRPC using the custom plugin from library
-                grpckt { }
+                grpckt {
+                    task.dependsOn ':grpc-kotlin-compiler:build'
+                }
             }
         }
     }
