@@ -21,12 +21,6 @@ java_lite_proto_library(
     deps = [":hello_world_proto"],
 )
 
-java_grpc_library(
-    name = "hello_world_java_grpc",
-    srcs = [":hello_world_proto"],
-    deps = [":hello_world_java_proto"],
-)
-
 kt_jvm_grpc_library(
     name = "hello_world_kt_grpc",
     srcs = [":hello_world_proto"],
@@ -56,12 +50,6 @@ java_lite_proto_library(
     deps = [":route_guide_proto"],
 )
 
-java_grpc_library(
-    name = "route_guide_java_grpc",
-    srcs = [":route_guide_proto"],
-    deps = [":route_guide_java_proto"],
-)
-
 kt_jvm_grpc_library(
     name = "route_guide_kt_grpc",
     srcs = [":route_guide_proto"],
@@ -73,4 +61,36 @@ kt_jvm_grpc_library(
     srcs = [":route_guide_proto"],
     flavor = "lite",
     deps = [":route_guide_java_proto_lite"],
+)
+
+proto_library(
+    name = "animals_proto",
+    srcs = [
+        "dog.proto",
+        "pig.proto",
+        "sheep.proto",
+    ],
+)
+
+java_proto_library(
+    name = "animals_java_proto",
+    deps = [":animals_proto"],
+)
+
+java_lite_proto_library(
+    name = "animals_java_proto_lite",
+    deps = [":animals_proto"],
+)
+
+kt_jvm_grpc_library(
+    name = "animals_kt_grpc",
+    srcs = [":animals_proto"],
+    deps = [":animals_java_proto"],
+)
+
+kt_jvm_grpc_library(
+    name = "animals_kt_grpc_lite",
+    srcs = [":animals_proto"],
+    flavor = "lite",
+    deps = [":animals_java_proto_lite"],
 )
