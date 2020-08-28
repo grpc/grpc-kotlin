@@ -2,14 +2,14 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version'1.3.61' apply false
+    id 'org.jetbrains.kotlin.jvm' version'1.4.0' apply false
 }
 
 ext {
     grpcVersion = '1.29.0' // CURRENT_GRPC_VERSION
     protobufVersion = '3.11.0'
-    kotlinVersion = '1.3.61'
-    coroutinesVersion = '1.3.3'
+    kotlinVersion = '1.4.0'
+    coroutinesVersion = '1.3.9'
     googleauthVersion = '0.20.0'
 }
 
