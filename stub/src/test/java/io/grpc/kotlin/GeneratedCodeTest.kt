@@ -218,7 +218,7 @@ class GeneratedCodeTest : AbstractCallsTest() {
   @Test
   fun simpleServerStreamingRpc() = runBlocking {
     val channel = makeChannel(object : GreeterCoroutineImplBase() {
-      override fun serverStreamSayHello(request: MultiHelloRequest): Flow<HelloReply> {
+      override suspend fun serverStreamSayHello(request: MultiHelloRequest): Flow<HelloReply> {
         return request.nameList.asFlow().map { helloReply("Hello, $it") }
       }
     })
@@ -243,7 +243,7 @@ class GeneratedCodeTest : AbstractCallsTest() {
     val serverReceived = Job()
 
     val channel = makeChannel(object : GreeterCoroutineImplBase() {
-      override fun serverStreamSayHello(request: MultiHelloRequest): Flow<HelloReply> {
+      override suspend fun serverStreamSayHello(request: MultiHelloRequest): Flow<HelloReply> {
         return flow {
           serverReceived.complete()
           suspendUntilCancelled {
@@ -265,7 +265,7 @@ class GeneratedCodeTest : AbstractCallsTest() {
   @Test
   fun bidiPingPong() = runBlocking {
     val channel = makeChannel(object : GreeterCoroutineImplBase() {
-      override fun bidiStreamSayHello(requests: Flow<HelloRequest>): Flow<HelloReply> {
+      override suspend fun bidiStreamSayHello(requests: Flow<HelloRequest>): Flow<HelloReply> {
         return requests.map { helloReply("Hello, ${it.name}") }
       }
     })
@@ -286,7 +286,7 @@ class GeneratedCodeTest : AbstractCallsTest() {
   @Test
   fun bidiStreamingRpcReturnsEarly() = runBlocking {
     val channel = makeChannel(object : GreeterCoroutineImplBase() {
-      override fun bidiStreamSayHello(requests: Flow<HelloRequest>): Flow<HelloReply> {
+      override suspend fun bidiStreamSayHello(requests: Flow<HelloRequest>): Flow<HelloReply> {
         return requests.take(2).map { helloReply("Hello, ${it.name}") }
       }
     })

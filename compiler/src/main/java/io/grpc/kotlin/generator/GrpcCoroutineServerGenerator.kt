@@ -161,11 +161,11 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
       )
 
     val responseType = method.outputType.messageClass()
+    methodSpecBuilder.addModifiers(KModifier.SUSPEND)
     if (method.isServerStreaming) {
       methodSpecBuilder.returns(FLOW.parameterizedBy(responseType))
     } else {
       methodSpecBuilder.returns(responseType)
-      methodSpecBuilder.addModifiers(KModifier.SUSPEND)
     }
 
     methodSpecBuilder.addKdoc(stubKDoc(method, requestParam))

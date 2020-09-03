@@ -26,11 +26,7 @@ import io.grpc.ServerCallHandler
 import io.grpc.ServerMethodDefinition
 import io.grpc.Status
 import io.grpc.StatusException
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -130,7 +126,7 @@ object ServerCalls {
   fun <RequestT, ResponseT> serverStreamingServerMethodDefinition(
     context: CoroutineContext,
     descriptor: MethodDescriptor<RequestT, ResponseT>,
-    implementation: (request: RequestT) -> Flow<ResponseT>
+    implementation: suspend (request: RequestT) -> Flow<ResponseT>
   ): ServerMethodDefinition<RequestT, ResponseT> {
     require(descriptor.type == SERVER_STREAMING) {
       "Expected a server streaming method descriptor but got $descriptor"
@@ -165,7 +161,7 @@ object ServerCalls {
   fun <RequestT, ResponseT> bidiStreamingServerMethodDefinition(
     context: CoroutineContext,
     descriptor: MethodDescriptor<RequestT, ResponseT>,
-    implementation: (requests: Flow<RequestT>) -> Flow<ResponseT>
+    implementation: suspend (requests: Flow<RequestT>) -> Flow<ResponseT>
   ): ServerMethodDefinition<RequestT, ResponseT> {
     require(descriptor.type == BIDI_STREAMING) {
       "Expected a bidi streaming method descriptor but got $descriptor"
@@ -181,7 +177,7 @@ object ServerCalls {
   private fun <RequestT, ResponseT> serverMethodDefinition(
     context: CoroutineContext,
     descriptor: MethodDescriptor<RequestT, ResponseT>,
-    implementation: (Flow<RequestT>) -> Flow<ResponseT>
+    implementation: suspend (Flow<RequestT>) -> Flow<ResponseT>
   ): ServerMethodDefinition<RequestT, ResponseT> =
     ServerMethodDefinition.create(
       descriptor,
@@ -194,7 +190,7 @@ object ServerCalls {
    */
   private fun <RequestT, ResponseT> serverCallHandler(
     context: CoroutineContext,
-    implementation: (Flow<RequestT>) -> Flow<ResponseT>
+    implementation: suspend (Flow<RequestT>) -> Flow<ResponseT>
   ): ServerCallHandler<RequestT, ResponseT> =
     ServerCallHandler {
       call, _ -> serverCallListener(
@@ -209,7 +205,7 @@ object ServerCalls {
   private fun <RequestT, ResponseT> serverCallListener(
     context: CoroutineContext,
     call: ServerCall<RequestT, ResponseT>,
-    implementation: (Flow<RequestT>) -> Flow<ResponseT>
+    implementation: suspend (Flow<RequestT>) -> Flow<ResponseT>
   ): ServerCall.Listener<RequestT> {
     call.sendHeaders(GrpcMetadata())
 
@@ -239,7 +235,7 @@ object ServerCalls {
     }
 
     val rpcScope = CoroutineScope(context)
-    rpcScope.async {
+    val job = rpcScope.launch {
       val mutex = Mutex()
       val failure = runCatching {
         implementation(requests).collect {
@@ -260,7 +256,7 @@ object ServerCalls {
       var isReceiving = true
 
       override fun onCancel() {
-        rpcScope.cancel("Cancellation received from client")
+        job.cancel("Cancellation received from client")
       }
 
       override fun onMessage(message: RequestT) {

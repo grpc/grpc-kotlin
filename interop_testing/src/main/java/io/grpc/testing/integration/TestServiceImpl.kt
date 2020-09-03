@@ -72,7 +72,7 @@ class TestServiceImpl(
       .build()
   }
 
-  override fun streamingOutputCall(
+  override suspend fun streamingOutputCall(
     request: Messages.StreamingOutputCallRequest
   ): Flow<Messages.StreamingOutputCallResponse> {
     return flow {
@@ -103,7 +103,7 @@ class TestServiceImpl(
       }
       .build()
 
-  override fun fullDuplexCall(
+  override suspend fun fullDuplexCall(
     requests: Flow<Messages.StreamingOutputCallRequest>
   ): Flow<Messages.StreamingOutputCallResponse> =
     requests.flatMapConcat {
@@ -116,7 +116,7 @@ class TestServiceImpl(
       streamingOutputCall(it)
     }
 
-  override fun halfDuplexCall(
+  override suspend fun halfDuplexCall(
     requests: Flow<Messages.StreamingOutputCallRequest>
   ): Flow<Messages.StreamingOutputCallResponse> =
     flow {

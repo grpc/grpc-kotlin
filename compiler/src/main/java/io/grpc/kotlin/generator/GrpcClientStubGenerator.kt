@@ -182,9 +182,7 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
       "headers" to GrpcMetadata::class
     )
 
-    if (!method.isServerStreaming) {
-      funSpecBuilder.addModifiers(KModifier.SUSPEND)
-    }
+    funSpecBuilder.addModifiers(KModifier.SUSPEND)
 
     funSpecBuilder.addNamedCode(
       """
