@@ -12,7 +12,6 @@ plugins {
     id 'application'
     id 'maven-publish'
 
-    id 'edu.sc.seis.launch4j' version '2.4.4'
     id 'com.github.johnrengelman.shadow' version '4.0.2'
 }
 
@@ -47,7 +46,7 @@ dependencies {
     testImplementation "junit:junit:4.12"
     testImplementation "com.google.guava:guava:28.2-jre"
     testImplementation "com.google.jimfs:jimfs:1.1"
-    testImplementation 'com.google.protobuf:protobuf-gradle-plugin:0.8.11'
+    testImplementation 'com.google.protobuf:protobuf-gradle-plugin:0.8.13'
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     testImplementation "org.junit.jupiter:junit-jupiter-engine:5.5.2"
     testImplementation "org.mockito:mockito-core:2.28.2"
@@ -103,19 +102,9 @@ publishing {
             artifacts = []
             artifactId 'protoc-gen-grpc-kotlin'
             artifact("$buildDir/artifacts/protoc-gen-grpc-kotlin" as File) {
-                classifier "osx-x86_64"
-                extension "exe"
-                builtBy prependShellStub
-            }
-            artifact("$buildDir/artifacts/protoc-gen-grpc-kotlin" as File) {
-                classifier "linux-x86_64"
-                extension "exe"
-                builtBy prependShellStub
-            }
-            artifact("$buildDir/artifacts/protoc-gen-grpc-kotlin-windows-x86_64.exe" as File) {
-                classifier "windows-x86_64"
-                extension "exe"
-                builtBy createExe
+                classifier "jdk8"
+                extension "jar"
+                builtBy shadowJar
             }
             pom.withXml {
                 // This isn't any sort of Java archive artifact, and OSSRH doesn't enforce
@@ -126,14 +115,6 @@ publishing {
             }
         }
     }
-}
-
-launch4j {
-    outfile = "protoc-gen-grpc-kotlin-windows-x86_64.exe"
-    mainClassName = mainClassName
-    outputDir = "artifacts"
-    jar = '../artifacts/protoc-gen-grpc-kotlin'
-    jreMinVersion = JavaVersion.VERSION_1_7
 }
 
 shadowJar {
@@ -150,8 +131,3 @@ shadowJar {
     archiveName = "protoc-gen-grpc-kotlin"
     destinationDir = "$buildDir/artifacts" as File
 }
-
-createExe.dependsOn(shadowJar)
-prependShellStub.dependsOn(test)
-prependShellStub.dependsOn(shadowJar)
-prependShellStub.dependsOn(createExe)
