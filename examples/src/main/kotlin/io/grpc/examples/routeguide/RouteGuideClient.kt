@@ -20,35 +20,23 @@ import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.grpc.examples.routeguide.RouteGuideGrpcKt.RouteGuideCoroutineStub
 import java.io.Closeable
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 import kotlin.random.nextLong
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.runBlocking
 
-class RouteGuideClient private constructor(
-    private val channel: ManagedChannel
-) : Closeable {
+class RouteGuideClient(private val channel: ManagedChannel) : Closeable {
     private val random = Random(314159)
     private val stub = RouteGuideCoroutineStub(channel)
-
-    constructor(
-        channelBuilder: ManagedChannelBuilder<*>,
-        dispatcher: CoroutineDispatcher
-    ) : this(channelBuilder.executor(dispatcher.asExecutor()).build())
 
     override fun close() {
         channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
     }
 
-    fun getFeature(latitude: Int, longitude: Int) = runBlocking {
+    suspend fun getFeature(latitude: Int, longitude: Int) {
         println("*** GetFeature: lat=$latitude lon=$longitude")
 
         val request = point(latitude, longitude)
@@ -61,7 +49,7 @@ class RouteGuideClient private constructor(
         }
     }
 
-    fun listFeatures(lowLat: Int, lowLon: Int, hiLat: Int, hiLon: Int) = runBlocking {
+    suspend fun listFeatures(lowLat: Int, lowLon: Int, hiLat: Int, hiLon: Int) {
         println("*** ListFeatures: lowLat=$lowLat lowLon=$lowLon hiLat=$hiLat liLon=$hiLon")
 
         val request = Rectangle.newBuilder()
@@ -74,7 +62,7 @@ class RouteGuideClient private constructor(
         }
     }
 
-    fun recordRoute(points: Flow<Point>) = runBlocking {
+    suspend fun recordRoute(points: Flow<Point>) {
         println("*** RecordRoute")
         val summary = stub.recordRoute(points)
         println("Finished trip with ${summary.pointCount} points.")
@@ -93,7 +81,7 @@ class RouteGuideClient private constructor(
         }
     }
 
-    fun routeChat() = runBlocking {
+    suspend fun routeChat() {
         println("*** RouteChat")
         val requests = generateOutgoingNotes()
         stub.routeChat(requests).collect { note ->
@@ -133,17 +121,17 @@ class RouteGuideClient private constructor(
     }
 }
 
-fun main(args: Array<String>) {
+suspend fun main() {
     val features = defaultFeatureSource().parseJsonFeatures()
-    Executors.newFixedThreadPool(10).asCoroutineDispatcher().use { dispatcher ->
-        val channel = ManagedChannelBuilder.forAddress("localhost", 8980).usePlaintext()
-        RouteGuideClient(channel, dispatcher).use {
-            it.getFeature(409146138, -746188906)
-            it.getFeature(0, 0)
-            it.listFeatures(400000000, -750000000, 420000000, -730000000)
-            it.recordRoute(it.generateRoutePoints(features, 10))
-            it.routeChat()
-        }
+
+    val channel = ManagedChannelBuilder.forAddress("localhost", 8980).usePlaintext().build()
+
+    RouteGuideClient(channel).use {
+        it.getFeature(409146138, -746188906)
+        it.getFeature(0, 0)
+        it.listFeatures(400000000, -750000000, 420000000, -730000000)
+        it.recordRoute(it.generateRoutePoints(features, 10))
+        it.routeChat()
     }
 }
 
