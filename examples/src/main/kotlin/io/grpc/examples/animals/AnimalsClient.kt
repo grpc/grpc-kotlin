@@ -20,33 +20,28 @@ import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import java.io.Closeable
 import java.util.concurrent.TimeUnit
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asExecutor
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
 
-class AnimalsClient constructor(private val channel: ManagedChannel) : Closeable {
+class AnimalsClient(private val channel: ManagedChannel) : Closeable {
     private val dogStub: DogGrpcKt.DogCoroutineStub by lazy { DogGrpcKt.DogCoroutineStub(channel) }
     private val pigStub: PigGrpcKt.PigCoroutineStub by lazy { PigGrpcKt.PigCoroutineStub(channel) }
     private val sheepStub: SheepGrpcKt.SheepCoroutineStub by lazy { SheepGrpcKt.SheepCoroutineStub(channel) }
 
-    suspend fun bark() = coroutineScope {
+    suspend fun bark() {
         val request = BarkRequest.getDefaultInstance()
-        val response = async { dogStub.bark(request) }
-        println("Received: ${response.await().message}")
+        val response = dogStub.bark(request)
+        println("Received: ${response.message}")
     }
 
-    suspend fun oink() = coroutineScope {
+    suspend fun oink() {
         val request = OinkRequest.getDefaultInstance()
-        val response = async { pigStub.oink(request) }
-        println("Received: ${response.await().message}")
+        val response = pigStub.oink(request)
+        println("Received: ${response.message}")
     }
 
-    suspend fun baa() = coroutineScope {
+    suspend fun baa() {
         val request = BaaRequest.getDefaultInstance()
-        val response = async { sheepStub.baa(request) }
-        println("Received: ${response.await().message}")
+        val response = sheepStub.baa(request)
+        println("Received: ${response.message}")
     }
 
     override fun close() {
@@ -57,7 +52,7 @@ class AnimalsClient constructor(private val channel: ManagedChannel) : Closeable
 /**
  * Talk to the animals. Fluent in dog, pig and sheep.
  */
-fun main(args: Array<String>) = runBlocking {
+suspend fun main(args: Array<String>) {
     val usage = "usage: animals_client [{dog|pig|sheep} ...]"
 
     if (args.isEmpty()) {
@@ -67,11 +62,9 @@ fun main(args: Array<String>) = runBlocking {
 
     val port = 50051
 
-    val client = AnimalsClient(
-            ManagedChannelBuilder.forAddress("localhost", port)
-                    .usePlaintext()
-                    .executor(Dispatchers.Default.asExecutor())
-                    .build())
+    val channel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build()
+
+    val client = AnimalsClient(channel)
 
     args.forEach {
         when (it) {
