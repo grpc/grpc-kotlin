@@ -14,7 +14,7 @@ dependencies {
     protobuf(project(":protos"))
 
     implementation(kotlin("stdlib-jdk8"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
 
     api("com.google.protobuf:protobuf-java:${rootProject.ext["protobufVersion"]}")

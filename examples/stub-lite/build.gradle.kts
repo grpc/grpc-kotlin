@@ -4,8 +4,6 @@ import com.google.protobuf.gradle.plugins
 import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
 
-// todo: aar packaging when https://github.com/google/protobuf-gradle-plugin/pull/414 is released
-
 plugins {
     id("com.android.library")
     kotlin("android")
@@ -14,18 +12,13 @@ plugins {
 
 dependencies {
     protobuf(project(":protos"))
-    protobuf("com.google.protobuf:protobuf-java:${rootProject.ext["protobufVersion"]}")
 
     implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
-
-    //api("com.google.protobuf:protobuf-java:${rootProject.ext["protobufVersion"]}")
 
     api("com.google.protobuf:protobuf-javalite:${rootProject.ext["protobufVersion"]}")
     api("io.grpc:grpc-protobuf-lite:${rootProject.ext["grpcVersion"]}")
-    //api("io.grpc:grpc-protobuf:${rootProject.ext["grpcVersion"]}")
-    //api("io.grpc:grpc-stub:${rootProject.ext["grpcVersion"]}")
 
     // todo: I think we should be able to just include this:
     // api("io.grpc:grpc-kotlin-stub-lite:${rootProject.ext["grpcKotlinVersion"]}")
@@ -38,8 +31,8 @@ dependencies {
 }
 
 android {
-    compileSdkVersion(29)
-    buildToolsVersion = "29.0.3"
+    compileSdkVersion(30)
+    buildToolsVersion = "30.0.2"
 }
 
 protobuf {

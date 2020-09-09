@@ -6,7 +6,7 @@ plugins {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(project(":stub"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
 
     api("com.google.protobuf:protobuf-java-util:${rootProject.ext["protobufVersion"]}")
 
@@ -23,10 +23,16 @@ tasks.register<JavaExec>("HelloWorldServer") {
     main = "io.grpc.examples.helloworld.HelloWorldServerKt"
 }
 
-tasks.register<JavaExec>("RouteGuideServerKt") {
+tasks.register<JavaExec>("RouteGuideServer") {
     dependsOn("classes")
     classpath = sourceSets["main"].runtimeClasspath
     main = "io.grpc.examples.routeguide.RouteGuideServerKt"
+}
+
+tasks.register<JavaExec>("AnimalsServer") {
+    dependsOn("classes")
+    classpath = sourceSets["main"].runtimeClasspath
+    main = "io.grpc.examples.animals.AnimalsServerKt"
 }
 
 val helloWorldServerStartScripts = tasks.register<CreateStartScripts>("helloWorldServerStartScripts") {
@@ -43,7 +49,15 @@ val routeGuideServerStartScripts = tasks.register<CreateStartScripts>("routeGuid
     classpath = tasks.named<CreateStartScripts>("startScripts").get().classpath
 }
 
+val animalsServerStartScripts = tasks.register<CreateStartScripts>("animalsServerStartScripts") {
+    mainClassName = "io.grpc.examples.animals.AnimalsServerKt"
+    applicationName = "animals-server"
+    outputDir = tasks.named<CreateStartScripts>("startScripts").get().outputDir
+    classpath = tasks.named<CreateStartScripts>("startScripts").get().classpath
+}
+
 tasks.named("startScripts") {
     dependsOn(helloWorldServerStartScripts)
     dependsOn(routeGuideServerStartScripts)
+    dependsOn(animalsServerStartScripts)
 }

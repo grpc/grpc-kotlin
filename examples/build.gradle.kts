@@ -11,9 +11,9 @@ plugins {
 }
 
 // todo: move to subprojects, but how?
-ext["grpcVersion"] = "1.30.0"
-ext["grpcKotlinVersion"] = "0.1.4"
-ext["protobufVersion"] = "3.12.2"
+ext["grpcVersion"] = "1.31.1"
+ext["grpcKotlinVersion"] = "0.1.5"
+ext["protobufVersion"] = "3.13.0"
 
 allprojects {
     repositories {
