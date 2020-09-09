@@ -127,7 +127,7 @@ class RouteGuideServer private constructor(
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val port = 8980
     val server = RouteGuideServer(port)
     server.start()
