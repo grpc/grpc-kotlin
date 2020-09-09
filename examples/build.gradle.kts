@@ -13,7 +13,7 @@ val coroutinesVersion = "1.3.7"
 plugins {
     application
     kotlin("jvm") version "1.3.72"
-    id("com.google.protobuf") version "0.8.12"
+    id("com.google.protobuf") version "0.8.13"
     id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
 }
 

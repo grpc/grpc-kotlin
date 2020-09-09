@@ -1,5 +1,5 @@
 plugins {
-    id 'com.google.protobuf' version '0.8.11'
+    id 'com.google.protobuf' version '0.8.13'
 
     // Generate IntelliJ IDEA's .idea & .iml project files
     // Starting with 0.8.4 of protobuf-gradle-plugin, *.proto and the gen output files are added

@@ -33,7 +33,7 @@ dependencies {
   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext.coroutinesVersion}"
 
   // Grpc and Protobuf
-  implementation 'com.google.protobuf:protobuf-gradle-plugin:0.8.11'
+  implementation 'com.google.protobuf:protobuf-gradle-plugin:0.8.13'
   implementation "com.google.protobuf:protobuf-java:${rootProject.ext.protobufVersion}"
   implementation "com.google.protobuf:protobuf-java-util:${rootProject.ext.protobufVersion}"
   implementation "io.grpc:grpc-netty-shaded:${rootProject.ext.grpcVersion}"

@@ -1,5 +1,5 @@
 plugins {
-    id 'com.google.protobuf' version '0.8.11'
+    id 'com.google.protobuf' version '0.8.13'
     id 'org.jetbrains.dokka' version '0.10.1'
 
     // Generate IntelliJ IDEA's .idea & .iml project files
