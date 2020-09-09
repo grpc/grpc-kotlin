@@ -79,20 +79,6 @@ protobuf {
     }
 }
 
-task prependShellStub() {
-    doLast {
-        def stub = file("stub.sh")
-        def plugin = new File("${buildDir}/artifacts/protoc-gen-grpc-kotlin")
-        def tempScript = new File("${buildDir}/artifacts/protoc-gen-grpc-kotlin.stubbed")
-        tempScript.write('') // truncate output if needed
-        tempScript << stub.text.normalize() // remove carriage returns
-        tempScript << plugin.bytes
-        plugin.delete()
-        tempScript.renameTo(plugin)
-        plugin.setExecutable(true)
-    }
-}
-
 publishing {
     publications {
         maven(MavenPublication) {
