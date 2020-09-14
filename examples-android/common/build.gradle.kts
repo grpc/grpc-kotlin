@@ -7,7 +7,7 @@ import com.google.protobuf.gradle.protoc
 
 plugins {
     kotlin("jvm")
-    id("com.google.protobuf") version "0.8.12"
+    id("com.google.protobuf") version "0.8.13"
 }
 
 dependencies {
