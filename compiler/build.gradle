@@ -88,7 +88,7 @@ publishing {
             artifacts = []
             artifactId 'protoc-gen-grpc-kotlin'
             artifact("$buildDir/artifacts/protoc-gen-grpc-kotlin" as File) {
-                classifier "jdk8"
+                classifier "jdk7"
                 extension "jar"
                 builtBy shadowJar
             }
