@@ -85,7 +85,7 @@ class RouteGuideServer private constructor(
                 // No feature was found, return an unnamed feature.
                 features.find { it.location == request } ?: Feature.newBuilder().apply { location = request }.build()
 
-        override fun listFeatures(request: Rectangle): Flow<Feature> =
+        override suspend fun listFeatures(request: Rectangle): Flow<Feature> =
                 features.asFlow().filter { it.exists() && it.location in request }
 
         override suspend fun recordRoute(requests: Flow<Point>): RouteSummary {
@@ -113,7 +113,7 @@ class RouteGuideServer private constructor(
             }.build()
         }
 
-        override fun routeChat(requests: Flow<RouteNote>): Flow<RouteNote> = flow {
+        override suspend fun routeChat(requests: Flow<RouteNote>): Flow<RouteNote> = flow {
             requests.collect { note ->
                 val notes: MutableList<RouteNote> = routeNotes.computeIfAbsent(note.location) {
                     Collections.synchronizedList(mutableListOf<RouteNote>())
