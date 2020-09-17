@@ -34,9 +34,9 @@ import kotlinx.coroutines.flow.flow
  * Kotlin adaptation of RouteGuideServer from the Java gRPC example.
  */
 class RouteGuideServer(
-        val port: Int,
-        val features: Collection<Feature> = Database.features(),
-        val server: Server = ServerBuilder.forPort(port).addService(RouteGuideService(features)).build()
+    val port: Int,
+    val features: Collection<Feature> = Database.features(),
+    val server: Server = ServerBuilder.forPort(port).addService(RouteGuideService(features)).build()
 ) {
 
     fun start() {

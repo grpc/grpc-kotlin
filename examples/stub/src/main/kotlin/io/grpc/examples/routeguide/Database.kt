@@ -18,9 +18,7 @@ package io.grpc.examples.routeguide
 
 import com.google.protobuf.util.JsonFormat
 
-
 object Database {
-
     fun features(): List<Feature> {
         return javaClass.getResourceAsStream("route_guide_db.json").use {
             FeatureDatabase.newBuilder().apply {
@@ -28,5 +26,4 @@ object Database {
             }
         }.build().featureList
     }
-
 }
