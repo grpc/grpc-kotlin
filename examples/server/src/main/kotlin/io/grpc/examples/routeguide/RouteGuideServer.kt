@@ -18,7 +18,6 @@ package io.grpc.examples.routeguide
 
 import com.google.common.base.Stopwatch
 import com.google.common.base.Ticker
-import com.google.common.io.ByteSource
 import com.google.protobuf.util.Durations
 import io.grpc.Server
 import io.grpc.ServerBuilder
@@ -34,26 +33,11 @@ import kotlinx.coroutines.flow.flow
 /**
  * Kotlin adaptation of RouteGuideServer from the Java gRPC example.
  */
-class RouteGuideServer private constructor(
-    val port: Int,
-    val server: Server
+class RouteGuideServer(
+        val port: Int,
+        val features: Collection<Feature> = Database.features(),
+        val server: Server = ServerBuilder.forPort(port).addService(RouteGuideService(features)).build()
 ) {
-    constructor(port: Int) : this(port, defaultFeatureSource())
-
-    constructor(port: Int, featureData: ByteSource) : this(
-        serverBuilder = ServerBuilder.forPort(port),
-        port = port,
-        features = featureData.parseJsonFeatures()
-    )
-
-    constructor(
-        serverBuilder: ServerBuilder<*>,
-        port: Int,
-        features: Collection<Feature>
-    ) : this(
-            port = port,
-            server = serverBuilder.addService(RouteGuideService(features)).build()
-    )
 
     fun start() {
         server.start()

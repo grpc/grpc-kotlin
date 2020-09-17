@@ -122,7 +122,7 @@ class RouteGuideClient(private val channel: ManagedChannel) : Closeable {
 }
 
 suspend fun main() {
-    val features = defaultFeatureSource().parseJsonFeatures()
+    val features = Database.features()
 
     val channel = ManagedChannelBuilder.forAddress("localhost", 8980).usePlaintext().build()
 

@@ -27,7 +27,7 @@ private const val EARTH_RADIUS_IN_M = 6371000
 
 private fun Int.toRadians() = Math.toRadians(toDouble())
 
-internal infix fun Point.distanceTo(other: Point): Int {
+infix fun Point.distanceTo(other: Point): Int {
     val lat1 = latitude.toRadians()
     val long1 = longitude.toRadians()
     val lat2 = other.latitude.toRadians()
@@ -41,7 +41,7 @@ internal infix fun Point.distanceTo(other: Point): Int {
     return (EARTH_RADIUS_IN_M * c).roundToInt()
 }
 
-internal operator fun Rectangle.contains(p: Point): Boolean {
+operator fun Rectangle.contains(p: Point): Boolean {
     val lowLong = minOf(lo.longitude, hi.longitude)
     val hiLong = maxOf(lo.longitude, hi.longitude)
     val lowLat = minOf(lo.latitude, hi.latitude)
@@ -51,10 +51,10 @@ internal operator fun Rectangle.contains(p: Point): Boolean {
 
 private fun Int.normalizeCoordinate(): Double = this / 1.0e7
 
-internal fun Point.toStr(): String {
+fun Point.toStr(): String {
     val lat = latitude.normalizeCoordinate()
     val long = longitude.normalizeCoordinate()
     return "$lat, $long"
 }
 
-internal fun Feature.exists(): Boolean = name.isNotEmpty()
+fun Feature.exists(): Boolean = name.isNotEmpty()

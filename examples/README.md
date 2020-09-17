@@ -1,28 +1,59 @@
-TODO
+# gRPC Kotlin Examples
 
+Sub-Project Layout:
+- `protos` : Only protobufs
+- `stub` : Creates regular Java & Kotlin stub artifacts from the `protos` sub-project
+- `stub-lite` : Creates lite Java & Kotlin stub artifacts from the `protos` sub-project
+- `server` : Kotlin servers based on regular `stub` artifacts
+- `client` : Kotlin clients based on regular `stub` artifacts
+- `android` : Kotlin Android app based on `stub-lite` artifacts and the `server`
 
+## Hello, World Client & Server Example
 
-
-
-
-
-
-
-
-
-# gRPC Kotlin Android Sample
-
-## Run Server Locally:
-
+Start the server:
 ```sh
-./gradlew -t :server:run
+./gradlew :server:HelloWorldServer
 ```
 
-## Deploy and Run Server on Cloud Run:
+In another console, run the client:
+```sh
+./gradlew :client:HelloWorldClient
+```
 
-[![Run on Google Cloud](https://deploy.cloud.run/button.png)](https://deploy.cloud.run/?cloudshell_context=cloudrun-gbp)
+## Streaming "Route Guide" Example
 
-## Run the Client:
+Start the server:
+```sh
+./gradlew :server:RouteGuideServer
+```
+
+In another console, run the client:
+```sh
+./gradlew :client:RouteGuideClient
+```
+
+## Multiple Services "Animals" Example
+
+Start the server:
+```sh
+./gradlew :server:AnimalsServer
+```
+
+In another console, run the client against the "dog", "pig", and "sheep" services:
+```sh
+./gradlew :client:AnimalsClient --args=dog
+./gradlew :client:AnimalsClient --args=pig
+./gradlew :client:AnimalsClient --args=sheep
+```
+
+## Android Example
+
+Start the server:
+```sh
+./gradlew :server:HelloWorldServer
+```
+
+Run the Client:
 
 1. [Download Android Command Line Tools](https://developer.android.com/studio)
 
@@ -33,7 +64,7 @@ TODO
     cd android-sdk
     unzip PATH_TO_SDK_ZIP/sdk-tools-linux-VERSION.zip
     tools/bin/sdkmanager --update
-    tools/bin/sdkmanager "platforms;android-29" "build-tools;29.0.3" "extras;google;m2repository" "extras;android;m2repository"
+    tools/bin/sdkmanager "platforms;android-30" "build-tools;30.0.2" "extras;google;m2repository" "extras;android;m2repository"
     tools/bin/sdkmanager --licenses
     ```
 
