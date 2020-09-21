@@ -10,6 +10,7 @@ kt_jvm_binary(
     main_class = "io.grpc.examples.routeguide.RouteGuideServerKt",
     resources = ["//examples/stub/src/main/resources/io/grpc/examples/routeguide:route_guide_db"],
     deps = [
+        "//examples/protos/src/main/proto/io/grpc/examples/routeguide:route_guide_java_proto",
         "//examples/protos/src/main/proto/io/grpc/examples/routeguide:route_guide_kt_grpc",
         "//examples/stub/src/main/kotlin/io/grpc/examples/routeguide:route_guide_stub",
         "@com_google_protobuf//:protobuf_java_util",
