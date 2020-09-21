@@ -3,4 +3,6 @@
     <string name="name_hint">name</string>
     <string name="say_hello">say hello</string>
     <string name="app_label">gRPC Kotlin Android</string>
+    <string name="server_response">Server says: %s</string>
+    <string name="server_error">Server error: %s</string>
 </resources>

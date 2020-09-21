@@ -60,9 +60,9 @@ class MainActivity : AppCompatActivity() {
             try {
                 val request = HelloRequest.newBuilder().setName(nameText.text.toString()).build()
                 val response = greeter.sayHello(request)
-                responseText.text = "Server says: " + response.getMessage()
+                responseText.text = resources.getString(R.string.server_response, response.message)
             } catch (e: Exception) {
-                responseText.text = "Server error: " + e.message
+                responseText.text = resources.getString(R.string.server_error, e.message)
                 e.printStackTrace()
             }
         }
