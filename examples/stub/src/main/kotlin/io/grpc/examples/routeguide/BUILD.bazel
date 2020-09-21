@@ -11,6 +11,7 @@ kt_jvm_library(
         "Points.kt"
     ],
     deps = [
+        "//examples/protos/src/main/proto/io/grpc/examples/routeguide:route_guide_kt_grpc",
         "@com_google_protobuf//:protobuf_java_util"
     ],
 )
