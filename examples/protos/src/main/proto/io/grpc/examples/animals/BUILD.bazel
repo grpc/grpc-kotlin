@@ -4,7 +4,7 @@ load("//:kt_jvm_grpc.bzl", "kt_jvm_grpc_library")
 
 licenses(["notice"])
 
-package(default_visibility = ["//examples/src:__subpackages__"])
+package(default_visibility = ["//examples:__subpackages__"])
 
 proto_library(
     name = "animals_proto",
