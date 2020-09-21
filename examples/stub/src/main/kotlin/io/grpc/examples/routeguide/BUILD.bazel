@@ -1,0 +1,16 @@
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_binary")
+
+licenses(["notice"])
+
+package(default_visibility = ["//examples/src:__subpackages__"])
+
+kt_jvm_binary(
+    name = "route_guide_stub",
+    srcs = [
+        "Database.kt",
+        "Points.kt"
+    ],
+    deps = [
+        "@com_google_protobuf//:protobuf_java_util"
+    ],
+)
