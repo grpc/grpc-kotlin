@@ -9,6 +9,7 @@ kt_jvm_binary(
     srcs = ["AnimalsServer.kt"],
     main_class = "io.grpc.examples.animals.AnimalsServerKt",
     deps = [
+        "//examples/src/main/proto:animals_kt_grpc",
         "@com_google_protobuf//:protobuf_java_util",
         "@io_grpc_grpc_java//netty",
     ],
