@@ -9,6 +9,7 @@ kt_jvm_binary(
     srcs = ["RouteGuideServer.kt"],
     main_class = "io.grpc.examples.routeguide.RouteGuideServerKt",
     deps = [
+        "//examples/protos/src/main/proto/io/grpc/examples/routeguide:route_guide_kt_grpc",
         "@com_google_protobuf//:protobuf_java_util",
         "@io_grpc_grpc_java//netty",
     ],
