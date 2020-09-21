@@ -13,13 +13,3 @@ kt_jvm_binary(
         "@io_grpc_grpc_java//netty",
     ],
 )
-
-kt_jvm_binary(
-    name = "hello_world_server",
-    srcs = ["HelloWorldServer.kt"],
-    main_class = "io.grpc.examples.helloworld.HelloWorldServerKt",
-    deps = [
-        "//examples/src/main/proto:hello_world_kt_grpc",
-        "@io_grpc_grpc_java//netty",
-    ],
-)
