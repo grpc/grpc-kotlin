@@ -2,7 +2,7 @@ load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library")
 
 licenses(["notice"])
 
-package(default_visibility = ["//examples/src:__subpackages__"])
+package(default_visibility = ["//examples:__subpackages__"])
 
 kt_jvm_library(
     name = "route_guide_stub",

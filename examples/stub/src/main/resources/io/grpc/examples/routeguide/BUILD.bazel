@@ -1,6 +1,6 @@
 licenses(["notice"])
 
-package(default_visibility = ["//examples/src:__subpackages__"])
+package(default_visibility = ["//examples:__subpackages__"])
 
 filegroup(
     name = "route_guide_db",
