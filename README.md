@@ -27,11 +27,11 @@ This repo includes the sources for the following:
   but with a dependency on `grpc-protobuf-lite` instead of `grpc-protobuf` for
   Android projects.
 
-For more information, see the following [Kotlin pages from grpc.io][]:
+For more information, see the following [Kotlin/JVM pages from grpc.io][]:
 
-- [gRPC Kotlin/JVM Quick Start][]
-- [gRPC Basics - Kotlin/JVM][] tutorial
-- [API Reference][]
+- [Quick start][]
+- [Basics tutorial][]
+- [API reference][]
 
 How-to pages from this repo:
 
@@ -40,13 +40,12 @@ How-to pages from this repo:
 
 Note that [official releases][] are [published to Maven Central][].
 
-[API Reference]: https://grpc.io/docs/languages/kotlin/api
-[Gradle Build Status]: https://github.com/grpc/grpc-kotlin/workflows/Gradle%20Build/badge.svg
+[API Reference]: https://grpc.io/docs/languages/kotlin/api/
+[Basics tutorial]: https://grpc.io/docs/languages/kotlin/basics/
 [Bazel Build Status]: https://github.com/grpc/grpc-kotlin/workflows/Bazel%20Build/badge.svg
 [gen-java]: https://github.com/grpc/grpc-java/tree/master/compiler
-[gRPC Kotlin/JVM Quick Start]: https://grpc.io/docs/languages/kotlin/quickstart
-[gRPC Basics - Kotlin/JVM]: https://grpc.io/docs/languages/kotlin/basics
-[Kotlin pages from grpc.io]: https://grpc.io/docs/languages/kotlin
+[Gradle Build Status]: https://github.com/grpc/grpc-kotlin/workflows/Gradle%20Build/badge.svg
+[Kotlin/JVM pages from grpc.io]: https://grpc.io/docs/languages/kotlin/
 [label:plugin]: https://img.shields.io/maven-central/v/io.grpc/protoc-gen-grpc-kotlin.svg?label=protoc-gen-grpc-kotlin
 [label:stub]: https://img.shields.io/maven-central/v/io.grpc/grpc-kotlin-stub.svg?label=grpc-kotlin-stub
 [label:stub-lite]: https://img.shields.io/maven-central/v/io.grpc/grpc-kotlin-stub-lite.svg?label=grpc-kotlin-stub-lite
@@ -57,3 +56,4 @@ Note that [official releases][] are [published to Maven Central][].
 [protoc]: https://github.com/protocolbuffers/protobuf#protocol-compiler-installation
 [protocolbuffers/protobuf#3742]: https://github.com/protocolbuffers/protobuf/issues/3742
 [published to Maven Central]: https://search.maven.org/search?q=g:io.grpc%20AND%20grpc-kotlin
+[Quick start]: https://grpc.io/docs/languages/kotlin/quickstart/
