@@ -1,0 +1,18 @@
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library")
+
+licenses(["notice"])
+
+package(default_visibility = ["//examples:__subpackages__"])
+
+kt_jvm_library(
+    name = "route_guide_stub",
+    srcs = [
+        "Database.kt",
+        "Points.kt"
+    ],
+    deps = [
+        "//examples/protos/src/main/proto/io/grpc/examples/routeguide:route_guide_java_proto",
+        "//examples/protos/src/main/proto/io/grpc/examples/routeguide:route_guide_kt_grpc",
+        "@com_google_protobuf//:protobuf_java_util"
+    ],
+)
