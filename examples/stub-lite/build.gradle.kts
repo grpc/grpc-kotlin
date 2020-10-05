@@ -5,15 +5,14 @@ import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
 
 plugins {
-    id("com.android.library")
-    kotlin("android")
+    kotlin("jvm")
     id("com.google.protobuf")
 }
 
 dependencies {
     protobuf(project(":protos"))
 
-    implementation(kotlin("stdlib"))
+    implementation(kotlin("stdlib-jdk8"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
 
@@ -30,9 +29,8 @@ dependencies {
     }
 }
 
-android {
-    compileSdkVersion(30)
-    buildToolsVersion = "30.0.2"
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
 protobuf {
@@ -40,9 +38,6 @@ protobuf {
         artifact = "com.google.protobuf:protoc:${rootProject.ext["protobufVersion"]}"
     }
     plugins {
-        id("java") {
-            artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.ext["grpcVersion"]}"
-        }
         id("grpc") {
             artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.ext["grpcVersion"]}"
         }
@@ -52,10 +47,12 @@ protobuf {
     }
     generateProtoTasks {
         all().forEach {
-            it.plugins {
-                id("java") {
+            it.builtins {
+                named("java") {
                     option("lite")
                 }
+            }
+            it.plugins {
                 id("grpc") {
                     option("lite")
                 }
