@@ -91,6 +91,6 @@ proto_library(
 )
 
 java_proto_library(
-    name = "service_t_java_proto"",
+    name = "service_t_java_proto",
     deps = ["service_t_proto"],
 )
