@@ -121,7 +121,7 @@ val FileDescriptorProto.outerClassSimpleName: ClassSimpleName
     explicitOuterClassSimpleName?.let { return it }
 
     val defaultOuterClassName = ClassSimpleName(
-      LOWER_UNDERSCORE.to(UPPER_CAMEL, fileName.name.replace("-", "_"))
+      fileName.name.replace("-", "_").underscoresToCamel()
     )
 
     val foundDuplicate =
@@ -135,6 +135,30 @@ val FileDescriptorProto.outerClassSimpleName: ClassSimpleName
       defaultOuterClassName
     }
   }
+
+private fun String.underscoresToCamel(): String {
+  val builder = StringBuilder()
+  var capNextLetter = true
+  for ((i, ch) in this.withIndex()) {
+    if (ch in 'a'..'z') {
+      builder.append(
+        if (capNextLetter) Ascii.toUpperCase(ch) else ch
+      )
+      capNextLetter = false
+    } else if (ch in 'A'..'Z') {
+      builder.append(
+        if (i == 0 && !capNextLetter) Ascii.toLowerCase(ch) else ch
+      )
+      capNextLetter = false
+    } else if (ch in '0'..'9') {
+      builder.append(ch)
+      capNextLetter = true
+    } else {
+      capNextLetter = true
+    }
+  }
+  return builder.toString()
+}
 
 private fun DescriptorProto.anyHaveNameRecursive(name: ClassSimpleName): Boolean =
   messageClassSimpleName == name ||
