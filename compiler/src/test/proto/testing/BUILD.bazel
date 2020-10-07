@@ -83,3 +83,14 @@ java_proto_library(
     name = "service_name_conflicts_with_file_java_proto",
     deps = ["service_name_conflicts_with_file_proto"],
 )
+
+proto_library(
+    name = "service_t_proto",
+    srcs = ["serviceT.proto"],
+    strip_import_prefix = "//compiler/src/test/proto",
+)
+
+java_proto_library(
+    name = "service_t_java_proto"",
+    deps = ["service_t_proto"],
+)
