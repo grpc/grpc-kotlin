@@ -185,7 +185,7 @@ class GeneratorConfigTest {
       ImplicitJavaPackage.getDescriptor() to ImplicitJavaPackage::class,
       ServiceNameConflictsWithFileOuterClass.getDescriptor() to
         ServiceNameConflictsWithFileOuterClass::class,
-      ServiceTOuterClass.getDescriptor() to ServiceTOuterClass::class
+      ServiceT.getDescriptor() to ServiceT::class
     )
 
   @Test
