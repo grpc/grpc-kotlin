@@ -27,6 +27,7 @@ import io.grpc.kotlin.generator.protoc.testproto.Example3
 import io.grpc.kotlin.generator.protoc.testproto.HasOuterClassNameConflictOuterClass
 import io.grpc.kotlin.generator.protoc.testproto.MyExplicitOuterClassName
 import io.grpc.testing.ServiceNameConflictsWithFileOuterClass
+import io.grpc.testing.ServiceTOuterClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -184,7 +185,8 @@ class GeneratorConfigTest {
         HasOuterClassNameConflictOuterClass::class,
       ImplicitJavaPackage.getDescriptor() to ImplicitJavaPackage::class,
       ServiceNameConflictsWithFileOuterClass.getDescriptor() to
-        ServiceNameConflictsWithFileOuterClass::class
+        ServiceNameConflictsWithFileOuterClass::class,
+      ServiceTOuterClass.getDescriptor() to ServiceTOuterClass::class
     )
 
   @Test

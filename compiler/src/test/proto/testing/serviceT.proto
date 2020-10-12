@@ -1,0 +1,10 @@
+syntax = "proto3";
+package io.grpc.testing;
+
+service ServiceT {
+  rpc serviceT(stream reqT) returns (stream resT) {}
+}
+
+message reqT {}
+
+message resT {}

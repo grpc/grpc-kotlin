@@ -62,6 +62,7 @@ kt_jvm_test(
         "//compiler/src/test/proto/testing:has_outer_class_name_conflict_java_proto",
         "//compiler/src/test/proto/testing:implicit_java_package_java_proto",
         "//compiler/src/test/proto/testing:service_name_conflicts_with_file_java_proto",
+        "//compiler/src/test/proto/testing:service_t_java_proto",
         "@maven//:com_google_truth_truth",
     ],
 )
