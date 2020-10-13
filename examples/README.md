@@ -4,9 +4,11 @@ Sub-Project Layout:
 - `protos` : Only protobufs
 - `stub` : Creates regular Java & Kotlin stub artifacts from the `protos` sub-project
 - `stub-lite` : Creates lite Java & Kotlin stub artifacts from the `protos` sub-project
+- `stub-android` : Creates Android-compatible Java & Kotlin stub artifacts from the `protos` sub-project
 - `server` : Kotlin servers based on regular `stub` artifacts
 - `client` : Kotlin clients based on regular `stub` artifacts
-- `android` : Kotlin Android app based on `stub-lite` artifacts and the `server`
+- `native-client` : GraalVM Native Image clients based on `stub-lite` artifacts
+- `android` : Kotlin Android app based on `stub-android` artifacts
 
 ## Hello, World Client & Server Example
 
@@ -44,6 +46,19 @@ In another console, run the client against the "dog", "pig", and "sheep" service
 ./gradlew :client:AnimalsClient --args=dog
 ./gradlew :client:AnimalsClient --args=pig
 ./gradlew :client:AnimalsClient --args=sheep
+```
+
+## GraalVM Native Image Example
+
+Start the server:
+```sh
+./gradlew :server:HelloWorldServer
+```
+
+In another console, create the native image client and run it:
+```sh
+./gradlew :native-client:nativeImage
+native-client/build/graal/hello-world
 ```
 
 ## Android Example
