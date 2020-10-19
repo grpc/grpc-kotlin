@@ -1,146 +1,154 @@
-# gRPC Kotlin Examples
+# gRPC Kotlin examples
 
-Sub-Project Layout:
-- `protos` : Only protobufs
-- `stub` : Creates regular Java & Kotlin stub artifacts from the `protos` sub-project
-- `stub-lite` : Creates lite Java & Kotlin stub artifacts from the `protos` sub-project
-- `stub-android` : Creates Android-compatible Java & Kotlin stub artifacts from the `protos` sub-project
-- `server` : Kotlin servers based on regular `stub` artifacts
-- `client` : Kotlin clients based on regular `stub` artifacts
-- `native-client` : GraalVM Native Image clients based on `stub-lite` artifacts
-- `android` : Kotlin Android app based on `stub-android` artifacts
+## Examples
 
-## Hello, World Client & Server Example
+This directory contains several Kotlin gRPC examples. You can find detailed
+instructions for building and running the two main examples from the [grpc.io
+Kotlin/JVM][] pages:
 
-Start the server:
-```sh
-./gradlew :server:HelloWorldServer
-```
+- **Greeter** ("hello world"): for details, see [Quick start][].
+- **Route guide**: for details, see [Basics tutorial][]
 
-In another console, run the client:
-```sh
-./gradlew :client:HelloWorldClient
-```
+Instructions for the remaining examples are provided below.
 
-## Streaming "Route Guide" Example
+## File organization
 
-Start the server:
-```sh
-./gradlew :server:RouteGuideServer
-```
+The example sources are organized into the following top-level folders:
 
-In another console, run the client:
-```sh
-./gradlew :client:RouteGuideClient
-```
+- [protos][]: `.proto` files (shared across examples)
+- [stub][]: regular Java & Kotlin stub artifacts from [protos][]
+- [stub-lite][]: lite Java & Kotlin stub artifacts from [protos][]
+- [stub-android][]: Android-compatible Java & Kotlin stub artifacts from [protos][]
+- [client](client): Kotlin clients based on regular [stub][] artifacts
+- [server](server): Kotlin servers based on regular [stub][] artifacts
+- [native-client](native-client) : GraalVM Native Image clients based [stub-lite][]
+- [android](android): Kotlin Android app based on [stub-android][]
 
-## Multiple Services "Animals" Example
+## Instructions for running other examples
 
-Start the server:
-```sh
-./gradlew :server:AnimalsServer
-```
+- <details>
+  <summary>Multiple-services animals example</summary>
 
-In another console, run the client against the "dog", "pig", and "sheep" services:
-```sh
-./gradlew :client:AnimalsClient --args=dog
-./gradlew :client:AnimalsClient --args=pig
-./gradlew :client:AnimalsClient --args=sheep
-```
+  Start the server:
 
-## GraalVM Native Image Example
+  ```sh
+  ./gradlew :server:AnimalsServer
+  ```
 
-Start the server:
-```sh
-./gradlew :server:HelloWorldServer
-```
+  In another console, run the client against the "dog", "pig", and "sheep" services:
 
-In another console, create the native image client and run it:
-```sh
-./gradlew :native-client:nativeImage
-native-client/build/graal/hello-world
-```
+  ```sh
+  ./gradlew :client:AnimalsClient --args=dog
+  ./gradlew :client:AnimalsClient --args=pig
+  ./gradlew :client:AnimalsClient --args=sheep
+  ```
 
-## Android Example
+- <details>
+  <summary>GraalVM native image example</summary>
 
-Start the server:
-```sh
-./gradlew :server:HelloWorldServer
-```
+  Start the server:
 
-Run the Client:
+  ```sh
+  ./gradlew :server:HelloWorldServer
+  ```
 
-1. [Download Android Command Line Tools](https://developer.android.com/studio)
+  In another console, create the native image client and run it:
 
- 1. Install the SDK:
+  ```sh
+  ./gradlew :native-client:nativeImage
+  native-client/build/graal/hello-world
+  ```
 
-    ```sh
-    mkdir android-sdk
-    cd android-sdk
-    unzip PATH_TO_SDK_ZIP/sdk-tools-linux-VERSION.zip
-    tools/bin/sdkmanager --update
-    tools/bin/sdkmanager "platforms;android-30" "build-tools;30.0.2" "extras;google;m2repository" "extras;android;m2repository"
-    tools/bin/sdkmanager --licenses
-    ```
+- <details>
+  <summary>Android example</summary>
 
-1. Set an env var pointing to the `android-sdk`
+  Start the server:
 
-    ```sh
-    export ANDROID_SDK_ROOT=PATH_TO_SDK/android-sdk
-    ```
+  ```sh
+  ./gradlew :server:HelloWorldServer
+  ```
 
-1. Run the build from this project's dir:
+  Run the Client:
 
-    ```sh
-    ./gradlew :android:build
-    ```
+  1. [Download Android Command Line Tools](https://developer.android.com/studio)
 
- 1. You can either run on an emulator or a physical device and you can either
-    connect to the server running on your local machine, or connect to a server
-    you deployed on the cloud.
+  1. Install the SDK:
 
-    * Emulator + Local Server:
+      ```sh
+      mkdir android-sdk
+      cd android-sdk
+      unzip PATH_TO_SDK_ZIP/sdk-tools-linux-VERSION.zip
+      tools/bin/sdkmanager --update
+      tools/bin/sdkmanager "platforms;android-30" "build-tools;30.0.2" "extras;google;m2repository" "extras;android;m2repository"
+      tools/bin/sdkmanager --licenses
+      ```
 
-      * From the command line:
+  1. Set an env var pointing to the `android-sdk`
 
-        ```sh
-        ./gradlew :android:installDebug
-        ```
+      ```sh
+      export ANDROID_SDK_ROOT=PATH_TO_SDK/android-sdk
+      ```
 
-      * From Android Studio / IntelliJ, navigate to
-        `android/src/main/kotlin/io/grpc/examples/helloworld` and right-click on
-        `MainActivity` and select `Run`.
+  1. Run the build from this project's dir:
 
-    * Physical Device + Local Server:
+      ```sh
+      ./gradlew :android:build
+      ```
 
-      * From the command line:
+  1. You can either run on an emulator or a physical device and you can either
+      connect to the server running on your local machine, or connect to a server
+      you deployed on the cloud.
 
-        1. [Setup adb](https://developer.android.com/studio/run/device)
-        1. `./gradlew :android:installDebug -PserverUrl=http://YOUR_MACHINE_IP:50051/`
+      * Emulator + Local Server:
 
-      * From Android Studio / IntelliJ:
+        * From the command line:
 
-        1. Create a `gradle.properties` file in your root project directory containing:
+          ```sh
+          ./gradlew :android:installDebug
+          ```
 
-            ```sh
-            serverUrl=http://YOUR_MACHINE_IP:50051/
-            ```
+        * From Android Studio / IntelliJ, navigate to
+          `android/src/main/kotlin/io/grpc/examples/helloworld` and right-click on
+          `MainActivity` and select `Run`.
 
-        1. Navigate to `android/src/main/kotlin/io/grpc/examples/helloworld` and right-click on `MainActivity` and select `Run`.
+      * Physical Device + Local Server:
 
-    * Emulator or Physical Device + Cloud:
+        * From the command line:
 
-      * From the command line:
+          1. [Setup adb](https://developer.android.com/studio/run/device)
+          1. `./gradlew :android:installDebug -PserverUrl=http://YOUR_MACHINE_IP:50051/`
 
-        1. [setup adb](https://developer.android.com/studio/run/device)
-        1. `./gradlew :android:installDebug -PserverUrl=https://YOUR_SERVER/`
+        * From Android Studio / IntelliJ:
 
-      * From Android Studio / IntelliJ:
+          1. Create a `gradle.properties` file in your root project directory containing:
 
-        1. Create a `gradle.properties` file in your root project directory containing:
+              ```sh
+              serverUrl=http://YOUR_MACHINE_IP:50051/
+              ```
 
-            ```sh
-            serverUrl=https://YOUR_SERVER/
-            ```
+          1. Navigate to `android/src/main/kotlin/io/grpc/examples/helloworld` and right-click on `MainActivity` and select `Run`.
 
-        1. Navigate to `android/src/main/kotlin/io/grpc/examples/helloworld` and right-click on `MainActivity` and select `Run`.
+      * Emulator or Physical Device + Cloud:
+
+        * From the command line:
+
+          1. [setup adb](https://developer.android.com/studio/run/device)
+          1. `./gradlew :android:installDebug -PserverUrl=https://YOUR_SERVER/`
+
+        * From Android Studio / IntelliJ:
+
+          1. Create a `gradle.properties` file in your root project directory containing:
+
+              ```sh
+              serverUrl=https://YOUR_SERVER/
+              ```
+
+          1. Navigate to `android/src/main/kotlin/io/grpc/examples/helloworld` and right-click on `MainActivity` and select `Run`.
+
+[Basics tutorial]: https://grpc.io/docs/languages/kotlin/basics/
+[grpc.io Kotlin/JVM]: https://grpc.io/docs/languages/kotlin/
+[protos]: protos
+[Quick start]: https://grpc.io/docs/languages/kotlin/quickstart/
+[stub]: stub
+[stub-android]: stub-android
+[stub-lite]: stub-lite
