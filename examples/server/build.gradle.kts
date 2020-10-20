@@ -4,15 +4,11 @@ plugins {
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("stdlib"))
     implementation(project(":stub"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
 
     runtimeOnly("io.grpc:grpc-netty:${rootProject.ext["grpcVersion"]}")
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
 tasks.register<JavaExec>("HelloWorldServer") {
