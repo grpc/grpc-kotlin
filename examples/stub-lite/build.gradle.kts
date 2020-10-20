@@ -12,7 +12,7 @@ plugins {
 dependencies {
     protobuf(project(":protos"))
 
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
 
@@ -30,7 +30,7 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_1_7
 }
 
 protobuf {
