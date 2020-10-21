@@ -18,11 +18,19 @@
     <Button android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/say_hello"
+        android:text="@string/send_request"
         android:enabled="false"/>
 
+    <TextView android:id="@+id/response_label"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_margin="5dp"
+        android:textSize="18sp"
+        android:text="@string/server_response"/>
+
     <TextView android:id="@+id/response"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_marginHorizontal="5dp"/>
 
 </LinearLayout>
