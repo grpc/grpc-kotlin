@@ -27,7 +27,6 @@ dependencies {
 
     // Grpc and Protobuf
     api "io.grpc:grpc-protobuf-lite:${rootProject.ext.grpcVersion}"
-    api "com.google.guava:guava:29.0-android"
     api "io.grpc:grpc-stub:${rootProject.ext.grpcVersion}"
 
     api(project(":grpc-kotlin-stub")) {
