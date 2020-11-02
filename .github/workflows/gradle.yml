@@ -20,6 +20,11 @@ jobs:
       uses: eskatos/gradle-command-action@v1
       with:
         arguments: build
+    - name: Publish to Maven Local
+      if: contains(github.event.pull_request.labels.*.name, 'prerelease')
+      uses: eskatos/gradle-command-action@v1
+      with:
+        arguments: publishToMavenLocal
     - name: Build Examples
       uses: eskatos/gradle-command-action@v1
       with:
