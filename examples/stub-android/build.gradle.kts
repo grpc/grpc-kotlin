@@ -18,16 +18,7 @@ dependencies {
     implementation("javax.annotation:javax.annotation-api:1.3.2")
 
     api("com.google.protobuf:protobuf-javalite:${rootProject.ext["protobufVersion"]}")
-    api("io.grpc:grpc-protobuf-lite:${rootProject.ext["grpcVersion"]}")
-
-    // todo: I think we should be able to just include this:
-    // api("io.grpc:grpc-kotlin-stub-lite:${rootProject.ext["grpcKotlinVersion"]}")
-    // but it doesn't pull transitives correctly
-
-    api("io.grpc:grpc-stub:${rootProject.ext["grpcVersion"]}")
-    api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}") {
-        exclude("io.grpc", "grpc-protobuf")
-    }
+    api("io.grpc:grpc-kotlin-stub-lite:${rootProject.ext["grpcKotlinVersion"]}")
 }
 
 android {
