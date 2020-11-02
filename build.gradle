@@ -59,7 +59,6 @@ subprojects {
         || project.name == "grpc-kotlin-stub-lite"
     ) {
         apply plugin: 'maven-publish'
-        apply plugin: 'signing'
 
         plugins.withId("maven-publish") {
             publishing {
@@ -115,8 +114,11 @@ subprojects {
             }
         }
 
-        signing {
-            sign publishing.publications
+        if (project.hasProperty("signing.keyId")) {
+            apply plugin: 'signing'
+            signing {
+                sign publishing.publications
+            }
         }
     }
 
