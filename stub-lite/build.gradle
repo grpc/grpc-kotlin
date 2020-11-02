@@ -1,21 +1,18 @@
 plugins {
-    id 'com.google.protobuf' version '0.8.13'
-    id 'org.jetbrains.dokka' version '0.10.1'
+    id "org.jetbrains.dokka" version "0.10.1"
 
     // Generate IntelliJ IDEA's .idea & .iml project files
     // Starting with 0.8.4 of protobuf-gradle-plugin, *.proto and the gen output files are added
     // to IntelliJ as sources. It is no longer necessary to add them manually to the idea {} block
     // to jump to definitions from Java and Kotlin files.
     // For best results, install the Protobuf and Kotlin plugins for IntelliJ.
-    id 'idea'
+    id "idea"
 
-    // Provide convenience executables for trying out the examples.
-    id 'application'
-    id 'maven-publish'
+    id "java-library"
+    id "maven-publish"
 }
 
-description = 'gRPC Kotlin: Stub Lite'
-mainClassName = ''
+description = "gRPC Kotlin: Stub Lite"
 
 repositories {
     google()
@@ -29,10 +26,10 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext.coroutinesVersion}"
 
     // Grpc and Protobuf
-    implementation "io.grpc:grpc-protobuf-lite:${rootProject.ext.grpcVersion}"
-    implementation "io.grpc:grpc-stub:${rootProject.ext.grpcVersion}"
-    implementation ("io.grpc:grpc-kotlin-stub:$version") {
-        exclude group: 'io.grpc', module: 'grpc-protobuf'
+    api "io.grpc:grpc-protobuf-lite:${rootProject.ext.grpcVersion}"
+
+    api(project(":grpc-kotlin-stub")) {
+        exclude group: "io.grpc", module: "grpc-protobuf"
     }
 
     // Java

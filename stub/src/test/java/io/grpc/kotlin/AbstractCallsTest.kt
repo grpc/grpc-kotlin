@@ -129,6 +129,7 @@ abstract class AbstractCallsTest {
     executor.shutdown()
     if (this::channel.isInitialized) {
       channel.shutdownNow()
+      channel.awaitTermination(1, TimeUnit.SECONDS)
     }
   }
 
