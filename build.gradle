@@ -17,7 +17,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'org.jetbrains.kotlin.jvm'
     group = "io.grpc"
-    version = "0.2.0" // CURRENT_GRPC_KOTLIN_VERSION
+    version = "0.2.1" // CURRENT_GRPC_KOTLIN_VERSION
     repositories {
         mavenCentral()
     }
