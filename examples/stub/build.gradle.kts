@@ -7,6 +7,7 @@ import com.google.protobuf.gradle.protoc
 plugins {
     kotlin("jvm")
     id("com.google.protobuf")
+    idea
 }
 
 dependencies {
@@ -45,5 +46,13 @@ protobuf {
                 id("grpckt")
             }
         }
+    }
+}
+
+idea {
+    module {
+        sourceDirs.add(file("${buildDir}/generated/source/proto/main/java"))
+        sourceDirs.add(file("${buildDir}/generated/source/proto/main/grpc"))
+        sourceDirs.add(file("${buildDir}/generated/source/proto/main/grpckt"))
     }
 }
