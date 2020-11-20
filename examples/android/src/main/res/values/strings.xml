@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name_hint">Name</string>
+    <string name="name_hint">Name:</string>
     <string name="send_request">Send gRPC Request</string>
     <string name="app_label">gRPC Kotlin Android</string>
-    <string name="server_response">Server response</string>
+    <string name="server_response">Server response: </string>
 </resources>

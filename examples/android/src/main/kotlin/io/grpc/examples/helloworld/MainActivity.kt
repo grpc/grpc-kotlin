@@ -1,30 +1,51 @@
 package io.grpc.examples.helloworld
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.KeyEvent
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import io.grpc.ManagedChannel
+import androidx.compose.foundation.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ContextAmbient
+import androidx.compose.ui.platform.setContent
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
 import io.grpc.ManagedChannelBuilder
+<<<<<<< HEAD
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.runBlocking
 import java.net.URL
 import java.util.logging.Logger
+=======
+import kotlinx.coroutines.*
+import java.net.URL
+>>>>>>> c586a91 (to compose)
 
-// todo: suspend funs
 class MainActivity : AppCompatActivity() {
-    private val logger = Logger.getLogger(this.javaClass.name)
 
-    private fun channel(): ManagedChannel {
-        val url = URL(resources.getString(R.string.server_url))
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            Surface(color = MaterialTheme.colors.background) {
+                Greeter()
+            }
+        }
+    }
+}
+
+@Composable
+fun Greeter() {
+    val context = ContextAmbient.current
+
+    val channel = remember {
+        val url = URL(context.getString(R.string.server_url))
         val port = if (url.port == -1) url.defaultPort else url.port
 
-        logger.info("Connecting to ${url.host}:$port")
+        println("Connecting to ${url.host}:$port")
 
         val builder = ManagedChannelBuilder.forAddress(url.host, port)
         if (url.protocol == "https") {
@@ -33,18 +54,16 @@ class MainActivity : AppCompatActivity() {
             builder.usePlaintext()
         }
 
-        return builder.executor(Dispatchers.Default.asExecutor()).build()
+        builder.executor(Dispatchers.Default.asExecutor()).build()
     }
 
-    // lazy otherwise resources is null
-    private val greeter by lazy { GreeterGrpcKt.GreeterCoroutineStub(channel()) }
+    val greeter = GreeterGrpcKt.GreeterCoroutineStub(channel)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+    val nameState = remember { mutableStateOf(TextFieldValue()) }
 
-        val button = findViewById<Button>(R.id.button)
+    val responseState = remember { mutableStateOf("") }
 
+<<<<<<< HEAD
         val nameText = findViewById<EditText>(R.id.name)
         nameText.addTextChangedListener(object : TextWatcher {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
@@ -66,18 +85,39 @@ class MainActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
         }
+=======
+    val scope = remember { CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate) }
+>>>>>>> c586a91 (to compose)
 
-        button.setOnClickListener {
-            sendReq()
+    onActive {
+        onDispose {
+            channel.shutdownNow()
+            scope.cancel()
+        }
+    }
+
+    Column(Modifier.fillMaxWidth().fillMaxHeight(), Arrangement.Top, Alignment.CenterHorizontally) {
+        Text(context.getString(R.string.name_hint), modifier = Modifier.padding(top = 10.dp))
+        OutlinedTextField(nameState.value, { nameState.value = it })
+
+        Button({
+            scope.launch {
+                try {
+                    val request = HelloRequest.newBuilder().setName(nameState.value.text).build()
+                    val response = greeter.sayHello(request)
+                    responseState.value = response.message
+                } catch (e: Exception) {
+                    responseState.value = e.message ?: "Unknown Error"
+                    e.printStackTrace()
+                }
+            }
+        }, Modifier.padding(10.dp)) {
+            Text(context.getString(R.string.send_request))
         }
 
-        nameText.setOnKeyListener { _, keyCode, event ->
-            if ((event.action == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                sendReq()
-                true
-            } else {
-                false
-            }
+        if (responseState.value.isNotEmpty()) {
+            Text(context.getString(R.string.server_response), modifier = Modifier.padding(top = 10.dp))
+            Text(responseState.value)
         }
     }
 }
