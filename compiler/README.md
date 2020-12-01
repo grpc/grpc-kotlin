@@ -47,7 +47,7 @@ protobuf {
 }
 ```
 
-For Maven include the [protobuf plugin](https://www.xolstice.org/protobuf-maven-plugin/) and configure it to use the
+For Maven, include the [protobuf plugin](https://www.xolstice.org/protobuf-maven-plugin/) and configure it to use the
 `protoc-gen-grpc-kotlin` compiler, like:
 ```
 <plugin>
