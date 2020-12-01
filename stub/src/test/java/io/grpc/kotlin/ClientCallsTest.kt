@@ -20,7 +20,13 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import io.grpc.CallOptions
+import io.grpc.ClientCall
+import io.grpc.ClientInterceptor
+import io.grpc.ClientInterceptors
 import io.grpc.Context
+import io.grpc.ForwardingClientCall
+import io.grpc.Metadata
+import io.grpc.MethodDescriptor
 import io.grpc.Status
 import io.grpc.StatusException
 import io.grpc.examples.helloworld.GreeterGrpc
@@ -608,5 +614,45 @@ class ClientCallsTest: AbstractCallsTest() {
     assertThat(responses.single()).isEqualTo(helloReply("Hello, Sunstone"))
     assertThat(responses.single()).isEqualTo(helloReply("Hello, Sunstone"))
     assertThat(requestsEvaluations.get()).isEqualTo(2)
+  }
+
+  @Test
+  fun metadataCopied() = runBlocking {
+    val metadataKey: Metadata.Key<String> = Metadata.Key.of("test", Metadata.ASCII_STRING_MARSHALLER)
+    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
+      override fun serverStreamSayHello(
+        request: MultiHelloRequest,
+        responseObserver: StreamObserver<HelloReply>
+      ) {
+        responseObserver.onNext(helloReply("hello!"))
+        responseObserver.onCompleted()
+      }
+    }
+
+    // Verify that the metadata is copied anew for each collection of the flow, with an interceptor
+    // that checks that it hasn't run before.
+    val interceptor = object : ClientInterceptor {
+      override fun <ReqT, RespT> interceptCall(
+        method: MethodDescriptor<ReqT, RespT>?,
+        callOptions: CallOptions,
+        next: io.grpc.Channel
+      ): ClientCall<ReqT, RespT> {
+        val call: ClientCall<ReqT, RespT> = next.newCall(method, callOptions)
+        return object : ForwardingClientCall<ReqT, RespT>() {
+          override fun start(responseListener: Listener<RespT>, headers: Metadata) {
+            check(!headers.containsKey(metadataKey))
+            headers.put(metadataKey, "value")
+            super.start(responseListener, headers)
+          }
+
+          override fun delegate(): ClientCall<ReqT, RespT> = call
+        }
+      }
+    }
+    val channel = ClientInterceptors.intercept(makeChannel(serverImpl), interceptor)
+    val flow =
+      ClientCalls.serverStreamingRpc(channel, serverStreamingSayHelloMethod, multiHelloRequest())
+    flow.collect()
+    flow.collect()
   }
 }
