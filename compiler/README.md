@@ -8,7 +8,7 @@ This generates the Kotlin interfaces out of the service definition from a
 
 Usually this compiler is used via a build tool plugin, like in Gradle, Maven, etc.
 
-For Gradle include the [protobuf plugin](https://github.com/google/protobuf-gradle-plugin) with at least version `0.8.13`, like:
+For Gradle, include the [protobuf plugin](https://github.com/google/protobuf-gradle-plugin) with at least version `0.8.13`, like:
 ```
 plugins {
     id("com.google.protobuf") version "SOME_VERSION"
