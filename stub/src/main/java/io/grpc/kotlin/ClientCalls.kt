@@ -251,6 +251,12 @@ object ClientCalls {
     }
   }
 
+  private fun GrpcMetadata.copy(): GrpcMetadata {
+    val result = GrpcMetadata()
+    result.merge(this)
+    return result
+  }
+
   /**
    * Returns a [Flow] that, when collected, issues the specified RPC with the specified request
    * on the specified channel, and emits the responses.  This is intended to be the root
@@ -294,7 +300,7 @@ object ClientCalls {
             readiness.onReady()
           }
         },
-        headers
+        headers.copy()
       )
 
       val sender = launch(CoroutineName("SendMessage worker for ${method.fullMethodName}")) {
