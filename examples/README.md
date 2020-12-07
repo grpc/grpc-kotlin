@@ -46,17 +46,18 @@ The example sources are organized into the following top-level folders:
 - <details>
   <summary>GraalVM native image example</summary>
 
-  Start the server:
+  Start the native server:
 
   ```sh
-  ./gradlew :server:HelloWorldServer
+  ./gradlew :native-server:nativeImage
+  native-server/build/graal/hello-world-server
   ```
 
   In another console, create the native image client and run it:
 
   ```sh
   ./gradlew :native-client:nativeImage
-  native-client/build/graal/hello-world
+  native-client/build/graal/hello-world-client
   ```
 
 - <details>
