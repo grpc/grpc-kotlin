@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 plugins {
     id "com.google.protobuf" version "0.8.13"
     id "org.jetbrains.dokka" version "0.10.1"
@@ -52,7 +54,11 @@ protobuf {
         }
         // Specify protoc to generate using our grpc kotlin plugin
         grpckt {
-            path = "$rootDir/compiler/build/install/grpc-kotlin-compiler/bin/grpc-kotlin-compiler"
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                path = "$rootDir/compiler/build/install/grpc-kotlin-compiler/bin/grpc-kotlin-compiler.bat"
+            } else {
+                path = "$rootDir/compiler/build/install/grpc-kotlin-compiler/bin/grpc-kotlin-compiler"
+            }
         }
     }
     generateProtoTasks {
