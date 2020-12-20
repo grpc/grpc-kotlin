@@ -75,7 +75,8 @@ internal object CodeGenerators {
   inline fun codeGeneratorResponse(build: () -> List<FileSpec>): PluginProtos.CodeGeneratorResponse {
     val builder = PluginProtos.CodeGeneratorResponse.newBuilder()
     try {
-      builder.addAllFile(build().map { toCodeGeneratorResponseFile(it) })
+      builder.setSupportedFeatures(PluginProtos.CodeGeneratorResponse.Feature.FEATURE_PROTO3_OPTIONAL_VALUE.toLong())
+        .addAllFile(build().map { toCodeGeneratorResponseFile(it) })
     } catch (failure: Exception) {
       builder.error = Throwables.getStackTraceAsString(failure)
     }
