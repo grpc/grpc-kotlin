@@ -11,7 +11,7 @@ jobs:
     - uses: actions/checkout@v2.1.0
     - uses: uraimo/run-on-arch-action@v2.0.5
       with:
-        arch: armv7
+        arch: aarch64
         distro: ubuntu18.04
 
         # Not required, but speeds up builds by storing container images in
