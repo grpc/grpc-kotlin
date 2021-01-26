@@ -1,0 +1,27 @@
+name: Gradle Build on ARM
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+jobs:
+  gradle_arm:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2.1.0
+    - uses: uraimo/run-on-arch-action@v2.0.5
+      with:
+        arch: armv7
+        distro: ubuntu18.04
+
+        # Not required, but speeds up builds by storing container images in
+        # a GitHub package registry.
+        githubToken: ${{ github.token }}
+
+        install: |
+          apt-get update -q -y
+          apt-get install openjdk-8-jdk -q -y
+
+        # Set an output parameter `uname` for use in subsequent steps
+        run: |
+          ./gradlew build
