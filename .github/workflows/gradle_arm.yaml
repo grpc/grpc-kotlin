@@ -21,7 +21,6 @@ jobs:
         install: |
           apt-get update -q -y
           apt-get install openjdk-8-jdk -q -y
-          ./gradlew
 
         # Set an output parameter `uname` for use in subsequent steps
         run: |
