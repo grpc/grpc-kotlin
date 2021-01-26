@@ -58,9 +58,6 @@ dependencies {
   implementation "com.google.truth:truth:1.0.1"
 
   testImplementation "org.mockito:mockito-core:2.28.2"
-
-  // For aarch64 compatibility
-  testImplementation 'org.conscrypt:conscrypt-android:2.5.1'
 }
 
 protobuf {
