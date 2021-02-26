@@ -78,9 +78,12 @@ The example sources are organized into the following top-level folders:
       mkdir android-sdk
       cd android-sdk
       unzip PATH_TO_SDK_ZIP/sdk-tools-linux-VERSION.zip
-      tools/bin/sdkmanager --update
-      tools/bin/sdkmanager "platforms;android-30" "build-tools;30.0.2" "extras;google;m2repository" "extras;android;m2repository"
-      tools/bin/sdkmanager --licenses
+      mv cmdline-tools latest
+      mkdir cmdline-tools
+      mv latest cmdline-tools
+      cmdline-tools/latest/bin/sdkmanager --update
+      cmdline-tools/latest/bin/sdkmanager "platforms;android-30" "build-tools;30.0.2" "extras;google;m2repository" "extras;android;m2repository"
+      cmdline-tools/latest/bin/sdkmanager --licenses
       ```
 
   1. Set an env var pointing to the `android-sdk`
