@@ -28,7 +28,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext.coroutinesVersion}"
 
     // Grpc and Protobuf
-    api "io.grpc:grpc-stub:${rootProject.ext.grpcVersion}"
+    compileOnly "io.grpc:grpc-stub:${rootProject.ext.grpcVersion}"
 
     // Java
     implementation "javax.annotation:javax.annotation-api:1.2"
