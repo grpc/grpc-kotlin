@@ -53,6 +53,11 @@ import java.util.concurrent.TimeUnit
 @RunWith(JUnit4::class)
 class GeneratedCodeTest : AbstractCallsTest() {
   @Test
+  fun serviceName() {
+    assertThat(GreeterGrpcKt.SERVICE_NAME).isEqualTo("helloworld.Greeter")
+  }
+
+  @Test
   fun simpleUnary() {
     val server = object : GreeterCoroutineImplBase() {
       override suspend fun sayHello(request: HelloRequest): HelloReply {
