@@ -31,6 +31,7 @@ object GeneratorRunner: AbstractGeneratorRunner() {
 
   val generator = ProtoFileCodeGenerator(
     generators = listOf(
+      ::ServiceNameGenerator,
       ::GrpcClientStubGenerator,
       ::GrpcCoroutineServerGenerator,
       ::TopLevelConstantsGenerator
