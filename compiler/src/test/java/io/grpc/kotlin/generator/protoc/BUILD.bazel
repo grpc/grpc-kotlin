@@ -63,6 +63,7 @@ kt_jvm_test(
         "//compiler/src/test/proto/testing:implicit_java_package_java_proto",
         "//compiler/src/test/proto/testing:service_name_conflicts_with_file_java_proto",
         "//compiler/src/test/proto/testing:service_t_java_proto",
+        "//compiler/src/test/proto/testing:test_proto3_optional_java_proto",
         "@maven//:com_google_truth_truth",
     ],
 )
@@ -85,6 +86,17 @@ kt_jvm_test(
     test_class = "io.grpc.kotlin.generator.protoc.MemberSimpleNameTest",
     deps = [
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "@maven//:com_google_truth_truth",
+    ],
+)
+
+kt_jvm_test(
+    name = "OptionalProto3FieldTest",
+    srcs = ["OptionalProto3FieldTest.kt"],
+    test_class = "io.grpc.kotlin.generator.protoc.OptionalProto3FieldTest",
+    deps = [
+        "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
+        "//compiler/src/test/proto/testing:test_proto3_optional_java_proto",
         "@maven//:com_google_truth_truth",
     ],
 )

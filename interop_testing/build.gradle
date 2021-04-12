@@ -61,7 +61,7 @@ dependencies {
 }
 
 protobuf {
-    protoc { artifact = 'com.google.protobuf:protoc:3.11.0' }
+    protoc { artifact = 'com.google.protobuf:protoc:3.14.0' }
     plugins {
         // Specify protoc to generate using kotlin protobuf plugin
         grpc {
