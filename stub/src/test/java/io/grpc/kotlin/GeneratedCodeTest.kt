@@ -200,7 +200,7 @@ class GeneratedCodeTest : AbstractCallsTest() {
     serverReceived.join()
     response.cancel()
     serverCancelled.join()
-    assertThrows<StatusException> {
+    assertThrows<CancellationException> {
       requests.send(helloRequest("John"))
     }
   }
