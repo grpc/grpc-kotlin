@@ -1,0 +1,11 @@
+syntax = "proto3";
+package io.grpc.testing;
+
+// Currently, java proto compiler supports optional fields only if there is an additional flag
+// --experimental_allow_proto3_optional or the filename (or a directory name) of the proto
+// file contains the string 'test_proto3_optional'
+message OptionalProto3 {
+
+  optional string optional_field = 1;
+
+}
