@@ -25,10 +25,12 @@ jobs:
       with:
         timeout_minutes: 10
         max_attempts: 3
-        command: "${GITHUB_WORKSPACE}/bin/bazel" test //...
+        command: |
+          "${GITHUB_WORKSPACE}/bin/bazel" test //...
     - name: Build
       uses: nick-invision/retry@v2
       with:
         timeout_minutes: 10
         max_attempts: 3
-        command: "${GITHUB_WORKSPACE}/bin/bazel" build //...
+        command: |
+          "${GITHUB_WORKSPACE}/bin/bazel" build //...
