@@ -19,6 +19,7 @@ jobs:
     - name: Build Library
       uses: nick-invision/retry@v2
       with:
+        timeout_minutes: 10
         max_attempts: 3
         command: ./gradlew build
     - name: Publish to Maven Local
@@ -29,5 +30,6 @@ jobs:
     - name: Build Examples
       uses: nick-invision/retry@v2
       with:
+        timeout_minutes: 10
         max_attempts: 3
         command: ./examples/gradlew build
