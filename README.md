@@ -39,7 +39,12 @@ Note that [official releases][] are [published to Maven Central][].
 
 ### 1.0.0 -> 1.1.0
 
-TODO
+The `grpc-kotlin-stub-lite` library no longer exists as `grpc-kotlin-stub` no longer has a dependency on
+`grpc-protobuf` or `protobuf-java-util`.  But this means you now need to specify those or the lite dependencies when
+you use `grpc-kotlin-stub`.  For examples, see: [](examples/stub/build.gradle.kts),
+[](examples/stub-lite/build.gradle.kts), or [](examples/stub-android/build.gradle.kts).
+
+The `javax.annotation:javax.annotation-api` dependency is now transitive so you do not need to specify it manually.
 
 
 [API Reference]: https://grpc.io/docs/languages/kotlin/api/
