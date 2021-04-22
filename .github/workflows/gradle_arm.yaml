@@ -24,4 +24,4 @@ jobs:
 
         # Build library using gradle
         run: |
-          ./gradlew build
+          ./gradlew --console=plain build
