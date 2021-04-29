@@ -8,17 +8,17 @@ jobs:
   gradle_arm:
     strategy:
       matrix:
-        os: [ubuntu-18.04]
-        aarch: [aarch64]
-    runs-on: ${{ matrix.os }}
+        arm_os: [ubuntu18.04]
+        arm_arch: [aarch64]
+    runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2.1.0
     - name: test_on_arm
       continue-on-error: true
       uses: uraimo/run-on-arch-action@v2.0.5
       with:
-        arch: ${{ matrix.aarch }}
-        distro: ${{ matrix.os }}
+        arch: ${{ matrix.arm_arch }}
+        distro: ${{ matrix.arm_os }}
 
         # Not required, but speeds up builds by storing container images in
         # a GitHub package registry.
@@ -32,11 +32,11 @@ jobs:
         run: |
           ./gradlew --console=plain build
     - name: test_on_arm_retry
-      if: steps.test_on_arm.outcome=='failure'
+      if: failure() && steps.test_on_arm.outcome == 'failure'
       uses: uraimo/run-on-arch-action@v2.0.5
       with:
-        arch: ${{ matrix.aarch }}
-        distro: ${{ matrix.os }}
+        arch: ${{ matrix.arm_arch }}
+        distro: ${{ matrix.arm_os }}
 
         # Not required, but speeds up builds by storing container images in
         # a GitHub package registry.
