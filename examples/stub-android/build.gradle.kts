@@ -13,12 +13,12 @@ plugins {
 dependencies {
     protobuf(project(":protos"))
 
-    implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
-    implementation("javax.annotation:javax.annotation-api:1.3.2")
+    api(kotlin("stdlib"))
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3")
 
+    api("io.grpc:grpc-protobuf-lite:${rootProject.ext["grpcVersion"]}")
+    api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}")
     api("com.google.protobuf:protobuf-javalite:${rootProject.ext["protobufVersion"]}")
-    api("io.grpc:grpc-kotlin-stub-lite:${rootProject.ext["grpcKotlinVersion"]}")
 }
 
 android {
