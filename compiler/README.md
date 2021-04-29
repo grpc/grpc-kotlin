@@ -15,10 +15,11 @@ plugins {
 }
 ```
 
-Add dependencies on either `grpc-kotlin-stub` or `grpc-kotlin-stub-lite` like:
+Add dependencies on `grpc-kotlin-stub` and a protobuf library like:
 ```
 dependencies {
     implementation("io.grpc:grpc-kotlin-stub:SOME_VERSION")
+    implementation("io.grpc:grpc-protobuf:SOME_VERSION")
 }
 ```
 
@@ -81,11 +82,16 @@ For Maven, include the [protobuf plugin](https://www.xolstice.org/protobuf-maven
 </plugin>
 ```
 
-Make sure you include a dependency on `stub` or `stub-lite`, like:
+Make sure you include a dependency on `stub` and a protobuf library like:
 ```
 <dependency>
   <groupId>io.grpc</groupId>
   <artifactId>grpc-kotlin-stub</artifactId>
+  <version>SOME_VERSION</version>
+</dependency>
+<dependency>
+  <groupId>io.grpc</groupId>
+  <artifactId>grpc-protobuf</artifactId>
   <version>SOME_VERSION</version>
 </dependency>
 ```
@@ -125,27 +131,33 @@ protoc --plugin=protoc-gen-grpckt=protoc-gen-grpc-kotlin.sh \
 To compile the plugin:
 
 ```
-./gradlew :grpc-kotlin-compiler:build
+./gradlew :compiler:build
 ```
 
 To test the plugin with the compiler:
 
 ```
-./gradlew :grpc-kotlin-compiler:test
+./gradlew :compiler:test
 ```
 
 You will see a `PASS` if the test succeeds.
 
+To create a `compiler` start script:
+
+```
+./gradlew :compiler:installDist
+```
+
 To compile a proto file and generate Kotlin interfaces out of the service definitions:
 
 ```
-protoc --plugin=protoc-gen-grpckt=compiler/build/install/grpc-kotlin-compiler/bin/grpc-kotlin-compiler \
+protoc --plugin=protoc-gen-grpckt=compiler/build/install/compiler/bin/compiler \
   --grpckt_out="$OUTPUT_FILE" --proto_path="$DIR_OF_PROTO_FILE" "$PROTO_FILE"
 ```
 
 For example:
 ```
-protoc --plugin=protoc-gen-grpckt=compiler/build/install/grpc-kotlin-compiler/bin/grpc-kotlin-compiler \
+protoc --plugin=protoc-gen-grpckt=compiler/build/install/compiler/bin/compiler \
   --grpckt_out=compiler/build --proto_path=compiler/src/test/proto/helloworld \
   compiler/src/test/proto/helloworld/helloworld.proto
 ```

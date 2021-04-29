@@ -17,17 +17,18 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
     - name: Build Library
-      uses: eskatos/gradle-command-action@v1
+      uses: nick-invision/retry@v2
       with:
-        arguments: build
+        timeout_minutes: 10
+        max_attempts: 3
+        command: ./gradlew build
     - name: Publish to Maven Local
-      if: contains(github.event.pull_request.labels.*.name, 'prerelease')
       uses: eskatos/gradle-command-action@v1
       with:
         arguments: publishToMavenLocal
     - name: Build Examples
-      uses: eskatos/gradle-command-action@v1
+      uses: nick-invision/retry@v2
       with:
-        arguments: build
-        build-root-directory: examples
-        wrapper-directory: examples
+        timeout_minutes: 10
+        max_attempts: 3
+        command: ./examples/gradlew build

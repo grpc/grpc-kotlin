@@ -4,12 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
     implementation(project(":stub"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
-
-    api("com.google.protobuf:protobuf-java-util:${rootProject.ext["protobufVersion"]}")
-
     runtimeOnly("io.grpc:grpc-netty:${rootProject.ext["grpcVersion"]}")
 }
 
