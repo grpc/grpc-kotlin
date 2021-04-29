@@ -6,13 +6,19 @@ on:
   pull_request:
 jobs:
   gradle_arm:
-    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+        aarch: [aarch64]
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2.1.0
-    - uses: uraimo/run-on-arch-action@v2.0.5
+    - name: test_on_arm
+      continue-on-error: true
+      uses: uraimo/run-on-arch-action@v2.0.5
       with:
-        arch: aarch64
-        distro: ubuntu18.04
+        arch: ${{ matrix.aarch }}
+        distro: ${{ matrix.os }}
 
         # Not required, but speeds up builds by storing container images in
         # a GitHub package registry.
@@ -24,4 +30,22 @@ jobs:
 
         # Build library using gradle
         run: |
-          ./gradlew build
+          ./gradlew --console=plain build
+    - name: test_on_arm_retry
+      if: steps.test_on_arm.outcome=='failure'
+      uses: uraimo/run-on-arch-action@v2.0.5
+      with:
+        arch: ${{ matrix.aarch }}
+        distro: ${{ matrix.os }}
+
+        # Not required, but speeds up builds by storing container images in
+        # a GitHub package registry.
+        githubToken: ${{ github.token }}
+
+        install: |
+          apt-get update -q -y
+          apt-get install openjdk-8-jdk -q -y
+
+        # Build library using gradle
+        run: |
+          ./gradlew --console=plain build
