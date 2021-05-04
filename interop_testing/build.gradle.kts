@@ -69,3 +69,7 @@ tasks.named("startScripts") {
     dependsOn(testServiceClientStartScripts)
     dependsOn(testServiceServerStartScripts)
 }
+
+tasks.withType<AbstractPublishToMaven> {
+    enabled = false
+}
