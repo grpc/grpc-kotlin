@@ -4,6 +4,7 @@ import io.grpc.Metadata
 import io.grpc.ServerCall
 import io.grpc.ServerCallHandler
 import io.grpc.ServerInterceptor
+import io.grpc.StatusException
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import io.grpc.Context as GrpcContext
@@ -33,6 +34,9 @@ abstract class CoroutineContextServerInterceptor : ServerInterceptor {
    * server object.
    *
    * This function will be called each time a [call] is executed.
+   *
+   * @throws StatusException if the call should be closed with the [Status][io.grpc.Status] in the
+   *     exception and further processing suppressed
    */
   abstract fun coroutineContext(call: ServerCall<*, *>, headers: Metadata): CoroutineContext
 
@@ -49,8 +53,15 @@ abstract class CoroutineContextServerInterceptor : ServerInterceptor {
     call: ServerCall<ReqT, RespT>,
     headers: Metadata,
     next: ServerCallHandler<ReqT, RespT>
-  ): ServerCall.Listener<ReqT> =
-    withGrpcContext(GrpcContext.current().extendCoroutineContext(coroutineContext(call, headers))) {
+  ): ServerCall.Listener<ReqT> {
+    val coroutineContext = try {
+      coroutineContext(call, headers)
+    } catch (e: StatusException) {
+      call.close(e.status, e.trailers ?: Metadata())
+      return object: ServerCall.Listener<ReqT>() {}
+    }
+    return withGrpcContext(GrpcContext.current().extendCoroutineContext(coroutineContext)) {
       next.startCall(call, headers)
     }
+  }
 }
