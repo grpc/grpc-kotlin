@@ -37,7 +37,6 @@ jobs:
       with:
         arch: ${{ matrix.arm_arch }}
         distro: ${{ matrix.arm_os }}
-
         # Not required, but speeds up builds by storing container images in
         # a GitHub package registry.
         githubToken: ${{ github.token }}

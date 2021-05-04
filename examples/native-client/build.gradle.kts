@@ -5,10 +5,7 @@ plugins {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
     implementation(project(":stub-lite"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.8")
-
     runtimeOnly("io.grpc:grpc-okhttp:${rootProject.ext["grpcVersion"]}")
 }
 
@@ -21,7 +18,7 @@ application {
 
 graal {
     graalVersion("20.2.0")
-    mainClass(application.mainClassName)
+    mainClass(application.mainClass.get())
     outputName("hello-world")
     option("--verbose")
     option("--no-server")
