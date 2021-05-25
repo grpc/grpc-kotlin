@@ -19,6 +19,7 @@ package io.grpc.kotlin.generator
 import com.google.common.annotations.VisibleForTesting
 import com.google.protobuf.Descriptors.MethodDescriptor
 import com.google.protobuf.Descriptors.ServiceDescriptor
+import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FunSpec
@@ -159,6 +160,14 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
         UNIMPLEMENTED_STATUS,
         "Method ${method.fullName} is unimplemented"
       )
+
+    if (method.options.deprecated) {
+      methodSpecBuilder.addAnnotation(
+        AnnotationSpec.builder(Deprecated::class)
+          .addMember("%S", "The underlying service method is marked deprecated.")
+          .build()
+      )
+    }
 
     val responseType = method.outputType.messageClass()
     if (method.isServerStreaming) {
