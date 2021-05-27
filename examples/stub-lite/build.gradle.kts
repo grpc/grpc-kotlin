@@ -16,11 +16,17 @@ dependencies {
 
     api("io.grpc:grpc-protobuf-lite:${rootProject.ext["grpcVersion"]}")
     api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}")
-    api("com.google.protobuf:protobuf-javalite:${rootProject.ext["protobufVersion"]}")
+    api("com.google.protobuf:protobuf-kotlin-lite:${rootProject.ext["protobufVersion"]}")
 }
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_7
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
+    }
 }
 
 protobuf {
@@ -39,6 +45,9 @@ protobuf {
         all().forEach {
             it.builtins {
                 named("java") {
+                    option("lite")
+                }
+                id("kotlin") {
                     option("lite")
                 }
             }

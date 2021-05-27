@@ -18,12 +18,18 @@ dependencies {
 
     api("io.grpc:grpc-protobuf-lite:${rootProject.ext["grpcVersion"]}")
     api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}")
-    api("com.google.protobuf:protobuf-javalite:${rootProject.ext["protobufVersion"]}")
+    api("com.google.protobuf:protobuf-kotlin-lite:${rootProject.ext["protobufVersion"]}")
 }
 
 android {
     compileSdkVersion(30)
     buildToolsVersion = "30.0.2"
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
+    }
 }
 
 protobuf {
@@ -51,6 +57,11 @@ protobuf {
                     option("lite")
                 }
                 id("grpckt") {
+                    option("lite")
+                }
+            }
+            it.builtins {
+                id("kotlin") {
                     option("lite")
                 }
             }

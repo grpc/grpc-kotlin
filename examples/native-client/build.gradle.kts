@@ -1,7 +1,7 @@
 plugins {
     application
     kotlin("jvm")
-    id("com.palantir.graal") version "0.7.1"
+    id("com.palantir.graal") version "0.7.2"
 }
 
 dependencies {
