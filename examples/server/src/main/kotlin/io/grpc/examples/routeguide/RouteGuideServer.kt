@@ -67,7 +67,7 @@ class RouteGuideServer(
 
         override suspend fun getFeature(request: Point): Feature =
                 // No feature was found, return an unnamed feature.
-                features.find { it.location == request } ?: Feature.newBuilder().apply { location = request }.build()
+                features.find { it.location == request } ?: feature { location = request }
 
         override fun listFeatures(request: Rectangle): Flow<Feature> =
                 features.asFlow().filter { it.exists() && it.location in request }
@@ -89,12 +89,12 @@ class RouteGuideServer(
                 }
                 previous = request
             }
-            return RouteSummary.newBuilder().apply {
+            return routeSummary {
                 this.pointCount = pointCount
                 this.featureCount = featureCount
                 this.distance = distance
                 this.elapsedTime = Durations.fromMicros(stopwatch.elapsed(TimeUnit.MICROSECONDS))
-            }.build()
+            }
         }
 
         override fun routeChat(requests: Flow<RouteNote>): Flow<RouteNote> = flow {
