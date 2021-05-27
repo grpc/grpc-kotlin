@@ -18,7 +18,10 @@ allprojects {
         google()
     }
 
-    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+    apply {
+        plugin("org.jlleitschuh.gradle.ktlint")
+        plugin("idea")
+    }
 }
 
 tasks.create("assemble").dependsOn(":server:installDist")
