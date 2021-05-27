@@ -48,24 +48,21 @@ class AnimalsServer constructor(private val port: Int) {
     }
 
     private class DogService : DogGrpcKt.DogCoroutineImplBase() {
-        override suspend fun bark(request: BarkRequest) = BarkReply
-                .newBuilder()
-                .setMessage("Bark!")
-                .build()
+        override suspend fun bark(request: BarkRequest) = barkReply {
+            message = "Bark!"
+        }
     }
 
     private class PigService : PigGrpcKt.PigCoroutineImplBase() {
-        override suspend fun oink(request: OinkRequest) = OinkReply
-                .newBuilder()
-                .setMessage("Oink!")
-                .build()
+        override suspend fun oink(request: OinkRequest) = oinkReply {
+            message = "Oink!"
+        }
     }
 
     private class SheepService : SheepGrpcKt.SheepCoroutineImplBase() {
-        override suspend fun baa(request: BaaRequest) = BaaReply
-                .newBuilder()
-                .setMessage("Baa!")
-                .build()
+        override suspend fun baa(request: BaaRequest) = baaReply {
+            message = "Baa!"
+        }
     }
 }
 

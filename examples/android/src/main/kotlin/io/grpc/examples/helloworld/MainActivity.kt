@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
 
         fun sendReq() = runBlocking {
             try {
-                val request = HelloRequest.newBuilder().setName(nameText.text.toString()).build()
+                val request = helloRequest { name = nameText.text.toString() }
                 val response = greeter.sayHello(request)
                 responseText.text = response.message
             } catch (e: Exception) {
