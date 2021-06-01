@@ -215,7 +215,8 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
       "parameter" to parameter,
       "flow" to Flow::class,
       "status" to Status::class,
-      "statusException" to StatusException::class
+      "statusException" to StatusException::class,
+      "headers" to HEADERS_PARAMETER
     )
 
     val kDocComponents = mutableListOf<String>()
@@ -272,6 +273,10 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
       } else {
         "@param %parameter:N The request message to send to the server."
       }
+    )
+
+    kDocComponents.add(
+      "@param %headers:N Metadata to attach to the request.  Most users will not need this."
     )
 
     kDocComponents.add(
