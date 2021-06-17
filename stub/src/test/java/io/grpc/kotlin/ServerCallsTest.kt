@@ -798,4 +798,54 @@ class ServerCallsTest : AbstractCallsTest() {
       ClientCalls.unaryRpc(channel, sayHelloMethod, helloRequest(""))
     ).isEqualTo(helloReply("Hello!"))
   }
+
+  @Test
+  fun serverCallListenerDefersHeaders() = runBlocking {
+    val requestReceived = Job()
+    val responseReleased = Job()
+    val channel = makeChannel(
+      ServerCalls.unaryServerMethodDefinition(context, sayHelloMethod) {
+        requestReceived.complete()
+        responseReleased.join()
+        helloReply("Hello, ${it.name}")
+      }
+    )
+
+    val call = channel.newCall(sayHelloMethod, CallOptions.DEFAULT)
+
+    val headersReceived = Job()
+    val responseReceived = CompletableDeferred<HelloReply>()
+    val closeStatus = CompletableDeferred<Status>()
+
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onHeaders(headers: Metadata) {
+          headersReceived.complete()
+        }
+
+        override fun onMessage(message: HelloReply) {
+          responseReceived.complete(message)
+        }
+
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
+    call.sendMessage(helloRequest("Bob"))
+    call.request(1)
+    call.halfClose()
+    // wait for the handler to begin
+    requestReceived.join()
+    delay(200)
+    // headers should not have been sent
+    assertThat(headersReceived.isCompleted).isFalse()
+    // release the handler
+    responseReleased.complete()
+    headersReceived.join()
+    assertThat(responseReceived.await()).isEqualTo(helloReply("Hello, Bob"))
+    assertThat(closeStatus.await().code).isEqualTo(Status.Code.OK)
+  }
+
 }
