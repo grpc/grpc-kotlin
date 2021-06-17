@@ -8,8 +8,8 @@ plugins {
     id("com.google.protobuf") version "0.8.15" apply false
 }
 
-ext["grpcVersion"] = "1.36.0" // CURRENT_GRPC_VERSION
-ext["protobufVersion"] = "3.14.0"
+ext["grpcVersion"] = "1.38.0" // CURRENT_GRPC_VERSION
+ext["protobufVersion"] = "3.17.3"
 ext["kotlinVersion"] = "1.3.61"
 ext["coroutinesVersion"] = "1.3.3"
 ext["googleauthVersion"] = "0.20.0"
