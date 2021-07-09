@@ -211,8 +211,6 @@ object ServerCalls {
     call: ServerCall<RequestT, ResponseT>,
     implementation: (Flow<RequestT>) -> Flow<ResponseT>
   ): ServerCall.Listener<RequestT> {
-    call.sendHeaders(GrpcMetadata())
-
     val readiness = Readiness { call.isReady }
     val requestsChannel = Channel<RequestT>(1)
 
@@ -241,8 +239,14 @@ object ServerCalls {
     val rpcScope = CoroutineScope(context)
     rpcScope.async {
       val mutex = Mutex()
+      val headersSent = AtomicBoolean(false) // enforces only sending headers once
       val failure = runCatching {
         implementation(requests).collect {
+          if (headersSent.compareAndSet(false, true)) {
+            mutex.withLock {
+              call.sendHeaders(GrpcMetadata())
+            }
+          }
           readiness.suspendUntilReady()
           mutex.withLock { call.sendMessage(it) }
         }
