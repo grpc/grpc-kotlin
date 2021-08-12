@@ -223,7 +223,6 @@ object ServerCalls {
         "requests flow can only be collected once"
       }
 
-      call.request(1)
       try {
         for (request in requestsChannel) {
           emit(request)
@@ -255,6 +254,8 @@ object ServerCalls {
       val trailers = failure?.let { Status.trailersFromThrowable(it) } ?: GrpcMetadata()
       mutex.withLock { call.close(closeStatus, trailers) }
     }
+
+    call.request(1)
 
     return object: ServerCall.Listener<RequestT>() {
       var isReceiving = true
