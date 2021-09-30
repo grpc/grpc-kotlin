@@ -26,7 +26,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  */
 abstract class AbstractCoroutineServerImpl(
   /** The context in which to run server coroutines. */
-  val context: CoroutineContext = EmptyCoroutineContext
+  open val context: CoroutineContext = EmptyCoroutineContext
 ) : BindableService {
   /*
    * Each RPC is executed in its own coroutine scope built from [context].  We could have a parent
