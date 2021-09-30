@@ -242,6 +242,7 @@ object ServerCalls {
       val headersSent = AtomicBoolean(false) // enforces only sending headers once
       val failure = runCatching {
         implementation(requests).collect {
+          // once we have a response message, check if we've sent headers yet - if not, do so
           if (headersSent.compareAndSet(false, true)) {
             mutex.withLock {
               call.sendHeaders(GrpcMetadata())
@@ -251,6 +252,13 @@ object ServerCalls {
           mutex.withLock { call.sendMessage(it) }
         }
       }.exceptionOrNull()
+      // check headers again once we're done collecting the response flow - if we received
+      // no elements or threw an exception, then we wouldn't have sent them
+      if (headersSent.compareAndSet(false, true)) {
+        mutex.withLock {
+          call.sendHeaders(GrpcMetadata())
+        }
+      }
       val closeStatus = when (failure) {
         null -> Status.OK
         is CancellationException -> Status.CANCELLED.withCause(failure)
