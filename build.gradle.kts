@@ -25,7 +25,7 @@ subprojects {
     }
 
     group = "io.grpc"
-    version = "1.1.0-SNAPSHOT"
+    version = "1.1.0" // CURRENT_GRPC_KOTLIN_VERSION
 
     repositories {
         mavenCentral()
@@ -117,15 +117,16 @@ subprojects {
                 }
             }
         }
-        repositories {
-            maven {
-                val snapshotUrl = uri("https://oss.sonatype.org/content/repositories/snapshots")
-                val releaseUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
-                url = if (version.safeAs<String>()?.endsWith("SNAPSHOT") == true) snapshotUrl else releaseUrl
-                credentials {
-                    username = project.findProperty("sonatypeUsername")?.safeAs() ?: ""
-                    password = project.findProperty("sonatypePassword")?.safeAs() ?: ""
-                }
+    }
+
+    extensions.getByType<PublishingExtension>().repositories {
+        maven {
+            val snapshotUrl = uri("https://oss.sonatype.org/content/repositories/snapshots")
+            val releaseUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+            url = if (version.safeAs<String>()?.endsWith("SNAPSHOT") == true) snapshotUrl else releaseUrl
+            credentials {
+                username = project.findProperty("sonatypeUsername")?.safeAs() ?: ""
+                password = project.findProperty("sonatypePassword")?.safeAs() ?: ""
             }
         }
     }
