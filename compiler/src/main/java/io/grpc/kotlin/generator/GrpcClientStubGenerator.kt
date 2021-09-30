@@ -181,6 +181,14 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
         .returns(returnType)
         .addKdoc(rpcStubKDoc(method, parameter))
 
+    if (method.options.deprecated) {
+      funSpecBuilder.addAnnotation(
+        AnnotationSpec.builder(Deprecated::class)
+          .addMember("%S", "The underlying service method is marked deprecated.")
+          .build()
+      )
+    }
+
     val codeBlockMap = mapOf(
       "helperMethod" to helperMethod,
       "methodDescriptor" to method.descriptorCode,
