@@ -18,6 +18,9 @@ package io.grpc.kotlin
 
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
+import io.grpc.ServerCall
+import io.grpc.ServerCallHandler
+import io.grpc.ServerInterceptor
 import io.grpc.Status
 import io.grpc.StatusException
 import io.grpc.examples.helloworld.GreeterGrpc
@@ -49,6 +52,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CompletableDeferred
+import io.grpc.Metadata as GrpcMetadata
 
 @RunWith(JUnit4::class)
 class GeneratedCodeTest : AbstractCallsTest() {
@@ -136,6 +141,38 @@ class GeneratedCodeTest : AbstractCallsTest() {
       stub.sayHello(helloRequest("Peridot"))
     }
     assertThat(ex.status.code).isEqualTo(Status.Code.PERMISSION_DENIED)
+  }
+
+  @Test
+  fun metadataPassedThrough() = runBlocking {
+    val key = GrpcMetadata.Key.of("key", GrpcMetadata.ASCII_STRING_MARSHALLER)
+
+    val server = object : GreeterCoroutineImplBase() {
+      override suspend fun sayHello(request: HelloRequest): HelloReply {
+        return HelloReply.newBuilder()
+          .setMessage("Hello, ${request.name}!" )
+          .build()
+      }
+    }
+    val receivedMetadata = CompletableDeferred<String>()
+    val channel = makeChannel(
+      server,
+      object : ServerInterceptor {
+        override fun <ReqT, RespT> interceptCall(
+          call: ServerCall<ReqT, RespT>,
+          headers: GrpcMetadata,
+          next: ServerCallHandler<ReqT, RespT>
+        ): ServerCall.Listener<ReqT> {
+          receivedMetadata.complete(headers[key]!!)
+          return next.startCall(call, headers)
+        }
+      }
+    )
+    val stub = GreeterCoroutineStub(channel)
+    val meta = GrpcMetadata()
+    meta.put(key, "Pink Diamond")
+    assertThat(helloReply("Hello, Steven!")).isEqualTo(stub.sayHello(helloRequest("Steven"), meta))
+    assertThat(receivedMetadata.await()).isEqualTo("Pink Diamond")
   }
 
   @Test
