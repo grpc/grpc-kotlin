@@ -42,7 +42,7 @@ val routeGuideClientStartScripts = tasks.register<CreateStartScripts>("routeGuid
 
 val animalsClientStartScripts = tasks.register<CreateStartScripts>("animalsClientStartScripts") {
     mainClassName = "io.grpc.examples.animals.AnimalsClientKt"
-    applicationName = "route-guide-client"
+    applicationName = "animals-client"
     outputDir = tasks.named<CreateStartScripts>("startScripts").get().outputDir
     classpath = tasks.named<CreateStartScripts>("startScripts").get().classpath
 }
