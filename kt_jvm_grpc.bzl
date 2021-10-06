@@ -207,6 +207,7 @@ def _kt_jvm_proto_library_helper_impl(ctx):
                            ]),
     )
 
+    # Because protoc outputs an unknown number of files we need to zip them into a srcjar.
     args = ctx.actions.args()
     args.add("c")
     args.add(ctx.outputs.srcjar)
@@ -258,11 +259,35 @@ def kt_jvm_proto_library(
         visibility = None,
         deprecation = None,
         features = []):
-    proto_lib_target = ":%s_DO_NOT_DEPEND_java_proto" % name
+    """
+    This rule accepts any number of proto_library targets in "deps", translates them to Kotlin and
+    returns the compiled Kotlin.
+
+    See also https://developers.google.com/protocol-buffers/docs/kotlintutorial for how to interact
+    with the generated Kotlin representation.
+
+    Note that the rule will also export the java version of the same protos as Kotlin protos depend
+    on the java version under the hood.
+
+    For standard attributes, see:
+      https://docs.bazel.build/versions/master/be/common-definitions.html#common-attributes
+
+    Args:
+      name: A name for the target
+      deps: One or more proto_library targets to turn into Kotlin.
+      tags: Standard attribute
+      testonly: Standard attribute
+      compatible_with: Standard attribute
+      restricted_to: Standard attribute
+      visibility: Standard attribute
+      deprecation: Standard attribute
+      features: Standard attribute
+    """
+    java_proto_target = ":%s_DO_NOT_DEPEND_java_proto" % name
     helper_target = ":%s_DO_NOT_DEPEND_kt_proto" % name
 
     native.java_proto_library(
-        name = proto_lib_target[1:],
+        name = java_proto_target[1:],
         deps = deps,
         testonly = testonly,
         compatible_with = compatible_with,
@@ -277,8 +302,15 @@ def kt_jvm_proto_library(
         name = helper_target[1:],
         proto_deps = deps,
         deps = [
-            proto_lib_target,
+            java_proto_target,
         ],
+        testonly = testonly,
+        compatible_with = compatible_with,
+        visibility = ["//visibility:private"],
+        restricted_to = restricted_to,
+        tags = tags,
+        deprecation = deprecation,
+        features = features,
     )
 
     kt_jvm_library(
@@ -286,10 +318,17 @@ def kt_jvm_proto_library(
         srcs = [helper_target + ".srcjar"],
         deps = [
             "@com_google_protobuf_protobuf_kotlin//jar",
-            proto_lib_target
+            java_proto_target
         ],
         exports = [
-            proto_lib_target
-        ]
+            java_proto_target
+        ],
+        testonly = testonly,
+        compatible_with = compatible_with,
+        visibility = visibility,
+        restricted_to = restricted_to,
+        tags = tags,
+        deprecation = deprecation,
+        features = features,
     )
 
