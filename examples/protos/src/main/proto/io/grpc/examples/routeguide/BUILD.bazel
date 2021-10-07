@@ -1,6 +1,6 @@
 load("@rules_proto//proto:defs.bzl", "proto_library")
 load("@io_grpc_grpc_java//:java_grpc_library.bzl", "java_grpc_library")
-load("//:kt_jvm_grpc.bzl", "kt_jvm_grpc_library")
+load("//:kt_jvm_grpc.bzl", "kt_jvm_grpc_library", "kt_jvm_proto_library")
 
 licenses(["notice"])
 
@@ -19,6 +19,11 @@ java_proto_library(
 
 java_lite_proto_library(
     name = "route_guide_java_proto_lite",
+    deps = [":route_guide_proto"],
+)
+
+kt_jvm_proto_library(
+    name = "route_guide_kt_proto",
     deps = [":route_guide_proto"],
 )
 
