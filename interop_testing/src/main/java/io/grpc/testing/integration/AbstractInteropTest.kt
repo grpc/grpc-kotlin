@@ -847,11 +847,11 @@ abstract class AbstractInteropTest {
     // Send a context proto (as it's in the default extension registry)
     val contextValue = SimpleContext.newBuilder().setValue("dog").build()
     fixedHeaders.put(Util.METADATA_KEY, contextValue)
-    stub = MetadataUtils.attachHeaders(stub, fixedHeaders)
+    stub = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(fixedHeaders))
     // .. and expect it to be echoed back in trailers
     val trailersCapture = AtomicReference<Metadata>()
     val headersCapture = AtomicReference<Metadata>()
-    stub = MetadataUtils.captureMetadata(stub, headersCapture, trailersCapture)
+    stub = stub.withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture))
     runBlocking {
       assertNotNull(stub.emptyCall(EMPTY))
     }
@@ -867,11 +867,11 @@ abstract class AbstractInteropTest {
     // Send a context proto (as it's in the default extension registry)
     val contextValue = SimpleContext.newBuilder().setValue("dog").build()
     fixedHeaders.put(Util.METADATA_KEY, contextValue)
-    stub = MetadataUtils.attachHeaders(stub, fixedHeaders)
+    stub = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(fixedHeaders))
     // .. and expect it to be echoed back in trailers
     val trailersCapture = AtomicReference<Metadata>()
     val headersCapture = AtomicReference<Metadata>()
-    stub = MetadataUtils.captureMetadata(stub, headersCapture, trailersCapture)
+    stub = stub.withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture))
     val responseSizes = listOf(50, 100, 150, 200)
     val streamingOutputBuilder = StreamingOutputCallRequest.newBuilder()
     for (size in responseSizes) {
@@ -1109,10 +1109,10 @@ abstract class AbstractInteropTest {
     metadata.put(Util.ECHO_INITIAL_METADATA_KEY, "test_initial_metadata_value")
     metadata.put(Util.ECHO_TRAILING_METADATA_KEY, trailingBytes)
     var theStub = stub
-    theStub = MetadataUtils.attachHeaders(theStub, metadata)
+    theStub = theStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
     var headersCapture = AtomicReference<Metadata>()
     var trailersCapture = AtomicReference<Metadata>()
-    theStub = MetadataUtils.captureMetadata(theStub, headersCapture, trailersCapture)
+    theStub = theStub.withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture))
     val response = runBlocking { theStub.unaryCall(request) }
     assertResponse(goldenResponse, response)
     assertEquals(
@@ -1131,10 +1131,10 @@ abstract class AbstractInteropTest {
     metadata.put(Util.ECHO_TRAILING_METADATA_KEY, trailingBytes)
 
     var theStreamingStub = stub
-    theStreamingStub = MetadataUtils.attachHeaders(theStreamingStub, metadata)
+    theStreamingStub = theStreamingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
     headersCapture = AtomicReference()
     trailersCapture = AtomicReference()
-    theStreamingStub = MetadataUtils.captureMetadata(theStreamingStub, headersCapture, trailersCapture)
+    theStreamingStub = theStreamingStub.withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture))
     runBlocking {
       assertResponse(goldenStreamingResponse, theStreamingStub.fullDuplexCall(flowOf(streamingRequest)).single())
     }

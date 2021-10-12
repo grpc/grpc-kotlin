@@ -52,14 +52,14 @@ protobuf {
 }
 
 val testServiceClientStartScripts = tasks.register<CreateStartScripts>("testServiceClientStartScripts") {
-    mainClassName = "io.grpc.testing.integration.TestServiceClient"
+    mainClass.set("io.grpc.testing.integration.TestServiceClient")
     applicationName = "test-service-client"
     outputDir = tasks.named<CreateStartScripts>("startScripts").get().outputDir
     classpath = tasks.named<CreateStartScripts>("startScripts").get().classpath
 }
 
 val testServiceServerStartScripts = tasks.register<CreateStartScripts>("testServiceServerStartScripts") {
-    mainClassName = "io.grpc.testing.integration.TestServiceServer"
+    mainClass.set("io.grpc.testing.integration.TestServiceServer")
     applicationName = "test-service-server"
     outputDir = tasks.named<CreateStartScripts>("startScripts").get().outputDir
     classpath = tasks.named<CreateStartScripts>("startScripts").get().classpath
@@ -72,4 +72,8 @@ tasks.named("startScripts") {
 
 tasks.withType<AbstractPublishToMaven> {
     enabled = false
+}
+
+tasks.withType<JavaCompile> {
+    options.isDeprecation = true
 }

@@ -67,7 +67,7 @@ public class Http2OkHttpTest extends AbstractInteropTest {
     // Starts the server with HTTPS.
     try {
       SslProvider sslProvider = SslContext.defaultServerProvider();
-      if (sslProvider == SslProvider.OPENSSL && !OpenSsl.isAlpnSupported()) {
+      if (sslProvider == SslProvider.OPENSSL && !SslProvider.isAlpnSupported(sslProvider)) {
         // OkHttp only supports Jetty ALPN on OpenJDK. So if OpenSSL doesn't support ALPN, then we
         // are forced to use Jetty ALPN for Netty instead of OpenSSL.
         sslProvider = SslProvider.JDK;
