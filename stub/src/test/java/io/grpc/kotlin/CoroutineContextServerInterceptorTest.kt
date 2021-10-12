@@ -3,6 +3,9 @@ package io.grpc.kotlin
 import com.google.common.truth.Truth.assertThat
 import io.grpc.ServerCall
 import io.grpc.ServerInterceptors
+import io.grpc.Status
+import io.grpc.StatusException
+import io.grpc.StatusRuntimeException
 import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineImplBase
 import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineStub
 import io.grpc.examples.helloworld.HelloReply
@@ -95,6 +98,48 @@ class CoroutineContextServerInterceptorTest : AbstractCallsTest() {
 
     runBlocking {
       assertThat(client.sayHello(helloRequest("")).message).isEqualTo("interceptor")
+    }
+  }
+
+  @Test
+  fun statusExceptionThrownFromCoroutineContextClosesCall() {
+    val interceptor = object : CoroutineContextServerInterceptor() {
+      override fun coroutineContext(
+        call: ServerCall<*, *>,
+        headers: GrpcMetadata
+      ): CoroutineContext {
+        throw StatusException(Status.INTERNAL.withDescription("An error"))
+      }
+    }
+
+    val channel = makeChannel(HelloReplyWithContextMessage("server"), interceptor)
+    val client = GreeterCoroutineStub(channel)
+
+    runBlocking {
+      assertThrows<StatusException> { client.sayHello(helloRequest("")) }
+    }
+  }
+
+  @Test
+  fun retainsTrailersFromStatusExceptionThrownFromCoroutineContext() {
+    val aMetadataKey = GrpcMetadata.Key.of("a-metadata-key", GrpcMetadata.ASCII_STRING_MARSHALLER)
+    val interceptor = object : CoroutineContextServerInterceptor() {
+      override fun coroutineContext(
+              call: ServerCall<*, *>,
+              headers: GrpcMetadata
+      ): CoroutineContext {
+        val trailers = GrpcMetadata().apply { put(aMetadataKey, "A value") }
+        throw StatusException(Status.INTERNAL, trailers)
+      }
+    }
+
+    val channel = makeChannel(HelloReplyWithContextMessage("server"), interceptor)
+    val client = GreeterCoroutineStub(channel)
+
+    runBlocking {
+      val thrown = assertThrows<StatusException> { client.sayHello(helloRequest("")) }
+
+      assertThat(thrown.trailers.get(aMetadataKey)).isEqualTo("A value")
     }
   }
 }
