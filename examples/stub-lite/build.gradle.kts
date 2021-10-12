@@ -12,7 +12,7 @@ plugins {
 dependencies {
     protobuf(project(":protos"))
 
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext["coroutinesVersion"]}")
 
     api("io.grpc:grpc-protobuf-lite:${rootProject.ext["grpcVersion"]}")
     api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}")
@@ -20,7 +20,7 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_7
+    sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {

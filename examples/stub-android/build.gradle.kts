@@ -14,7 +14,7 @@ dependencies {
     protobuf(project(":protos"))
 
     api(kotlin("stdlib"))
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:${rootProject.ext["coroutinesVersion"]}")
 
     api("io.grpc:grpc-protobuf-lite:${rootProject.ext["grpcVersion"]}")
     api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}")
@@ -24,6 +24,11 @@ dependencies {
 android {
     compileSdkVersion(30)
     buildToolsVersion = "30.0.2"
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {

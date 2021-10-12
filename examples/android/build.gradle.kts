@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
     implementation(project(":stub-android"))
-    implementation("androidx.appcompat:appcompat:1.2.0")
+    implementation("androidx.appcompat:appcompat:1.3.1")
     runtimeOnly("io.grpc:grpc-okhttp:${rootProject.ext["grpcVersion"]}")
 }
 
@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId = "io.grpc.examples.hello"
-        minSdkVersion(23)
+        minSdkVersion(26)
         targetSdkVersion(30)
         versionCode = 1
         versionName = "1.0"
@@ -31,7 +31,7 @@ android {
     sourceSets["main"].java.srcDir("src/main/kotlin")
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_7
-        targetCompatibility = JavaVersion.VERSION_1_7
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 }

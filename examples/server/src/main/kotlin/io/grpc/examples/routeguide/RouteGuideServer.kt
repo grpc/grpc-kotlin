@@ -21,14 +21,14 @@ import com.google.common.base.Ticker
 import com.google.protobuf.util.Durations
 import io.grpc.Server
 import io.grpc.ServerBuilder
-import java.util.Collections
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
+import java.util.Collections
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 
 /**
  * Kotlin adaptation of RouteGuideServer from the Java gRPC example.
@@ -43,11 +43,11 @@ class RouteGuideServer(
         server.start()
         println("Server started, listening on $port")
         Runtime.getRuntime().addShutdownHook(
-                Thread {
-                    println("*** shutting down gRPC server since JVM is shutting down")
-                    this@RouteGuideServer.stop()
-                    println("*** server shut down")
-                }
+            Thread {
+                println("*** shutting down gRPC server since JVM is shutting down")
+                this@RouteGuideServer.stop()
+                println("*** server shut down")
+            }
         )
     }
 
@@ -66,11 +66,11 @@ class RouteGuideServer(
         private val routeNotes = ConcurrentHashMap<Point, MutableList<RouteNote>>()
 
         override suspend fun getFeature(request: Point): Feature =
-                // No feature was found, return an unnamed feature.
-                features.find { it.location == request } ?: feature { location = request }
+            // No feature was found, return an unnamed feature.
+            features.find { it.location == request } ?: feature { location = request }
 
         override fun listFeatures(request: Rectangle): Flow<Feature> =
-                features.asFlow().filter { it.exists() && it.location in request }
+            features.asFlow().filter { it.exists() && it.location in request }
 
         override suspend fun recordRoute(requests: Flow<Point>): RouteSummary {
             var pointCount = 0
