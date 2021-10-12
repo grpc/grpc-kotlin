@@ -1497,9 +1497,9 @@ abstract class AbstractInteropTest {
     // assertClientStatsTrace() is called right after application receives status,
     // but streamClosed() may be called slightly later than that.  So we need a timeout.
     try {
-      assertTrue(tracer.await(5, TimeUnit.SECONDS))
+      assertTrue(tracer.await(10, TimeUnit.SECONDS))
     } catch (e: InterruptedException) {
-      throw AssertionError(e)
+      throw AssertionError("Awaiting the tracer took longer than expected", e)
     }
     assertEquals(code, tracer.status.code)
     if (requests != null && responses != null) {
