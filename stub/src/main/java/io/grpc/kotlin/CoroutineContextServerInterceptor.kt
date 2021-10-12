@@ -58,7 +58,7 @@ abstract class CoroutineContextServerInterceptor : ServerInterceptor {
       coroutineContext(call, headers)
     } catch (e: StatusException) {
       call.close(e.status, e.trailers ?: Metadata())
-      return object: ServerCall.Listener<ReqT>() {}
+      throw e
     }
     return withGrpcContext(GrpcContext.current().extendCoroutineContext(coroutineContext)) {
       next.startCall(call, headers)
