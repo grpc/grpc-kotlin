@@ -6,7 +6,7 @@ plugins {
 }
 
 // todo: move to subprojects, but how?
-ext["grpcVersion"] = "1.40.1"
+ext["grpcVersion"] = "1.41.0"
 ext["grpcKotlinVersion"] = "1.1.0" // CURRENT_GRPC_KOTLIN_VERSION
 ext["protobufVersion"] = "3.17.3"
 
