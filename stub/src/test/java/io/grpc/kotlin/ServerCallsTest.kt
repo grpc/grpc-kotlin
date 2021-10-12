@@ -899,7 +899,7 @@ class ServerCallsTest : AbstractCallsTest() {
     val responseReleased = Job()
     val channel = makeChannel(
       ServerCalls.serverStreamingServerMethodDefinition(context, serverStreamingSayHelloMethod) {
-        request -> flow {
+        flow {
           requestReceived.complete()
           responseReleased.join()
         }
