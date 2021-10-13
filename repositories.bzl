@@ -35,21 +35,23 @@ def grpc_kt_repositories():
         io_grpc_grpc_java()
 
 def io_bazel_rules_kotlin():
-    rules_kotlin_version = "b40d920c5a5e044c541513f0d5e9260d0a4579c0"
+    rules_kotlin_version = "v1.5.0-beta-3"
+    rules_kotlin_sha = "58edd86f0f3c5b959c54e656b8e7eb0b0becabd412465c37a2078693c2571f7f"
     http_archive(
         name = "io_bazel_rules_kotlin",
-        urls = ["https://github.com/bazelbuild/rules_kotlin/archive/%s.zip" % rules_kotlin_version],
-        sha256 = "3dadd0ad7272be6b1ed1274f62cadd4a1293c89990bcd7b4af32637a70ada63e",
-        type = "zip",
-        strip_prefix = "rules_kotlin-%s" % rules_kotlin_version,
+        urls = ["https://github.com/bazelbuild/rules_kotlin/releases/download/%s/rules_kotlin_release.tgz" % rules_kotlin_version],
+        sha256 = rules_kotlin_sha,
     )
 
 def com_google_protobuf():
+    protobuf_version = "3.17.3"
+    protobuf_sha = "77ad26d3f65222fd96ccc18b055632b0bfedf295cb748b712a98ba1ac0b704b2"
+
     http_archive(
         name = "com_google_protobuf",
-        sha256 = "b37e96e81842af659605908a421960a5dc809acbc888f6b947bc320f8628e5b1",
-        strip_prefix = "protobuf-3.12.0",
-        urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.12.0.zip"],
+        sha256 = protobuf_sha,
+        strip_prefix = "protobuf-%s" % protobuf_version,
+        urls = ["https://github.com/protocolbuffers/protobuf/releases/download/v%s/protobuf-all-%s.tar.gz" % (protobuf_version, protobuf_version)],
     )
 
 def io_grpc_grpc_java():

@@ -21,21 +21,21 @@ import io.grpc.ServerBuilder
 
 class AnimalsServer constructor(private val port: Int) {
     val server: Server = ServerBuilder
-            .forPort(port)
-            .addService(DogService())
-            .addService(PigService())
-            .addService(SheepService())
-            .build()
+        .forPort(port)
+        .addService(DogService())
+        .addService(PigService())
+        .addService(SheepService())
+        .build()
 
     fun start() {
         server.start()
         println("Server started, listening on $port")
         Runtime.getRuntime().addShutdownHook(
-                Thread {
-                    println("*** shutting down gRPC server since JVM is shutting down")
-                    this@AnimalsServer.stop()
-                    println("*** server shut down")
-                }
+            Thread {
+                println("*** shutting down gRPC server since JVM is shutting down")
+                this@AnimalsServer.stop()
+                println("*** server shut down")
+            }
         )
     }
 
@@ -48,24 +48,21 @@ class AnimalsServer constructor(private val port: Int) {
     }
 
     private class DogService : DogGrpcKt.DogCoroutineImplBase() {
-        override suspend fun bark(request: BarkRequest) = BarkReply
-                .newBuilder()
-                .setMessage("Bark!")
-                .build()
+        override suspend fun bark(request: BarkRequest) = barkReply {
+            message = "Bark!"
+        }
     }
 
     private class PigService : PigGrpcKt.PigCoroutineImplBase() {
-        override suspend fun oink(request: OinkRequest) = OinkReply
-                .newBuilder()
-                .setMessage("Oink!")
-                .build()
+        override suspend fun oink(request: OinkRequest) = oinkReply {
+            message = "Oink!"
+        }
     }
 
     private class SheepService : SheepGrpcKt.SheepCoroutineImplBase() {
-        override suspend fun baa(request: BaaRequest) = BaaReply
-                .newBuilder()
-                .setMessage("Baa!")
-                .build()
+        override suspend fun baa(request: BaaRequest) = baaReply {
+            message = "Baa!"
+        }
     }
 }
 

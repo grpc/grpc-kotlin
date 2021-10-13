@@ -34,6 +34,7 @@ maven_install(
     artifacts = [
         "com.google.jimfs:jimfs:1.1",
         "com.google.truth.extensions:truth-proto-extension:1.0.1",
+        "com.google.protobuf:protobuf-kotlin:3.18.0",
     ] + IO_GRPC_GRPC_KOTLIN_ARTIFACTS + IO_GRPC_GRPC_JAVA_ARTIFACTS,
     generate_compat_repositories = True,
     override_targets = dict(
@@ -56,16 +57,11 @@ grpc_java_repositories()
 
 # Protocol Buffers
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
 protobuf_deps()
 
 # Kotlin
-load(
-    "@io_bazel_rules_kotlin//kotlin:kotlin.bzl",
-    "kotlin_repositories",
-    "kt_register_toolchains",
-)
-
+load("@io_bazel_rules_kotlin//kotlin:repositories.bzl", "kotlin_repositories")
 kotlin_repositories()
 
+load("@io_bazel_rules_kotlin//kotlin:core.bzl", "kt_register_toolchains")
 kt_register_toolchains()

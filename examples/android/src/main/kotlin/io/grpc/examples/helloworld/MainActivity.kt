@@ -10,11 +10,11 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
-import java.net.URL
-import java.util.logging.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.runBlocking
+import java.net.URL
+import java.util.logging.Logger
 
 // todo: suspend funs
 class MainActivity : AppCompatActivity() {
@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
 
         fun sendReq() = runBlocking {
             try {
-                val request = HelloRequest.newBuilder().setName(nameText.text.toString()).build()
+                val request = helloRequest { name = nameText.text.toString() }
                 val response = greeter.sayHello(request)
                 responseText.text = response.message
             } catch (e: Exception) {
