@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val uri = Uri.parse(resources.getString(R.string.server_url))
-        val greeterService = GreeterService(uri) // todo: better resource open & closing
+        val greeterService = GreeterRCP(uri) // todo: better resource open & closing
 
         setContent {
             Surface(color = MaterialTheme.colors.background) {
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-class GreeterService(uri: Uri) : Closeable {
+class GreeterRCP(uri: Uri) : Closeable {
     val responseState = mutableStateOf("")
 
     private val channel = let {
@@ -80,7 +80,7 @@ class GreeterService(uri: Uri) : Closeable {
 }
 
 @Composable
-fun Greeter(greeterService: GreeterService) {
+fun Greeter(greeterRCP: GreeterRCP) {
 
     val scope = rememberCoroutineScope()
 
@@ -90,13 +90,13 @@ fun Greeter(greeterService: GreeterService) {
         Text(stringResource(R.string.name_hint), modifier = Modifier.padding(top = 10.dp))
         OutlinedTextField(nameState.value, { nameState.value = it })
 
-        Button({ scope.launch { greeterService.sayHello(nameState.value.text) } }, Modifier.padding(10.dp)) {
+        Button({ scope.launch { greeterRCP.sayHello(nameState.value.text) } }, Modifier.padding(10.dp)) {
         Text(stringResource(R.string.send_request))
     }
 
-        if (greeterService.responseState.value.isNotEmpty()) {
+        if (greeterRCP.responseState.value.isNotEmpty()) {
             Text(stringResource(R.string.server_response), modifier = Modifier.padding(top = 10.dp))
-            Text(greeterService.responseState.value)
+            Text(greeterRCP.responseState.value)
         }
     }
 }
