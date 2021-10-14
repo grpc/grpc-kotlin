@@ -1,5 +1,19 @@
 ## Change Log
 
+### 1.2.0
+
+#### Feature
+
+ - Support StatusException in CoroutineContextServerInterceptor (#249)
+ - Defer writing headers until the first message stanza is sent (#275)
+ - Open context val in order to allow overriding (#287)
+ - Restore metadata support to generated clients (#268)
+
+#### Fixes
+
+ - Fix application name in client (#284)
+ - Mark deprecated service methods with @Deprecated. (#264)
+
 ### 1.1.0
 
 #### Features
