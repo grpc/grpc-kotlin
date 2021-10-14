@@ -3,12 +3,14 @@ plugins {
     kotlin("android")
 }
 
-val composeVersion = "1.0.0-alpha03"
+val composeVersion = "1.0.3"
 
 dependencies {
     implementation(project(":stub-android"))
     implementation(kotlin("stdlib"))
+    implementation("androidx.activity:activity-compose:1.3.1")
     implementation("androidx.appcompat:appcompat:1.3.1")
+
     implementation("androidx.compose.foundation:foundation-layout:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
     implementation("androidx.compose.runtime:runtime:$composeVersion")
@@ -57,7 +59,7 @@ android {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
-        freeCompilerArgs = listOf("-Xallow-jvm-ir-dependencies", "-Xskip-prerelease-check")
+        // jvmTarget = JavaVersion.VERSION_11.toString()
+        // freeCompilerArgs = listOf("-Xallow-jvm-ir-dependencies", "-Xskip-prerelease-check")
     }
 }

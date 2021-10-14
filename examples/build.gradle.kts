@@ -1,7 +1,7 @@
 plugins {
-    id("com.android.application") version "4.1.1" apply false
+    id("com.android.application") version "4.2.0" apply false
     id("com.google.protobuf") version "0.8.17" apply false
-    kotlin("jvm") version "1.5.31" apply false
+    kotlin("jvm") version "1.5.30" apply false
     id("org.jlleitschuh.gradle.ktlint") version "10.2.0"
 }
 

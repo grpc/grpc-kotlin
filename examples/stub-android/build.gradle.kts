@@ -23,7 +23,7 @@ dependencies {
 
 android {
     compileSdkVersion(30)
-    buildToolsVersion = "30.0.2"
+    buildToolsVersion = "30.0.3"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -34,6 +34,7 @@ android {
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 }
 
