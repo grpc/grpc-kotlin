@@ -31,17 +31,22 @@ import java.io.Closeable
 
 class MainActivity : AppCompatActivity() {
 
+    private val uri by lazy { Uri.parse(resources.getString(R.string.server_url)) }
+    private val greeterService by lazy { GreeterRCP(uri) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val uri = Uri.parse(resources.getString(R.string.server_url))
-        val greeterService = GreeterRCP(uri) // todo: better resource open & closing
 
         setContent {
             Surface(color = MaterialTheme.colors.background) {
                 Greeter(greeterService)
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        greeterService.close()
     }
 }
 
@@ -58,7 +63,7 @@ class GreeterRCP(uri: Uri) : Closeable {
             builder.usePlaintext()
         }
 
-        builder.executor(Dispatchers.Default.asExecutor()).build()
+        builder.executor(Dispatchers.IO.asExecutor()).build()
     }
 
     private val greeter = GreeterGrpcKt.GreeterCoroutineStub(channel)
