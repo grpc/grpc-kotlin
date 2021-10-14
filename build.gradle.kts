@@ -23,7 +23,7 @@ subprojects {
     }
 
     group = "io.grpc"
-    version = "1.1.0" // CURRENT_GRPC_KOTLIN_VERSION
+    version = "1.2.0" // CURRENT_GRPC_KOTLIN_VERSION
 
     repositories {
         mavenCentral()
