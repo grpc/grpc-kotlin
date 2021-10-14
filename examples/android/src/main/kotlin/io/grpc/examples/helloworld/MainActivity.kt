@@ -14,12 +14,10 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -30,6 +28,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import java.io.Closeable
 import java.net.URL
 
 class MainActivity : AppCompatActivity() {
@@ -37,19 +36,23 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val url = URL(resources.getString(R.string.server_url))
+        val greeterService = GreeterService(url) // todo: better resource open & closing
+
         setContent {
             Surface(color = MaterialTheme.colors.background) {
-                val url = URL(stringResource(R.string.server_url))
-                GreeterEffect(url)
+                Greeter(greeterService)
             }
         }
     }
 }
 
-@Composable
-fun GreeterEffect(url: URL) {
+class GreeterService(url: URL) : Closeable {
+    val responseState = mutableStateOf("")
 
-    val channel = remember {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    private val channel = let {
         val port = if (url.port == -1) url.defaultPort else url.port
 
         println("Connecting to ${url.host}:$port")
@@ -64,35 +67,27 @@ fun GreeterEffect(url: URL) {
         builder.executor(Dispatchers.Default.asExecutor()).build()
     }
 
-    val greeter = GreeterGrpcKt.GreeterCoroutineStub(channel)
+    private val greeter = GreeterGrpcKt.GreeterCoroutineStub(channel)
 
-    val responseState = remember { mutableStateOf("") }
-
-    val scope = remember { CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate) }
-
-    DisposableEffect(LocalLifecycleOwner.current) {
-        onDispose {
-            channel.shutdownNow()
-            scope.cancel()
+    fun sayHello(name: String) = scope.launch {
+        try {
+            val request = helloRequest { this.name = name }
+            val response = greeter.sayHello(request)
+            responseState.value = response.message
+        } catch (e: Exception) {
+            responseState.value = e.message ?: "Unknown Error"
+            e.printStackTrace()
         }
     }
 
-    Greeter(responseState.value) { name ->
-        scope.launch {
-            try {
-                val request = helloRequest { this.name = name }
-                val response = greeter.sayHello(request)
-                responseState.value = response.message
-            } catch (e: Exception) {
-                responseState.value = e.message ?: "Unknown Error"
-                e.printStackTrace()
-            }
-        }
+    override fun close() {
+        channel.shutdownNow()
+        scope.cancel()
     }
 }
 
 @Composable
-fun Greeter(response: String, greet: (String) -> Unit) {
+fun Greeter(greeterService: GreeterService) {
 
     val nameState = remember { mutableStateOf(TextFieldValue()) }
 
@@ -100,13 +95,13 @@ fun Greeter(response: String, greet: (String) -> Unit) {
         Text(stringResource(R.string.name_hint), modifier = Modifier.padding(top = 10.dp))
         OutlinedTextField(nameState.value, { nameState.value = it })
 
-        Button({ greet(nameState.value.text) }, Modifier.padding(10.dp)) {
+        Button({ greeterService.sayHello(nameState.value.text) }, Modifier.padding(10.dp)) {
         Text(stringResource(R.string.send_request))
     }
 
-        if (response.isNotEmpty()) {
+        if (greeterService.responseState.value.isNotEmpty()) {
             Text(stringResource(R.string.server_response), modifier = Modifier.padding(top = 10.dp))
-            Text(response)
+            Text(greeterService.responseState.value)
         }
     }
 }
