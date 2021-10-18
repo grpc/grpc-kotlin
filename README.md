@@ -25,6 +25,7 @@ This repo includes the sources for the following:
 For more information, see the following [Kotlin/JVM pages from grpc.io][]:
 
 - [Quick start][]
+- [Maven / Gradle Plugin instructions]
 - [Basics tutorial][]
 - [API reference][]
 
@@ -50,3 +51,4 @@ Note that [official releases][] are [published to Maven Central][].
 [protocolbuffers/protobuf#3742]: https://github.com/protocolbuffers/protobuf/issues/3742
 [published to Maven Central]: https://search.maven.org/search?q=g:io.grpc%20AND%20grpc-kotlin
 [Quick start]: https://grpc.io/docs/languages/kotlin/quickstart/
+[Maven / Gradle Plugin instructions]: compiler/README.md
