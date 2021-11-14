@@ -71,11 +71,13 @@ For Maven, include the [protobuf plugin](https://www.xolstice.org/protobuf-maven
     https://search.maven.org/search?q=a:grpc-kotlin-stub -->
     <grpc.kotlin.version>1.2.0</grpc.kotlin.version>
 
-    <!-- The version is the latest found here: https://search.maven.org/artifact/io.grpc/grpc-protobuf/1.42.0/jar -->
-    <java.grpc.version>1.42.0</java.grpc.version>
+    <!-- The version is the latest found here: https://search.maven.org/artifact/io.grpc/grpc-protobuf -->
+    <!-- IMPORTANT: currently we support max 1.39.0 -->
+    <java.grpc.version>1.39.0</java.grpc.version>
 
     <!-- the version is the latest found here: https://search.maven.org/search?q=a:protobuf-kotlin -->
-    <protobuf.version>3.19.1</protobuf.version>
+    <!-- IMPORTANT: currently we support max 3.18.1 -->
+    <protobuf.version>3.18.1</protobuf.version>
 </properties>
 ```
 
@@ -135,15 +137,15 @@ And finally add the build job for the proto as last plugin:
                     <goal>compile-custom</goal>
                 </goals>
                 <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:YOUR_PROTOBUF_VERSION:exe:${os.detected.classifier}</protocArtifact>
+                    <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
                     <pluginId>grpc-java</pluginId>
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:YOUR_GRPC_VERSION:exe:${os.detected.classifier}</pluginArtifact>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${java.grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
                     <protocPlugins>
                         <protocPlugin>
                             <id>grpc-kotlin</id>
                             <groupId>io.grpc</groupId>
                             <artifactId>protoc-gen-grpc-kotlin</artifactId>
-                            <version>YOUR_GRPC_KOTLIN_VERSION</version>
+                            <version>${grpc.kotlin.version}</version>
                             <classifier>jdk7</classifier>
                             <mainClass>io.grpc.kotlin.generator.GeneratorRunner</mainClass>
                         </protocPlugin>
@@ -156,7 +158,7 @@ And finally add the build job for the proto as last plugin:
                     <goal>compile-custom</goal>
                 </goals>
                 <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:YOUR_PROTOBUF_VERSION:exe:${os.detected.classifier}</protocArtifact>
+                    <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
                     <outputDirectory>${project.build.directory}/generated-sources/protobuf/kotlin</outputDirectory>
                     <pluginId>kotlin</pluginId>
                 </configuration>
