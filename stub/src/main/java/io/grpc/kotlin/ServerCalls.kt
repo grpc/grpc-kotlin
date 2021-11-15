@@ -27,15 +27,14 @@ import io.grpc.ServerMethodDefinition
 import io.grpc.Status
 import io.grpc.StatusException
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.atomic.AtomicBoolean
@@ -236,8 +235,7 @@ object ServerCalls {
       }
     }
 
-    val rpcScope = CoroutineScope(context)
-    rpcScope.async {
+    val rpcJob = CoroutineScope(context).launch {
       val mutex = Mutex()
       val headersSent = AtomicBoolean(false) // enforces only sending headers once
       val failure = runCatching {
@@ -272,7 +270,7 @@ object ServerCalls {
       var isReceiving = true
 
       override fun onCancel() {
-        rpcScope.cancel("Cancellation received from client")
+        rpcJob.cancel("Cancellation received from client")
       }
 
       override fun onMessage(message: RequestT) {
