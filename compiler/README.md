@@ -8,6 +8,8 @@ This generates the Kotlin interfaces out of the service definition from a`.proto
 
 Usually this compiler is used via a build tool plugin, like in Gradle, Maven, etc.
 
+- #### Gradle
+
 For Gradle, include the [protobuf plugin](https://github.com/google/protobuf-gradle-plugin) with at least version `0.8.13`, like:
 ```
 plugins {
@@ -52,68 +54,118 @@ protobuf {
 }
 ```
 
+- #### Maven
+
 For Maven, include the [protobuf plugin](https://www.xolstice.org/protobuf-maven-plugin/) and configure it to use the
-`protoc-gen-grpc-kotlin` compiler, like:
+`protoc-gen-grpc-kotlin` compiler, starting by adding `properties` for the versions of the plugins
+
 ```
-<plugin>
-  <groupId>org.xolstice.maven.plugins</groupId>
-  <artifactId>protobuf-maven-plugin</artifactId>
-  <version>0.6.1</version>
-  <executions>
-    <execution>
-      <id>compile</id>
-      <goals>
-        <goal>compile</goal>
-        <goal>compile-custom</goal>
-      </goals>
-      <configuration>
-        <protocArtifact>com.google.protobuf:protoc:YOUR_PROTOBUF_VERSION:exe:${os.detected.classifier}</protocArtifact>
-        <pluginId>grpc-java</pluginId>
-        <pluginArtifact>io.grpc:protoc-gen-grpc-java:YOUR_GRPC_VERSION:exe:${os.detected.classifier}</pluginArtifact>
-        <protocPlugins>
-          <protocPlugin>
-            <id>grpc-kotlin</id>
-            <groupId>io.grpc</groupId>
-            <artifactId>protoc-gen-grpc-kotlin</artifactId>
-            <version>YOUR_GRPC_KOTLIN_VERSION</version>
-            <classifier>jdk7</classifier>
-            <mainClass>io.grpc.kotlin.generator.GeneratorRunner</mainClass>
-          </protocPlugin>
-        </protocPlugins>
-      </configuration>
-    </execution>
-    <execution>
-      <id>compile-kt</id>
-      <goals>
-        <goal>compile-custom</goal>
-      </goals>
-      <configuration>
-        <protocArtifact>com.google.protobuf:protoc:YOUR_PROTOBUF_VERSION:exe:${os.detected.classifier}</protocArtifact>
-        <outputDirectory>${project.build.directory}/generated-sources/protobuf/kotlin</outputDirectory>
-        <pluginId>kotlin</pluginId>
-      </configuration>
-    </execution>
-  </executions>
-</plugin>
+<properties>
+    <!-- This is just an example, don't mind the versions -->
+    <java.version></java.version> <!-- you should already have this line -->
+    <kotlin.version>1.5.31</kotlin.version> <!-- you should already have this line -->
+
+    <!- the version is the lower of the ones found in these two links
+    (they should always be synced, but double checking is better than being stuck on an error):
+    https://search.maven.org/search?q=a:protoc-gen-grpc-kotlin
+    https://search.maven.org/search?q=a:grpc-kotlin-stub -->
+    <grpc.kotlin.version>1.2.0</grpc.kotlin.version>
+
+    <!-- The version is the latest found here: https://search.maven.org/artifact/io.grpc/grpc-protobuf -->
+    <!-- IMPORTANT: currently we support max 1.39.0 -->
+    <java.grpc.version>1.39.0</java.grpc.version>
+
+    <!-- the version is the latest found here: https://search.maven.org/search?q=a:protobuf-kotlin -->
+    <!-- IMPORTANT: currently we support max 3.18.1 -->
+    <protobuf.version>3.18.1</protobuf.version>
+</properties>
 ```
 
-Make sure you include a dependency on `stub` and protobuf libraries like:
+Follow by adding the dependencies:
 ```
 <dependency>
   <groupId>io.grpc</groupId>
   <artifactId>grpc-kotlin-stub</artifactId>
-  <version>YOUR_GRPC_KOTLIN_VERSION</version>
+  <version>${grpc.kotlin.version}</version>
 </dependency>
 <dependency>
   <groupId>io.grpc</groupId>
   <artifactId>grpc-protobuf</artifactId>
-  <version>YOUR_PROTOBUF_VERSION</version>
+  <version>${java.grpc.version}</version>
 </dependency>
 <dependency>
   <groupId>com.google.protobuf</groupId>
   <artifactId>protobuf-kotlin</artifactId>
-  <version>YOUR_PROTOBUF_VERSION</version>
+  <version>${protobuf.version}</version>
 </dependency>
+```
+
+Add `os-maven-plugin` as first plugin, if not already added:
+```
+<plugins>
+    <plugin>
+        <groupId>kr.motd.maven</groupId>
+        <artifactId>os-maven-plugin</artifactId>
+        <version>1.7.0</version> <!-- consider handling this version via properties as well -->
+        <executions>
+            <execution>
+                <phase>initialize</phase>
+                <goals>
+                    <goal>detect</goal>
+                </goals>
+            </execution>
+        </executions>
+    </plugin>
+    <!-- (other plugins...) -->
+</plugins>
+```
+
+And finally add the build job for the proto as last plugin:
+
+```
+<plugins>
+    <!-- other plugins --> 
+    <plugin>
+        <groupId>org.xolstice.maven.plugins</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+        <version>0.6.1</version>
+        <executions>
+            <execution>
+                <id>compile</id>
+                <goals>
+                    <goal>compile</goal>
+                    <goal>compile-custom</goal>
+                </goals>
+                <configuration>
+                    <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+                    <pluginId>grpc-java</pluginId>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${java.grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
+                    <protocPlugins>
+                        <protocPlugin>
+                            <id>grpc-kotlin</id>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>protoc-gen-grpc-kotlin</artifactId>
+                            <version>${grpc.kotlin.version}</version>
+                            <classifier>jdk7</classifier>
+                            <mainClass>io.grpc.kotlin.generator.GeneratorRunner</mainClass>
+                        </protocPlugin>
+                    </protocPlugins>
+                </configuration>
+            </execution>
+            <execution>
+                <id>compile-kt</id>
+                <goals>
+                    <goal>compile-custom</goal>
+                </goals>
+                <configuration>
+                    <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+                    <outputDirectory>${project.build.directory}/generated-sources/protobuf/kotlin</outputDirectory>
+                    <pluginId>kotlin</pluginId>
+                </configuration>
+            </execution>
+        </executions>
+    </plugin>
+</plugins>
 ```
 
 ### Manual `protoc` Usage
