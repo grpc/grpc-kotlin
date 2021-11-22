@@ -61,13 +61,13 @@ _kt_grpc_generate_code = rule(
         ),
         _zipper = attr.label(
             executable = True,
-            cfg = "host",
+            cfg = "exec",
             default = Label("@bazel_tools//tools/zip:zipper"),
             allow_files = True,
         ),
         _generator = attr.label(
             default = Label("//compiler/src/main/java/io/grpc/kotlin/generator:GeneratorRunner"),
-            cfg = "host",
+            cfg = "exec",
             executable = True,
         ),
     ),
@@ -233,12 +233,12 @@ _kt_jvm_proto_library_helper = rule(
         ),
         _protoc = attr.label(
             default = Label("@com_google_protobuf//:protoc"),
-            cfg = "host",
+            cfg = "exec",
             executable = True,
         ),
         _zip = attr.label(
             default = Label("@bazel_tools//tools/zip:zipper"),
-            cfg = "host",
+            cfg = "exec",
             executable=True
         ),
     ),
