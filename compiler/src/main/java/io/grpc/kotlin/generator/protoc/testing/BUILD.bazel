@@ -11,7 +11,7 @@ kt_jvm_library(
     srcs = glob(["*.kt"]),
     deps = [
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
-        "@maven//:com_google_truth_truth",
-        "@maven//:com_squareup_kotlinpoet",
+        "@com_google_truth_truth//:com_google_truth_truth",
+        "@com_squareup_kotlinpoet//:com_squareup_kotlinpoet",
     ],
 )
