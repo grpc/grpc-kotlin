@@ -1,4 +1,4 @@
-load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library")
+load("@io_bazel_rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library")
 
 licenses(["notice"])
 
@@ -15,9 +15,9 @@ kt_jvm_library(
         "//stub/src/main/java/io/grpc/kotlin:stub",
         "@com_google_protobuf//:protobuf_java",
         "@io_grpc_grpc_java//core",
-        "@maven//:com_google_guava_guava",
-        "@maven//:com_squareup_kotlinpoet",
-        "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+        "@com_google_guava_guava//:com_google_guava_guava",
+        "@com_squareup_kotlinpoet//:com_squareup_kotlinpoet",
+        "@org_jetbrains_kotlinx_kotlinx_coroutines_core//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
     ],
 )
 

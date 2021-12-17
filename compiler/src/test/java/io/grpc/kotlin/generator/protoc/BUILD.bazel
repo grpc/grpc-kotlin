@@ -1,4 +1,4 @@
-load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_test")
+load("@io_bazel_rules_kotlin//kotlin:jvm.bzl", "kt_jvm_test")
 
 licenses(["notice"])
 
@@ -11,7 +11,7 @@ kt_jvm_test(
     deps = [
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc/testing",
-        "@maven//:com_google_truth_truth",
+        "@com_google_truth_truth//:com_google_truth_truth",
     ],
 )
 
@@ -21,7 +21,7 @@ kt_jvm_test(
     test_class = "io.grpc.kotlin.generator.protoc.ConstantNameTest",
     deps = [
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
-        "@maven//:com_google_truth_truth",
+        "@com_google_truth_truth//:com_google_truth_truth",
     ],
 )
 
@@ -32,7 +32,7 @@ kt_jvm_test(
     deps = [
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc/testing",
-        "@maven//:com_google_truth_truth",
+        "@com_google_truth_truth//:com_google_truth_truth",
     ],
 )
 
@@ -47,7 +47,7 @@ kt_jvm_test(
         "//compiler/src/test/proto/testing:has_nested_class_name_conflict_java_proto",
         "//compiler/src/test/proto/testing:has_outer_class_name_conflict_java_proto",
         "//compiler/src/test/proto/testing:proto-file-with-hyphen_java_proto",
-        "@maven//:com_google_truth_truth",
+        "@com_google_truth_truth//:com_google_truth_truth",
     ],
 )
 
@@ -64,7 +64,7 @@ kt_jvm_test(
         "//compiler/src/test/proto/testing:service_name_conflicts_with_file_java_proto",
         "//compiler/src/test/proto/testing:service_t_java_proto",
         "//compiler/src/test/proto/testing:test_proto3_optional_java_proto",
-        "@maven//:com_google_truth_truth",
+        "@com_google_truth_truth//:com_google_truth_truth",
     ],
 )
 
@@ -76,7 +76,7 @@ kt_jvm_test(
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
         "//compiler/src/test/proto/testing:example3_java_proto",
         "//compiler/src/test/proto/testing:implicit_java_package_java_proto",
-        "@maven//:com_google_truth_truth",
+        "@com_google_truth_truth//:com_google_truth_truth",
     ],
 )
 
@@ -86,7 +86,7 @@ kt_jvm_test(
     test_class = "io.grpc.kotlin.generator.protoc.MemberSimpleNameTest",
     deps = [
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
-        "@maven//:com_google_truth_truth",
+        "@com_google_truth_truth//:com_google_truth_truth",
     ],
 )
 
@@ -97,7 +97,7 @@ kt_jvm_test(
     deps = [
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
         "//compiler/src/test/proto/testing:test_proto3_optional_java_proto",
-        "@maven//:com_google_truth_truth",
+        "@com_google_truth_truth//:com_google_truth_truth",
     ],
 )
 
@@ -108,7 +108,7 @@ kt_jvm_test(
     deps = [
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
         "//compiler/src/test/proto/testing:example3_java_proto",
-        "@maven//:com_google_truth_truth",
+        "@com_google_truth_truth//:com_google_truth_truth",
     ],
 )
 
@@ -119,7 +119,7 @@ kt_jvm_test(
     deps = [
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
         "//compiler/src/test/proto/testing:example3_java_proto",
-        "@maven//:com_google_truth_truth",
+        "@com_google_truth_truth//:com_google_truth_truth",
     ],
 )
 
@@ -130,7 +130,7 @@ kt_jvm_test(
     deps = [
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
         "//compiler/src/test/proto/testing:example3_java_proto",
-        "@maven//:com_google_truth_truth",
+        "@com_google_truth_truth//:com_google_truth_truth",
     ],
 )
 
@@ -141,7 +141,7 @@ kt_jvm_test(
     deps = [
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
         "//compiler/src/test/proto/testing:example3_java_proto",
-        "@maven//:com_google_truth_truth",
+        "@com_google_truth_truth//:com_google_truth_truth",
     ],
 )
 
@@ -151,6 +151,6 @@ kt_jvm_test(
     test_class = "io.grpc.kotlin.generator.protoc.ScopeTest",
     deps = [
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
-        "@maven//:com_google_truth_truth",
+        "@com_google_truth_truth//:com_google_truth_truth",
     ],
 )

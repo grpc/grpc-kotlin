@@ -103,6 +103,27 @@ class ServerCallsTest : AbstractCallsTest() {
   }
 
   @Test
+  fun unaryMethodCancellationContextWithJobPropagatedToServer() = runBlocking {
+    val completable = CompletableDeferred<Int>()
+    val requestReceived = Job()
+    val channel = makeChannel(
+      // Note that we use runBlocking's context here
+      ServerCalls.unaryServerMethodDefinition(coroutineContext, sayHelloMethod) {
+        requestReceived.complete()
+        suspendUntilCancelled {
+          completable.complete(42)
+        }
+      }
+    )
+
+    val stub = GreeterGrpc.newFutureStub(channel)
+    val future = stub.sayHello(helloRequest("Garnet"))
+    requestReceived.join()
+    future.cancel(true)
+    assertThat(completable.await()).isEqualTo(42)
+  }
+
+  @Test
   fun unaryRequestHandledWithoutWaitingForHalfClose() = runBlocking {
     val processingStarted = Job()
     val channel = makeChannel(
