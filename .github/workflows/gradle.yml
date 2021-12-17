@@ -4,6 +4,7 @@ on:
     branches:
       - master
   pull_request:
+
 jobs:
   gradle:
     strategy:
@@ -30,3 +31,18 @@ jobs:
       if: matrix.java == '11'
       run: ./gradlew build
       working-directory: ./examples
+
+    - id: test-data
+      name: Run HelloWorld
+      working-directory: ./examples
+      run: |-
+        ./gradlew :server:HelloWorldServer &
+        OUTPUT=$(./gradlew :client:HelloWorldClient)
+        echo "::set-output name=stdout::$OUTPUT"
+
+    - name: Test HelloWorld
+      uses: nick-invision/assert-action@v1
+      with:
+        expected: "Received: Hello world"
+        actual: ${{ steps.test-data.outputs.stdout }}
+        comparison: contains
