@@ -38,7 +38,7 @@ jobs:
       run: |-
         ./gradlew :server:HelloWorldServer &
         OUTPUT=$(./gradlew :client:HelloWorldClient)
-        echo "::set-output name=stdout::$OUTPUT"
+        echo "::set-output name=stdout::${OUTPUT//$'\n'/'%0A'}"
 
     - name: Test HelloWorld
       uses: nick-invision/assert-action@v1
