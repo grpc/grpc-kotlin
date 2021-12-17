@@ -37,6 +37,7 @@ jobs:
       working-directory: ./examples
       run: |-
         ./gradlew :server:HelloWorldServer &
+        sleep 30
         OUTPUT=$(./gradlew :client:HelloWorldClient)
         echo "::set-output name=stdout::${OUTPUT//$'\n'/'%0A'}"
 
