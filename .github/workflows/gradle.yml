@@ -25,5 +25,6 @@ jobs:
       run: ./gradlew publishToMavenLocal
 
     - name: Build Examples
+      if: matrix.java == '1.11'
       run: ./gradlew build
       working-directory: ./examples
