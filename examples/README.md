@@ -62,6 +62,8 @@ The example sources are organized into the following top-level folders:
 - <details>
   <summary>Android example</summary>
 
+  *NOTE: You must use JDK 11 or higher*
+
   Start the server:
 
   ```sh
@@ -82,7 +84,7 @@ The example sources are organized into the following top-level folders:
       mkdir cmdline-tools
       mv latest cmdline-tools
       cmdline-tools/latest/bin/sdkmanager --update
-      cmdline-tools/latest/bin/sdkmanager "platforms;android-30" "build-tools;30.0.2" "extras;google;m2repository" "extras;android;m2repository"
+      cmdline-tools/latest/bin/sdkmanager "platforms;android-31" "build-tools;31.0.0" "extras;google;m2repository" "extras;android;m2repository"
       cmdline-tools/latest/bin/sdkmanager --licenses
       ```
 

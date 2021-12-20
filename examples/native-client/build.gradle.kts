@@ -4,6 +4,11 @@ plugins {
     id("com.palantir.graal") version "0.7.2"
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 dependencies {
     implementation(project(":stub-lite"))
     runtimeOnly("io.grpc:grpc-okhttp:${rootProject.ext["grpcVersion"]}")
