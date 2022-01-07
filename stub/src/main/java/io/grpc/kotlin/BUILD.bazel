@@ -17,6 +17,7 @@ kt_jvm_library(
         "@io_grpc_grpc_java//core",
         "@io_grpc_grpc_java//stub",
         "@org_jetbrains_kotlinx_kotlinx_coroutines_core//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+        "@org_jetbrains_kotlinx_kotlinx_coroutines_core_jvm//:org_jetbrains_kotlinx_kotlinx_coroutines_core_jvm",
     ],
 )
 
@@ -26,5 +27,6 @@ kt_jvm_library(
     deps = [
         "@io_grpc_grpc_java//context",
         "@org_jetbrains_kotlinx_kotlinx_coroutines_core//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+        "@org_jetbrains_kotlinx_kotlinx_coroutines_core_jvm//:org_jetbrains_kotlinx_kotlinx_coroutines_core_jvm",
     ],
 )
