@@ -19,3 +19,10 @@ $ ./gradlew publishToMavenLocal
 
 Ensure that you configure your project build to use the local version of
 gRPC-Kotlin.
+
+
+## Releasing
+
+1. [Generate a changelog](https://github.com/grpc/grpc-kotlin/releases/new) and prepend it to [CHANGELOG.md](CHANGELOG.md)
+2. Create a Pull Request with updated versions in: [build.gradle.kts](build.gradle.kts) and [examples/build.gradle.kts](examples/build.gradle.kts)
+3. Once merged, tag the release with `vX.Y.Z` and push the tag.  This will kick off a GitHub Action that does the actual release.
