@@ -1,5 +1,25 @@
 ## Change Log
 
+### 1.2.1
+
+#### Changes
+* ServerCalls: cancel only the request's Job by @goj in https://github.com/grpc/grpc-kotlin/pull/303
+* Update README.md by @Tails128 in https://github.com/grpc/grpc-kotlin/pull/304
+* Load rules_kotlin rules from jvm.bzl by @fmeum in https://github.com/grpc/grpc-kotlin/pull/300
+* Depend on tools in the exec configuration by @fmeum in https://github.com/grpc/grpc-kotlin/pull/301
+* Remove hardcoded references to @bazel by @aragos in https://github.com/grpc/grpc-kotlin/pull/305
+* Compose UI by @jamesward in https://github.com/grpc/grpc-kotlin/pull/296
+* add an integration test by @jamesward in https://github.com/grpc/grpc-kotlin/pull/310
+* Add kotlinx-coroutines-core-jvm dependency by @bu3 in https://github.com/grpc/grpc-kotlin/pull/311
+
+#### New Contributors
+* @goj made their first contribution in https://github.com/grpc/grpc-kotlin/pull/303
+* @Tails128 made their first contribution in https://github.com/grpc/grpc-kotlin/pull/304
+* @fmeum made their first contribution in https://github.com/grpc/grpc-kotlin/pull/300
+* @bu3 made their first contribution in https://github.com/grpc/grpc-kotlin/pull/311
+
+**Full Changelog**: https://github.com/grpc/grpc-kotlin/compare/v1.2.0...v1.2.1
+
 ### 1.2.0
 
 #### Changes
