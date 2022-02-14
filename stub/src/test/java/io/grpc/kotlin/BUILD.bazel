@@ -11,7 +11,7 @@ kt_jvm_library(
     deps = [
         "//stub/src/test/proto/helloworld:hello_world_kt_grpc",
         "@io_grpc_grpc_java//testing",
-        "@org_jetbrains_kotlinx_kotlinx_coroutines_debug//:org_jetbrains_kotlinx_kotlinx_coroutines_debug",
+        "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_debug",
     ],
 )
 
@@ -22,7 +22,7 @@ kt_jvm_test(
     deps = [
         ":AbstractCallsTest",
         "//stub/src/test/proto/helloworld:hello_world_kt_grpc",
-        "@com_google_truth_extensions_truth_proto_extension//:com_google_truth_extensions_truth_proto_extension",
+        "@maven//:com_google_truth_extensions_truth_proto_extension",
     ],
 )
 
@@ -33,7 +33,7 @@ kt_jvm_test(
     deps = [
         ":AbstractCallsTest",
         "//stub/src/test/proto/helloworld:hello_world_kt_grpc",
-        "@com_google_truth_truth//:com_google_truth_truth",
+        "@maven//:com_google_truth_truth",
     ],
 )
 
@@ -44,7 +44,7 @@ kt_jvm_test(
     deps = [
         ":AbstractCallsTest",
         "//stub/src/test/proto/helloworld:hello_world_kt_grpc",
-        "@com_google_truth_extensions_truth_proto_extension//:com_google_truth_extensions_truth_proto_extension",
+        "@maven//:com_google_truth_extensions_truth_proto_extension",
     ],
 )
 
@@ -55,8 +55,8 @@ kt_jvm_test(
     deps = [
         "//stub/src/main/java/io/grpc/kotlin:context",
         "@io_grpc_grpc_java//core",
-        "@com_google_truth_truth//:com_google_truth_truth",
-        "@org_jetbrains_kotlinx_kotlinx_coroutines_core//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+        "@maven//:com_google_truth_truth",
+        "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
     ],
 )
 
@@ -67,6 +67,6 @@ kt_jvm_test(
     deps = [
         ":AbstractCallsTest",
         "//stub/src/test/proto/helloworld:hello_world_kt_grpc",
-        "@com_google_truth_extensions_truth_proto_extension//:com_google_truth_extensions_truth_proto_extension",
+        "@maven//:com_google_truth_extensions_truth_proto_extension",
     ],
 )

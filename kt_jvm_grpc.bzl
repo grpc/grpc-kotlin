@@ -219,11 +219,10 @@ def _kt_jvm_proto_library_helper_impl(ctx):
         outputs = [ctx.outputs.srcjar],
     )
 
-
 _kt_jvm_proto_library_helper = rule(
     attrs = dict(
         proto_deps = attr.label_list(
-            providers = [ProtoInfo]
+            providers = [ProtoInfo],
         ),
         deps = attr.label_list(
             providers = [JavaInfo],
@@ -239,15 +238,14 @@ _kt_jvm_proto_library_helper = rule(
         _zip = attr.label(
             default = Label("@bazel_tools//tools/zip:zipper"),
             cfg = "exec",
-            executable=True
+            executable = True,
         ),
     ),
     implementation = _kt_jvm_proto_library_helper_impl,
     outputs = dict(
         srcjar = "%{name}.srcjar",
-    )
+    ),
 )
-
 
 def kt_jvm_proto_library(
         name,
@@ -317,11 +315,11 @@ def kt_jvm_proto_library(
         name = name,
         srcs = [helper_target + ".srcjar"],
         deps = [
-            "@com_google_protobuf_protobuf_kotlin//jar",
-            java_proto_target
+            "@maven//:com_google_protobuf_protobuf_kotlin",
+            java_proto_target,
         ],
         exports = [
-            java_proto_target
+            java_proto_target,
         ],
         testonly = testonly,
         compatible_with = compatible_with,
@@ -331,4 +329,3 @@ def kt_jvm_proto_library(
         deprecation = deprecation,
         features = features,
     )
-
