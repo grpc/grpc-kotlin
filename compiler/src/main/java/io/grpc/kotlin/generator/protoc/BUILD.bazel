@@ -11,8 +11,8 @@ kt_jvm_library(
     srcs = glob(["*.kt"]),
     deps = [
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc/util/graph",
+        "@com_google_guava_guava",
         "@com_google_protobuf//:protobuf_java",
-        "@com_google_guava_guava//:com_google_guava_guava",
-        "@com_squareup_kotlinpoet//:com_squareup_kotlinpoet",
+        "@maven//:com_squareup_kotlinpoet",
     ],
 )
