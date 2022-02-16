@@ -20,10 +20,10 @@ import com.google.protobuf.util.JsonFormat
 
 object Database {
     fun features(): List<Feature> {
-        return javaClass.getResourceAsStream("route_guide_db.json").use {
-            FeatureDatabase.newBuilder().apply {
-                JsonFormat.parser().merge(it.reader(), this)
-            }
-        }.build().featureList
+        return javaClass.getResourceAsStream("route_guide_db.json")?.use {
+            val featureDatabaseBuilder = FeatureDatabase.newBuilder()
+            JsonFormat.parser().merge(it.reader(), featureDatabaseBuilder)
+            featureDatabaseBuilder.build().featureList
+        } ?: emptyList()
     }
 }
