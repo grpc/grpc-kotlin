@@ -11,6 +11,9 @@ java {
 dependencies {
     implementation(project(":stub"))
     runtimeOnly("io.grpc:grpc-netty:${rootProject.ext["grpcVersion"]}")
+
+    testImplementation(kotlin("test-junit"))
+    testImplementation("io.grpc:grpc-testing:${rootProject.ext["grpcVersion"]}")
 }
 
 tasks.register<JavaExec>("HelloWorldServer") {
@@ -56,4 +59,14 @@ tasks.named("startScripts") {
     dependsOn(helloWorldServerStartScripts)
     dependsOn(routeGuideServerStartScripts)
     dependsOn(animalsServerStartScripts)
+}
+
+tasks.withType<Test> {
+    useJUnit()
+
+    testLogging {
+        events = setOf(org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED, org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED, org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED)
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showStandardStreams = true
+    }
 }

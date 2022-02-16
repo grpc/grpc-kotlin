@@ -45,7 +45,7 @@ class HelloWorldServer(private val port: Int) {
         server.awaitTermination()
     }
 
-    private class HelloWorldService : GreeterGrpcKt.GreeterCoroutineImplBase() {
+    internal class HelloWorldService : GreeterGrpcKt.GreeterCoroutineImplBase() {
         override suspend fun sayHello(request: HelloRequest) = helloReply {
             message = "Hello ${request.name}"
         }

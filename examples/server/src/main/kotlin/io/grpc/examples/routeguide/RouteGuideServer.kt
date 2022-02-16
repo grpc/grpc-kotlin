@@ -59,9 +59,9 @@ class RouteGuideServer(
         server.awaitTermination()
     }
 
-    class RouteGuideService(
-        val features: Collection<Feature>,
-        val ticker: Ticker = Ticker.systemTicker()
+    internal class RouteGuideService(
+        private val features: Collection<Feature>,
+        private val ticker: Ticker = Ticker.systemTicker()
     ) : RouteGuideGrpcKt.RouteGuideCoroutineImplBase() {
         private val routeNotes = ConcurrentHashMap<Point, MutableList<RouteNote>>()
 
