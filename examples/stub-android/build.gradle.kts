@@ -22,7 +22,7 @@ dependencies {
 }
 
 android {
-    compileSdkVersion(31)
+    compileSdk = 31
     buildToolsVersion = "31.0.0"
 
     compileOptions {
