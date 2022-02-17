@@ -3,13 +3,13 @@ plugins {
     kotlin("android")
 }
 
-val composeVersion = "1.0.5"
+val composeVersion = "1.1.0"
 
 dependencies {
     implementation(project(":stub-android"))
     implementation(kotlin("stdlib"))
     implementation("androidx.activity:activity-compose:1.4.0")
-    implementation("androidx.appcompat:appcompat:1.4.0")
+    implementation("androidx.appcompat:appcompat:1.4.1")
 
     implementation("androidx.compose.foundation:foundation-layout:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
@@ -22,13 +22,13 @@ dependencies {
 }
 
 android {
-    compileSdkVersion(31)
+    compileSdk = 31
     buildToolsVersion = "31.0.0"
 
     defaultConfig {
         applicationId = "io.grpc.examples.hello"
-        minSdkVersion(26)
-        targetSdkVersion(31)
+        minSdk = 26
+        targetSdk = 31
         versionCode = 1
         versionName = "1.0"
 
@@ -53,6 +53,10 @@ android {
 
     composeOptions {
         kotlinCompilerExtensionVersion = composeVersion
+    }
+
+    packagingOptions {
+        resources.excludes += "META-INF/kotlinx_coroutines_core.version"
     }
 }
 
