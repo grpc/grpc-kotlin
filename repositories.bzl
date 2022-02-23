@@ -10,9 +10,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 IO_GRPC_GRPC_KOTLIN_ARTIFACTS = [
     "com.google.guava:guava:29.0-jre",
     "com.squareup:kotlinpoet:1.5.0",
-    "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9",
-    "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.3.9",
-    "org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.3.9",
+    "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1",
+    "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.1",
+    "org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.6.1",
 ]
 
 # For use with maven_install's override_targets.
