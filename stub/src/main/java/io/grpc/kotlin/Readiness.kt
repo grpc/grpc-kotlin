@@ -29,7 +29,7 @@ internal class Readiness(
   private val channel = Channel<Unit>(Channel.CONFLATED)
 
   fun onReady() {
-    if (!channel.offer(Unit)) {
+    if (!channel.trySend(Unit).isSuccess) {
       throw AssertionError(
         "Should be impossible; a CONFLATED channel should never return false on offer"
       )

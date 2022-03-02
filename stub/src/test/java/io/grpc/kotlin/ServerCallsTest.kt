@@ -34,7 +34,6 @@ import io.grpc.examples.helloworld.HelloReply
 import io.grpc.examples.helloworld.HelloRequest
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -42,7 +41,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.channels.toList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asFlow
@@ -365,7 +364,7 @@ class ServerCallsTest : AbstractCallsTest() {
     val responseChannel = Channel<HelloReply>()
     clientCall.start(object: ClientCall.Listener<HelloReply>() {
       override fun onMessage(message: HelloReply) {
-        responseChannel.sendBlocking(message)
+        responseChannel.trySendBlocking(message)
       }
 
       override fun onClose(status: Status, trailers: Metadata) {

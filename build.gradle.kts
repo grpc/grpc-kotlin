@@ -3,8 +3,8 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.72" apply false
-    id("com.google.protobuf") version "0.8.15" apply false
+    kotlin("jvm") version "1.6.10" apply false
+    id("com.google.protobuf") version "0.8.18" apply false
 
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
@@ -14,7 +14,7 @@ version = "1.2.1" // CURRENT_GRPC_KOTLIN_VERSION
 
 ext["grpcVersion"] = "1.36.0" // CURRENT_GRPC_VERSION
 ext["protobufVersion"] = "3.14.0"
-ext["coroutinesVersion"] = "1.3.3"
+ext["coroutinesVersion"] = "1.6.0"
 
 subprojects {
 
@@ -35,14 +35,14 @@ subprojects {
     }
 
     tasks.withType<JavaCompile> {
-        sourceCompatibility = JavaVersion.VERSION_1_7.toString()
-        targetCompatibility = JavaVersion.VERSION_1_7.toString()
+        sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+        targetCompatibility = JavaVersion.VERSION_1_8.toString()
     }
 
     tasks.withType<KotlinCompile> {
         kotlinOptions {
             freeCompilerArgs = listOf("-Xjsr305=strict")
-            jvmTarget = JavaVersion.VERSION_1_6.toString()
+            jvmTarget = JavaVersion.VERSION_1_8.toString()
         }
     }
 

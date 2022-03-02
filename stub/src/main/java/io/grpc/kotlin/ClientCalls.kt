@@ -26,7 +26,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -272,7 +271,7 @@ object ClientCalls {
   ): Flow<ResponseT> = flow {
     coroutineScope {
       val clientCall: ClientCall<RequestT, ResponseT> =
-        channel.newCall<RequestT, ResponseT>(method, callOptions)
+        channel.newCall(method, callOptions)
 
       /*
        * We maintain a buffer of size 1 so onMessage never has to block: it only gets called after
@@ -285,7 +284,7 @@ object ClientCalls {
       clientCall.start(
         object : ClientCall.Listener<ResponseT>() {
           override fun onMessage(message: ResponseT) {
-            if (!responses.offer(message)) {
+            if (!responses.trySend(message).isSuccess) {
               throw AssertionError("onMessage should never be called until responses is ready")
             }
           }

@@ -31,7 +31,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -215,7 +214,7 @@ object ServerCalls {
 
     val requestsStarted = AtomicBoolean(false) // enforces read-once
 
-    val requests = flow<RequestT> {
+    val requests = flow {
       check(requestsStarted.compareAndSet(false, true)) {
         "requests flow can only be collected once"
       }
@@ -276,7 +275,7 @@ object ServerCalls {
       override fun onMessage(message: RequestT) {
         if (isReceiving) {
           try {
-            if (!requestsChannel.offer(message)) {
+            if (!requestsChannel.trySend(message).isSuccess) {
               throw Status.INTERNAL
                 .withDescription(
                   "onMessage should never be called when requestsChannel is unready"
