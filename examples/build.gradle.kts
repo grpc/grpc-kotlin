@@ -6,9 +6,9 @@ plugins {
 }
 
 // todo: move to subprojects, but how?
-ext["grpcVersion"] = "1.39.0" // need to wait for grpc kotlin to move past this
+ext["grpcVersion"] = "1.45.0"
 ext["grpcKotlinVersion"] = "1.2.1" // CURRENT_GRPC_KOTLIN_VERSION
-ext["protobufVersion"] = "3.19.2"
+ext["protobufVersion"] = "3.19.4"
 ext["coroutinesVersion"] = "1.6.0"
 
 allprojects {
