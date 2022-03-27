@@ -893,6 +893,7 @@ class ServerCallsTest : AbstractCallsTest() {
         }
 
         override fun onClose(status: Status, trailers: Metadata) {
+          headersReceived.complete()
           closeStatus.complete(status)
         }
       },
