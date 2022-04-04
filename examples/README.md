@@ -42,6 +42,7 @@ The example sources are organized into the following top-level folders:
   ./gradlew :client:AnimalsClient --args=pig
   ./gradlew :client:AnimalsClient --args=sheep
   ```
+  </details>
 
 - <details>
   <summary>GraalVM native image example</summary>
@@ -58,6 +59,7 @@ The example sources are organized into the following top-level folders:
   ./gradlew :native-client:nativeImage
   native-client/build/graal/hello-world
   ```
+  </details>
 
 - <details>
   <summary>Android example</summary>
@@ -149,6 +151,7 @@ The example sources are organized into the following top-level folders:
               ```
 
           1. Navigate to `android/src/main/kotlin/io/grpc/examples/helloworld` and right-click on `MainActivity` and select `Run`.
+  </details>
 
 [Basics tutorial]: https://grpc.io/docs/languages/kotlin/basics/
 [grpc.io Kotlin/JVM]: https://grpc.io/docs/languages/kotlin/

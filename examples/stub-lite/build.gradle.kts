@@ -14,6 +14,7 @@ dependencies {
 
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext["coroutinesVersion"]}")
 
+    api("io.grpc:grpc-stub:${rootProject.ext["grpcVersion"]}")
     api("io.grpc:grpc-protobuf-lite:${rootProject.ext["grpcVersion"]}")
     api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}")
     api("com.google.protobuf:protobuf-kotlin-lite:${rootProject.ext["protobufVersion"]}")
