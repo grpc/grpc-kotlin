@@ -25,7 +25,7 @@ dependencies {
     testImplementation("junit:junit:4.12")
     testImplementation("com.google.guava:guava:28.2-jre")
     testImplementation("com.google.jimfs:jimfs:1.1")
-    testImplementation("com.google.protobuf:protobuf-gradle-plugin:0.8.13")
+    testImplementation("com.google.protobuf:protobuf-gradle-plugin:0.8.18")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.5.2")
     testImplementation("org.mockito:mockito-core:2.28.2")
@@ -57,7 +57,7 @@ publishing {
             }
 
             artifact(tasks.jar) {
-                classifier = "jdk7"
+                classifier = "jdk8"
             }
         }
     }

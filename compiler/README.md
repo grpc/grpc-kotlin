@@ -37,7 +37,7 @@ protobuf {
             artifact = "io.grpc:protoc-gen-grpc-java:YOUR_GRPC_VERSION"
         }
         id("grpckt") {
-            artifact = "io.grpc:protoc-gen-grpc-kotlin:YOUR_GRPC_KOTLIN_VERSION:jdk7@jar"
+            artifact = "io.grpc:protoc-gen-grpc-kotlin:YOUR_GRPC_KOTLIN_VERSION:jdk8@jar"
         }
     }
     generateProtoTasks {
@@ -146,7 +146,7 @@ And finally add the build job for the proto as last plugin:
                             <groupId>io.grpc</groupId>
                             <artifactId>protoc-gen-grpc-kotlin</artifactId>
                             <version>${grpc.kotlin.version}</version>
-                            <classifier>jdk7</classifier>
+                            <classifier>jdk8</classifier>
                             <mainClass>io.grpc.kotlin.generator.GeneratorRunner</mainClass>
                         </protocPlugin>
                     </protocPlugins>
@@ -178,7 +178,7 @@ that just runs that `jar`, for example create a file named `protoc-gen-grpc-kotl
 #!/usr/bin/env sh
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-java -jar $DIR/protoc-gen-grpc-kotlin-SOME_VERSION-jdk7.jar "$@
+java -jar $DIR/protoc-gen-grpc-kotlin-SOME_VERSION-jdk8.jar "$@
 ```
 
 Then make that file executable:
@@ -195,7 +195,7 @@ protoc --plugin=protoc-gen-grpckt=protoc-gen-grpc-kotlin.sh \
 ## Developer Info
 
 * Linux, Mac OS X with Clang, or Windows with MSYS2
-* Java 7 or up
+* Java 8 or up
 * [Protobuf](https://github.com/google/protobuf) 3.0.0-beta-3 or up
 
 ### Compiling and testing the codegen
