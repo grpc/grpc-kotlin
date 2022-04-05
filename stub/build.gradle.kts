@@ -17,7 +17,7 @@ repositories {
 dependencies {
     // Kotlin
     implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext["coroutinesVersion"]}")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:${rootProject.ext["coroutinesVersion"]}")
 
     // Grpc
     api("io.grpc:grpc-stub:${rootProject.ext["grpcVersion"]}")

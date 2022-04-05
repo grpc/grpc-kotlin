@@ -15,16 +15,20 @@
  */
 package io.grpc.kotlin.generator.protoc.util.graph
 
+import com.google.common.annotations.Beta
 import com.google.common.base.Preconditions.checkArgument
 import com.google.common.graph.Graph
 import io.grpc.kotlin.generator.protoc.util.sort.PartialOrdering
 import io.grpc.kotlin.generator.protoc.util.sort.TopologicalSort.sortLexicographicallyLeast
 
+@Beta
 object TopologicalSortGraph {
     fun <N> topologicalOrdering(graph: Graph<N>): List<N> {
         checkArgument(graph.isDirected, "Cannot get topological ordering of an undirected graph.")
         val partialOrdering: PartialOrdering<N> = object : PartialOrdering<N> {
-            override fun getPredecessors(element: N): Set<N> = graph.predecessors(element)
+            override fun getPredecessors(element: N): Set<N> = element?.let {
+                graph.predecessors(it)
+            } ?: emptySet()
         }
         return sortLexicographicallyLeast(graph.nodes(), partialOrdering)
     }
