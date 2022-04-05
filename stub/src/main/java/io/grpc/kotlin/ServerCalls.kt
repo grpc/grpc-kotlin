@@ -276,7 +276,10 @@ object ServerCalls {
       override fun onMessage(message: RequestT) {
         if (isReceiving) {
           try {
-            if (!requestsChannel.offer(message)) {
+            try {
+              requestsChannel.trySend(message).getOrThrow()
+            }
+            catch (e: Exception) {
               throw Status.INTERNAL
                 .withDescription(
                   "onMessage should never be called when requestsChannel is unready"
