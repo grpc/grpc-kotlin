@@ -323,7 +323,7 @@ class TestServiceClient {
     private fun validTestCasesHelpText(): String {
       val builder = StringBuilder()
       for (testCase in TestCases.values()) {
-        val strTestcase = testCase.name.toLowerCase()
+        val strTestcase = testCase.name.lowercase()
         builder.append("\n      ")
           .append(strTestcase)
           .append(": ")
