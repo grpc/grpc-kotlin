@@ -993,7 +993,7 @@ class ServerCallsTest : AbstractCallsTest() {
     )
 
     val retryPolicy = hashMapOf<String, Any>()
-    retryPolicy["maxAttempts"] = 5.0
+    retryPolicy["maxAttempts"] = retryCount
     retryPolicy["initialBackoff"] = "0.5s"
     retryPolicy["maxBackoff"] = "30s"
     retryPolicy["backoffMultiplier"] = 2.0
