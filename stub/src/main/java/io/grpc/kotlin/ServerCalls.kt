@@ -39,6 +39,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.channels.onFailure
 import io.grpc.Metadata as GrpcMetadata
 
 /**
@@ -275,20 +276,17 @@ object ServerCalls {
 
       override fun onMessage(message: RequestT) {
         if (isReceiving) {
-          try {
-            try {
-              requestsChannel.trySend(message).getOrThrow()
-            }
-            catch (e: Exception) {
+          val result = requestsChannel.trySend(message)
+          isReceiving = isReceiving && result.isSuccess
+          result.onFailure { ex ->
+            if (ex !is CancellationException) {
               throw Status.INTERNAL
                 .withDescription(
                   "onMessage should never be called when requestsChannel is unready"
                 )
+                .withCause(ex)
                 .asException()
             }
-          } catch (e: CancellationException) {
-            // we don't want any more client input; swallow it
-            isReceiving = false
           }
         }
         if (!isReceiving) {
