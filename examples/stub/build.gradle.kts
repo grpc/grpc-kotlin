@@ -15,6 +15,7 @@ dependencies {
     api(kotlin("stdlib"))
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext["coroutinesVersion"]}")
 
+    api("io.grpc:grpc-stub:${rootProject.ext["grpcVersion"]}")
     api("io.grpc:grpc-protobuf:${rootProject.ext["grpcVersion"]}")
     api("com.google.protobuf:protobuf-java-util:${rootProject.ext["protobufVersion"]}")
     api("com.google.protobuf:protobuf-kotlin:${rootProject.ext["protobufVersion"]}")

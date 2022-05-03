@@ -18,20 +18,12 @@ package io.grpc.kotlin
 
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
-import io.grpc.CallOptions
-import io.grpc.ClientCall
-import io.grpc.Context
-import io.grpc.Contexts
-import io.grpc.Metadata
-import io.grpc.ServerCall
-import io.grpc.ServerCallHandler
-import io.grpc.ServerInterceptor
-import io.grpc.Status
-import io.grpc.StatusException
-import io.grpc.StatusRuntimeException
+import io.grpc.*
 import io.grpc.examples.helloworld.GreeterGrpc
 import io.grpc.examples.helloworld.HelloReply
 import io.grpc.examples.helloworld.HelloRequest
+import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineStub
+import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineImplBase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -893,6 +885,7 @@ class ServerCallsTest : AbstractCallsTest() {
         }
 
         override fun onClose(status: Status, trailers: Metadata) {
+          headersReceived.complete()
           closeStatus.complete(status)
         }
       },
@@ -957,5 +950,65 @@ class ServerCallsTest : AbstractCallsTest() {
     headersReceived.join()
     val status = closeStatus.await()
     assertThat(status.code).isEqualTo(Status.Code.OK)
+  }
+
+  @Test
+  fun coroutinesServerRetry() {
+    runBlocking {
+      val retryCount = 5
+      val config = getRetryingServiceConfig(retryCount.toDouble())
+      val coroutinesServer = object : GreeterCoroutineImplBase() {
+        var count = 0
+          private set
+
+        override suspend fun sayHello(request: HelloRequest): HelloReply {
+          count++
+          throw StatusRuntimeException(Status.UNKNOWN)
+        }
+      }
+
+      val channel = makeChannel(coroutinesServer.bindService(), config)
+
+      val coroutineStub = GreeterCoroutineStub(channel)
+
+      try {
+        coroutineStub.sayHello(helloRequest("hello"))
+      } catch (e: Exception) {
+        assertThat(coroutinesServer.count).isEqualTo(retryCount)
+      }
+    }
+  }
+
+  private fun getRetryingServiceConfig(
+    retryCount: Double
+  ): Map<String, Any> {
+    val config = hashMapOf<String, Any>()
+
+    val name = mutableListOf<Map<String, Any>>()
+    name.add(
+      mapOf(
+        "service" to "helloworld.Greeter",
+        "method" to "SayHello"
+      )
+    )
+
+    val retryPolicy = hashMapOf<String, Any>()
+    retryPolicy["maxAttempts"] = retryCount
+    retryPolicy["initialBackoff"] = "0.5s"
+    retryPolicy["maxBackoff"] = "30s"
+    retryPolicy["backoffMultiplier"] = 2.0
+    retryPolicy["retryableStatusCodes"] = listOf("UNKNOWN")
+
+    val methodConfig = mutableListOf<Map<String, Any>>()
+    val serviceConfig = hashMapOf<String, Any>()
+
+    serviceConfig["name"] = name
+    serviceConfig["retryPolicy"] = retryPolicy
+
+    methodConfig.add(serviceConfig)
+
+    config["methodConfig"] = methodConfig
+
+    return config
   }
 }
