@@ -277,7 +277,7 @@ object ServerCalls {
       override fun onMessage(message: RequestT) {
         if (isReceiving) {
           val result = requestsChannel.trySend(message)
-          isReceiving = isReceiving && result.isSuccess
+          isReceiving = result.isSuccess
           result.onFailure { ex ->
             if (ex !is CancellationException) {
               throw Status.INTERNAL
