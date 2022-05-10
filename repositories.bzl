@@ -36,8 +36,8 @@ def grpc_kt_repositories():
         io_grpc_grpc_java()
 
 def io_bazel_rules_kotlin():
-    rules_kotlin_version = "v1.5.0-beta-3"
-    rules_kotlin_sha = "58edd86f0f3c5b959c54e656b8e7eb0b0becabd412465c37a2078693c2571f7f"
+    rules_kotlin_version = "1.6.0-RC-1"
+    rules_kotlin_sha = "f1a4053eae0ea381147f5056bb51e396c5c494c7f8d50d0dee4cc2f9d5c701b0"
     http_archive(
         name = "io_bazel_rules_kotlin",
         urls = ["https://github.com/bazelbuild/rules_kotlin/releases/download/%s/rules_kotlin_release.tgz" % rules_kotlin_version],
@@ -58,7 +58,7 @@ def com_google_protobuf():
 def io_grpc_grpc_java():
     http_archive(
         name = "io_grpc_grpc_java",
-        sha256 = "e274597cc4de351b4f79e4c290de8175c51a403dc39f83f1dfc50a1d1c9e9a4f",
-        strip_prefix = "grpc-java-1.28.0",
-        url = "https://github.com/grpc/grpc-java/archive/v1.28.0.zip",
+        sha256 = "f588804614fea2452dbb42517f874230b1a66a4afd7e7eefb0413c666fb821b8",
+        strip_prefix = "grpc-java-1.36.0",
+        url = "https://github.com/grpc/grpc-java/archive/v1.36.0.zip",
     )
