@@ -12,8 +12,8 @@ plugins {
 group = "io.grpc"
 version = "1.2.1" // CURRENT_GRPC_KOTLIN_VERSION
 
-ext["grpcVersion"] = "1.36.0" // CURRENT_GRPC_VERSION
-ext["protobufVersion"] = "3.14.0"
+ext["grpcVersion"] = "1.46.0"
+ext["protobufVersion"] = "3.20.1"
 ext["coroutinesVersion"] = "1.6.1"
 
 subprojects {

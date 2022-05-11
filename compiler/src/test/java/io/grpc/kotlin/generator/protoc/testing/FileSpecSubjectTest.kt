@@ -16,7 +16,6 @@
 
 package io.grpc.kotlin.generator.protoc.testing
 
-import com.google.common.truth.ExpectFailure.SimpleSubjectBuilderCallback
 import com.google.common.truth.ExpectFailure.expectFailureAbout
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.INT
@@ -35,11 +34,11 @@ class FileSpecSubjectTest {
 
   @Test
   fun generates() {
-    io.grpc.kotlin.generator.protoc.testing.assertThat(fileSpec).generates(
+    assertThat(fileSpec).generates(
       """
       import kotlin.Int
 
-      val bar: Int
+      public val bar: Int
     """
     )
   }
@@ -47,16 +46,10 @@ class FileSpecSubjectTest {
   @Test
   fun generatesFailure() {
     expectFailureAbout(
-      io.grpc.kotlin.generator.protoc.testing.fileSpecs,
-      SimpleSubjectBuilderCallback { whenTesting ->
-        whenTesting.that(fileSpec).generates("")
-      }
-    )
+      fileSpecs
+    ) { it.that(fileSpec).generates("") }
     expectFailureAbout(
-      io.grpc.kotlin.generator.protoc.testing.fileSpecs,
-      SimpleSubjectBuilderCallback { whenTesting ->
-        whenTesting.that(fileSpec).generates("object Foo")
-      }
-    )
+      fileSpecs
+    ) { it.that(fileSpec).generates("object Foo") }
   }
 }

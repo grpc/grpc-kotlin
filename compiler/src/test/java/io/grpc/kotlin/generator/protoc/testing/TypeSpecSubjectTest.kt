@@ -16,7 +16,6 @@
 
 package io.grpc.kotlin.generator.protoc.testing
 
-import com.google.common.truth.ExpectFailure.SimpleSubjectBuilderCallback
 import com.google.common.truth.ExpectFailure.expectFailureAbout
 import com.squareup.kotlinpoet.INT
 import com.squareup.kotlinpoet.PropertySpec
@@ -36,10 +35,10 @@ class TypeSpecSubjectTest {
 
   @Test
   fun generates() {
-    io.grpc.kotlin.generator.protoc.testing.assertThat(typeSpec).generates(
+    assertThat(typeSpec).generates(
       """
-      object Foo {
-        val bar: kotlin.Int
+      public object Foo {
+        public val bar: kotlin.Int
       }
     """
     )
@@ -48,16 +47,10 @@ class TypeSpecSubjectTest {
   @Test
   fun generatesFailure() {
     expectFailureAbout(
-      io.grpc.kotlin.generator.protoc.testing.typeSpecs,
-      SimpleSubjectBuilderCallback { whenTesting ->
-        whenTesting.that(typeSpec).generates("")
-      }
-    )
+      typeSpecs
+    ) { it.that(typeSpec).generates("") }
     expectFailureAbout(
-      io.grpc.kotlin.generator.protoc.testing.typeSpecs,
-      SimpleSubjectBuilderCallback { whenTesting ->
-        whenTesting.that(typeSpec).generates("object Foo")
-      }
-    )
+      typeSpecs
+    ) { it.that(typeSpec).generates("public object Foo") }
   }
 }

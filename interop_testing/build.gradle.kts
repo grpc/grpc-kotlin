@@ -20,9 +20,12 @@ dependencies {
 
     implementation("com.google.protobuf:protobuf-java:${rootProject.ext["protobufVersion"]}")
 
-    implementation("com.google.truth:truth:1.0.1")
+    implementation("com.google.truth:truth:1.1.3")
 
-    testImplementation("org.mockito:mockito-core:2.28.2")
+    testImplementation("org.mockito:mockito-core:4.5.1")
+    testImplementation("com.squareup.okhttp:okhttp:2.7.5") {
+        because("transitive dep for grpc-okhttp")
+    }
 }
 
 protobuf {

@@ -3,7 +3,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 import java.net.URL
 
 plugins {
-    id("org.jetbrains.dokka") version "1.4.30"
+    id("org.jetbrains.dokka") version "1.6.21"
 }
 
 repositories {
@@ -26,10 +26,10 @@ dependencies {
     api("javax.annotation:javax.annotation-api:1.3.2")
 
     // Testing
-    testImplementation("junit:junit:4.12")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.5.2")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-debug:${rootProject.ext["coroutinesVersion"]}")
-    testImplementation("com.google.truth.extensions:truth-proto-extension:1.0")
+    testImplementation("com.google.truth.extensions:truth-proto-extension:1.1.3")
     testImplementation("io.grpc:grpc-protobuf:${rootProject.ext["grpcVersion"]}")
     testImplementation("io.grpc:grpc-testing:${rootProject.ext["grpcVersion"]}") // gRCP testing utilities
 }
