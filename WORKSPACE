@@ -43,7 +43,12 @@ maven_install(
     repositories = [
         "https://repo.maven.apache.org/maven2/",
     ],
+    generate_compat_repositories = True,
 )
+
+load("@maven//:compat.bzl", "compat_repositories")
+
+compat_repositories()
 
 # gRPC
 grpc_kt_repositories()
