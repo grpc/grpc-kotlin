@@ -58,10 +58,11 @@ class DeclarationsTest {
       package com.foo.bar
 
       import kotlin.Int
+      import kotlin.Unit
 
-      val someProperty: Int
+      public val someProperty: Int
 
-      fun someFunction() {
+      public fun someFunction(): Unit {
       }
       """.trimIndent()
     )
@@ -83,7 +84,7 @@ class DeclarationsTest {
 
       import kotlin.Int
 
-      val someProperty: Int
+      public val someProperty: Int
       """.trimIndent()
     )
   }
@@ -110,8 +111,10 @@ class DeclarationsTest {
       """
       package com.foo.bar
 
-      object SomeObject {
-        fun someFunction() {
+      import kotlin.Unit
+
+      public object SomeObject {
+        public fun someFunction(): Unit {
         }
       }
       """.trimIndent()
@@ -155,7 +158,7 @@ class DeclarationsTest {
       """
       import kotlin.Int
 
-      val someProperty: Int
+      public val someProperty: Int
     """
     )
     assertThat(decls).generatesNoEnclosedMembers()
@@ -169,7 +172,9 @@ class DeclarationsTest {
     assertThat(decls)
       .generatesTopLevel(
         """
-        fun someFunction() {
+        import kotlin.Unit
+
+        public fun someFunction(): Unit {
         }
         """
       )
@@ -181,7 +186,7 @@ class DeclarationsTest {
     val decls = declarations {
       addTopLevelType(type)
     }
-    assertThat(decls).generatesTopLevel("object MyObject")
+    assertThat(decls).generatesTopLevel("public object MyObject")
     assertThat(decls).generatesNoEnclosedMembers()
   }
 }

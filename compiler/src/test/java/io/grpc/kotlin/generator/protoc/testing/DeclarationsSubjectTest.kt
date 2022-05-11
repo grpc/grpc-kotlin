@@ -41,7 +41,7 @@ class DeclarationsSubjectTest {
       """
       import kotlin.Int
 
-      val topLevel: Int
+      public val topLevel: Int
     """
     )
   }
@@ -52,7 +52,7 @@ class DeclarationsSubjectTest {
       """
       import kotlin.Int
 
-      val enclosed: Int
+      public val enclosed: Int
       """
     )
   }
@@ -60,21 +60,15 @@ class DeclarationsSubjectTest {
   @Test
   fun generatesTopLevelFailure() {
     expectFailureAbout(
-      declarationsSubjectFactory,
-      SimpleSubjectBuilderCallback { whenTesting ->
-        whenTesting.that(decls).generatesTopLevel("")
-      }
-    )
+      declarationsSubjectFactory
+    ) { it.that(decls).generatesTopLevel("") }
   }
 
   @Test
   fun generatesEnclosedFailure() {
     expectFailureAbout(
-      declarationsSubjectFactory,
-      SimpleSubjectBuilderCallback { whenTesting ->
-        whenTesting.that(decls).generatesEnclosed("")
-      }
-    )
+      declarationsSubjectFactory
+    ) { it.that(decls).generatesEnclosed("") }
   }
 
   @Test
@@ -98,20 +92,14 @@ class DeclarationsSubjectTest {
   @Test
   fun generatesNoTopLevelFailure() {
     expectFailureAbout(
-      declarationsSubjectFactory,
-      SimpleSubjectBuilderCallback { whenTesting ->
-        whenTesting.that(decls).generatesNoTopLevelMembers()
-      }
-    )
+      declarationsSubjectFactory
+    ) { it.that(decls).generatesNoTopLevelMembers() }
   }
 
   @Test
   fun generatesNoEnclosedFailure() {
     expectFailureAbout(
-      declarationsSubjectFactory,
-      SimpleSubjectBuilderCallback { whenTesting ->
-        whenTesting.that(decls).generatesNoEnclosedMembers()
-      }
-    )
+      declarationsSubjectFactory
+    ) { it.that(decls).generatesNoEnclosedMembers() }
   }
 }

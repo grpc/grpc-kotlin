@@ -55,12 +55,12 @@ class ClassSimpleNameTest {
   @Test
   fun classBuilder() {
     val simpleName = ClassSimpleName("SimpleName")
-    assertThat(TypeSpec.classBuilder(simpleName).build()).generates("class SimpleName")
+    assertThat(TypeSpec.classBuilder(simpleName).build()).generates("public class SimpleName")
   }
 
   @Test
   fun objectBuilder() {
     val simpleName = ClassSimpleName("SimpleName")
-    assertThat(TypeSpec.objectBuilder(simpleName).build()).generates("object SimpleName")
+    assertThat(TypeSpec.objectBuilder(simpleName).build()).generates("public object SimpleName")
   }
 }

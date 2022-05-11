@@ -8,7 +8,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 #     ] + IO_GRPC_GRPC_KOTLIN_ARTIFACTS + IO_GRPC_GRPC_JAVA_ARTIFACTS,
 # )
 IO_GRPC_GRPC_KOTLIN_ARTIFACTS = [
-    "com.google.guava:guava:29.0-jre",
+    "com.google.guava:guava:29.0-android",
     "com.squareup:kotlinpoet:1.5.0",
     "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1",
     "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.1",
@@ -45,8 +45,8 @@ def io_bazel_rules_kotlin():
     )
 
 def com_google_protobuf():
-    protobuf_version = "3.17.3"
-    protobuf_sha = "77ad26d3f65222fd96ccc18b055632b0bfedf295cb748b712a98ba1ac0b704b2"
+    protobuf_version = "3.20.1"
+    protobuf_sha = "3a400163728db996e8e8d21c7dfb3c239df54d0813270f086c4030addeae2fad"
 
     http_archive(
         name = "com_google_protobuf",
@@ -58,7 +58,7 @@ def com_google_protobuf():
 def io_grpc_grpc_java():
     http_archive(
         name = "io_grpc_grpc_java",
-        sha256 = "f588804614fea2452dbb42517f874230b1a66a4afd7e7eefb0413c666fb821b8",
-        strip_prefix = "grpc-java-1.36.0",
-        url = "https://github.com/grpc/grpc-java/archive/v1.36.0.zip",
+        sha256 = "2f2ca0701cf23234e512f415318bfeae00036a980f6a83574264f41c0201e5cd",
+        strip_prefix = "grpc-java-1.46.0",
+        url = "https://github.com/grpc/grpc-java/archive/v1.46.0.zip",
     )

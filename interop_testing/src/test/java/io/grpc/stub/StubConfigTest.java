@@ -58,7 +58,7 @@ public class StubConfigTest {
    * Sets up mocks.
    */
   @Before public void setUp() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     ClientCall<SimpleRequest, SimpleResponse> call =
         new NoopClientCall<>();
     when(channel.newCall(
