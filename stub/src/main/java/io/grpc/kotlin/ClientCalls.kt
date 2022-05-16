@@ -285,11 +285,8 @@ object ClientCalls {
       clientCall.start(
         object : ClientCall.Listener<ResponseT>() {
           override fun onMessage(message: ResponseT) {
-            try {
-              responses.trySend(message).getOrThrow()
-            }
-            catch (e: Exception) {
-              throw AssertionError("onMessage should never be called until responses is ready")
+            responses.trySend(message).onFailure { e ->
+              throw e ?: AssertionError("onMessage should never be called until responses is ready")
             }
           }
 
