@@ -17,6 +17,7 @@
 package io.grpc.kotlin
 
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.onFailure
 
 /**
  * A simple helper allowing a notification of "ready" to be broadcast, and waited for.
