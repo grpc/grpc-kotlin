@@ -9,7 +9,7 @@ plugins {
 ext["grpcVersion"] = "1.46.0"
 ext["grpcKotlinVersion"] = "1.3.0" // CURRENT_GRPC_KOTLIN_VERSION
 ext["protobufVersion"] = "3.20.1"
-ext["coroutinesVersion"] = "1.6.1"
+ext["coroutinesVersion"] = "1.6.2"
 
 allprojects {
     repositories {
