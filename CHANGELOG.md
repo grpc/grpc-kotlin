@@ -1,5 +1,22 @@
 ## Change Log
 
+### 1.3.0
+
+#### Changes
+* Pin Bazel version by @Kernald in https://github.com/grpc/grpc-kotlin/pull/322
+* Use proper Maven targets rather than legacy compat ones by @Kernald in https://github.com/grpc/grpc-kotlin/pull/321
+* bump versions by @jamesward in https://github.com/grpc/grpc-kotlin/pull/325
+* add server examples - fixes #317 by @jamesward in https://github.com/grpc/grpc-kotlin/pull/319
+* bump versions by @jamesward in https://github.com/grpc/grpc-kotlin/pull/329
+* send headers when failure is null by @sangyongchoi in https://github.com/grpc/grpc-kotlin/pull/335
+* Upgrade coroutines version to 1.6.1. by @lowasser in https://github.com/grpc/grpc-kotlin/pull/327
+
+## New Contributors
+* @Kernald made their first contribution in https://github.com/grpc/grpc-kotlin/pull/322
+* @sangyongchoi made their first contribution in https://github.com/grpc/grpc-kotlin/pull/335
+
+**Full Changelog**: https://github.com/grpc/grpc-kotlin/compare/v1.2.1...v1.3.0
+
 ### 1.2.1
 
 #### Changes
