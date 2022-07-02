@@ -20,6 +20,7 @@ import io.grpc.CallOptions
 import io.grpc.ClientCall
 import io.grpc.MethodDescriptor
 import io.grpc.Status
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
@@ -292,9 +293,13 @@ object ClientCalls {
           }
 
           override fun onClose(status: Status, trailersMetadata: GrpcMetadata) {
-            responses.close(
-              cause = if (status.isOk) null else status.asException(trailersMetadata)
-            )
+            val cause =
+              when {
+                status.isOk -> null
+                status.cause is CancellationException -> status.cause
+                else -> status.asException(trailersMetadata)
+              }
+            responses.close(cause = cause)
           }
 
           override fun onReady() {

@@ -662,31 +662,7 @@ abstract class AbstractInteropTest {
 
   @Test
   fun cancelAfterFirstResponse() {
-    val request = StreamingOutputCallRequest.newBuilder()
-      .addResponseParameters(
-        ResponseParameters.newBuilder()
-          .setSize(31415)
-      )
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(27182)))
-      )
-      .build()
-
-    runBlocking {
-      val ex = assertFailsWith<StatusException> {
-        stub
-          .fullDuplexCall(
-            flow {
-              emit(request)
-              throw CancellationException()
-            }
-          )
-          .collect()
-      }
-      assertThat(ex.status.code).isEqualTo(Status.Code.CANCELLED)
-    }
-    assertStatsTrace("grpc.testing.TestService/FullDuplexCall", Status.Code.CANCELLED)
+    // This test is not relevant to flow API.
   }
 
   @Test
