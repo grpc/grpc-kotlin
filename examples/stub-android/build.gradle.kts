@@ -13,7 +13,7 @@ plugins {
 dependencies {
     protobuf(project(":protos"))
 
-    api(kotlin("stdlib"))
+    api(kotlin("stdlib-jdk8"))
     api("org.jetbrains.kotlinx:kotlinx-coroutines-android:${rootProject.ext["coroutinesVersion"]}")
 
     api("io.grpc:grpc-stub:${rootProject.ext["grpcVersion"]}")
@@ -35,7 +35,7 @@ android {
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
-        freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
+        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
     }
 }
 
