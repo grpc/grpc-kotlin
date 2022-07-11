@@ -173,6 +173,7 @@ abstract class AbstractCallsTest {
         .forName(serverName)
         .enableRetry()
         .defaultServiceConfig(serviceConfig)
+        .propagateCauseWithStatus(true)
         .run { this as io.grpc.ManagedChannelBuilder<*> } // workaround b/123879662
         .executor(executor)
         .build()

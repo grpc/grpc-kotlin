@@ -29,6 +29,7 @@ import io.grpc.Metadata
 import io.grpc.MethodDescriptor
 import io.grpc.Status
 import io.grpc.StatusException
+import io.grpc.StatusRuntimeException
 import io.grpc.examples.helloworld.GreeterGrpc
 import io.grpc.examples.helloworld.HelloReply
 import io.grpc.examples.helloworld.HelloRequest
@@ -220,6 +221,48 @@ class ClientCallsTest: AbstractCallsTest() {
       )
     }
     assertThat(ex.status.code).isEqualTo(Status.Code.UNKNOWN)
+  }
+
+  @Test
+  fun unaryStatusExceptionPropagated() = runBlocking {
+    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
+      override fun sayHello(request: HelloRequest, responseObserver: StreamObserver<HelloReply>) {
+        responseObserver.onError(StatusException(Status.INTERNAL))
+      }
+    }
+
+    channel = makeChannel(serverImpl)
+
+    val ex = assertThrows<StatusException> {
+      ClientCalls.unaryRpc(
+        channel = channel,
+        callOptions = CallOptions.DEFAULT,
+        method = sayHelloMethod,
+        request = helloRequest("Cindy")
+      )
+    }
+    assertThat(ex.status.code).isEqualTo(Status.Code.INTERNAL)
+  }
+
+  @Test
+  fun unaryStatusRuntimeExceptionPropagated() = runBlocking {
+    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
+      override fun sayHello(request: HelloRequest, responseObserver: StreamObserver<HelloReply>) {
+        responseObserver.onError(StatusRuntimeException(Status.INTERNAL.withCause(StatusRuntimeException(Status.INTERNAL))))
+      }
+    }
+
+    channel = makeChannel(serverImpl)
+
+    val ex = assertThrows<StatusRuntimeException> {
+      ClientCalls.unaryRpc(
+        channel = channel,
+        callOptions = CallOptions.DEFAULT,
+        method = sayHelloMethod,
+        request = helloRequest("Cindy")
+      )
+    }
+    assertThat(ex.status.code).isEqualTo(Status.Code.INTERNAL)
   }
 
   @Test
