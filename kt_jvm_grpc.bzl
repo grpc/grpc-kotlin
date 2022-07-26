@@ -255,6 +255,7 @@ def kt_jvm_proto_library(
         compatible_with = None,
         restricted_to = None,
         visibility = None,
+        flavor = None,
         deprecation = None,
         features = []):
     """
@@ -278,23 +279,38 @@ def kt_jvm_proto_library(
       compatible_with: Standard attribute
       restricted_to: Standard attribute
       visibility: Standard attribute
+      flavor: "normal" (default) for normal proto runtime, or "lite" for the lite runtime
+        (for Android usage)
       deprecation: Standard attribute
       features: Standard attribute
     """
     java_proto_target = ":%s_DO_NOT_DEPEND_java_proto" % name
     helper_target = ":%s_DO_NOT_DEPEND_kt_proto" % name
 
-    native.java_proto_library(
-        name = java_proto_target[1:],
-        deps = deps,
-        testonly = testonly,
-        compatible_with = compatible_with,
-        visibility = ["//visibility:private"],
-        restricted_to = restricted_to,
-        tags = tags,
-        deprecation = deprecation,
-        features = features,
-    )
+    if flavor == "lite":
+        native.java_lite_proto_library(
+            name = java_proto_target[1:],
+            deps = deps,
+            testonly = testonly,
+            compatible_with = compatible_with,
+            visibility = ["//visibility:private"],
+            restricted_to = restricted_to,
+            tags = tags,
+            deprecation = deprecation,
+            features = features,
+        )
+    else:
+        native.java_proto_library(
+            name = java_proto_target[1:],
+            deps = deps,
+            testonly = testonly,
+            compatible_with = compatible_with,
+            visibility = ["//visibility:private"],
+            restricted_to = restricted_to,
+            tags = tags,
+            deprecation = deprecation,
+            features = features,
+        )
 
     _kt_jvm_proto_library_helper(
         name = helper_target[1:],
