@@ -61,7 +61,9 @@ class GeneratorConfigTest {
         """
         package com.google
 
-        fun fooBar() {
+        import kotlin.Unit
+
+        public fun fooBar(): Unit {
         }
         """.trimIndent()
       )
@@ -75,7 +77,9 @@ class GeneratorConfigTest {
         """
         package com.google
 
-        inline fun fooBar() {
+        import kotlin.Unit
+
+        public inline fun fooBar(): Unit {
         }
         """.trimIndent()
       )
@@ -99,7 +103,7 @@ class GeneratorConfigTest {
 
         import kotlin.Int
 
-        val someProp: Int
+        public val someProp: Int
           get() = 1
         """.trimIndent()
       )
@@ -120,8 +124,8 @@ class GeneratorConfigTest {
 
         import kotlin.Int
 
-        val someProp: Int
-          inline get() = 1
+        public inline val someProp: Int
+          get() = 1
         """.trimIndent()
       )
     }
@@ -146,7 +150,7 @@ class GeneratorConfigTest {
 
         import kotlin.Int
 
-        var someProp: Int
+        public var someProp: Int
           set(newValue) {
           }
         """.trimIndent()
@@ -169,7 +173,7 @@ class GeneratorConfigTest {
 
         import kotlin.Int
 
-        var someProp: Int
+        public var someProp: Int
           inline set(newValue) {
           }
         """.trimIndent()

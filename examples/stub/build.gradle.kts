@@ -12,16 +12,38 @@ plugins {
 dependencies {
     protobuf(project(":protos"))
 
-    api(kotlin("stdlib"))
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
+    api(kotlin("stdlib-jdk8"))
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext["coroutinesVersion"]}")
 
+    api("io.grpc:grpc-stub:${rootProject.ext["grpcVersion"]}")
     api("io.grpc:grpc-protobuf:${rootProject.ext["grpcVersion"]}")
     api("com.google.protobuf:protobuf-java-util:${rootProject.ext["protobufVersion"]}")
+    api("com.google.protobuf:protobuf-kotlin:${rootProject.ext["protobufVersion"]}")
     api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}")
 }
 
+/*
+// this makes it so IntelliJ picks up the sources but then ktlint complains
+
+sourceSets {
+    val main by getting { }
+    main.java.srcDirs("build/generated/source/proto/main/java")
+    main.java.srcDirs("build/generated/source/proto/main/grpc")
+    main.java.srcDirs("build/generated/source/proto/main/kotlin")
+    main.java.srcDirs("build/generated/source/proto/main/grpckt")
+}
+ */
+
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_7
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
+    kotlinOptions {
+        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+    }
 }
 
 protobuf {
@@ -33,7 +55,7 @@ protobuf {
             artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.ext["grpcVersion"]}"
         }
         id("grpckt") {
-            artifact = "io.grpc:protoc-gen-grpc-kotlin:${rootProject.ext["grpcKotlinVersion"]}:jdk7@jar"
+            artifact = "io.grpc:protoc-gen-grpc-kotlin:${rootProject.ext["grpcKotlinVersion"]}:jdk8@jar"
         }
     }
     generateProtoTasks {
@@ -41,6 +63,9 @@ protobuf {
             it.plugins {
                 id("grpc")
                 id("grpckt")
+            }
+            it.builtins {
+                id("kotlin")
             }
         }
     }

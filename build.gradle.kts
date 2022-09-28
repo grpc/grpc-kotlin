@@ -1,18 +1,20 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 
 plugins {
-    kotlin("jvm") version "1.3.72" apply false
-    id("com.google.protobuf") version "0.8.15" apply false
+    kotlin("jvm") version "1.6.21" apply false
+    id("com.google.protobuf") version "0.8.18" apply false
+
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
-ext["grpcVersion"] = "1.36.0" // CURRENT_GRPC_VERSION
-ext["protobufVersion"] = "3.14.0"
-ext["kotlinVersion"] = "1.3.61"
-ext["coroutinesVersion"] = "1.3.3"
-ext["googleauthVersion"] = "0.20.0"
+group = "io.grpc"
+version = "1.3.0" // CURRENT_GRPC_KOTLIN_VERSION
+
+ext["grpcVersion"] = "1.46.0"
+ext["protobufVersion"] = "3.20.1"
+ext["coroutinesVersion"] = "1.6.2"
 
 subprojects {
 
@@ -24,22 +26,23 @@ subprojects {
         plugin("signing")
     }
 
-    group = "io.grpc"
-    version = "1.1.0" // CURRENT_GRPC_KOTLIN_VERSION
+    // gradle-nexus/publish-plugin needs these here too
+    group = rootProject.group
+    version = rootProject.version
 
     repositories {
         mavenCentral()
     }
 
     tasks.withType<JavaCompile> {
-        sourceCompatibility = JavaVersion.VERSION_1_7.toString()
-        targetCompatibility = JavaVersion.VERSION_1_7.toString()
+        sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+        targetCompatibility = JavaVersion.VERSION_1_8.toString()
     }
 
     tasks.withType<KotlinCompile> {
         kotlinOptions {
             freeCompilerArgs = listOf("-Xjsr305=strict")
-            jvmTarget = JavaVersion.VERSION_1_6.toString()
+            jvmTarget = JavaVersion.VERSION_1_8.toString()
         }
     }
 
@@ -119,22 +122,19 @@ subprojects {
         }
     }
 
-    extensions.getByType<PublishingExtension>().repositories {
-        maven {
-            val snapshotUrl = uri("https://oss.sonatype.org/content/repositories/snapshots")
-            val releaseUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
-            url = if (version.safeAs<String>()?.endsWith("SNAPSHOT") == true) snapshotUrl else releaseUrl
-            credentials {
-                username = project.findProperty("sonatypeUsername")?.safeAs() ?: ""
-                password = project.findProperty("sonatypePassword")?.safeAs() ?: ""
-            }
-        }
-    }
-
     extensions.getByType<SigningExtension>().sign(extensions.getByType<PublishingExtension>().publications.named("maven").get())
+    extensions.getByType<SigningExtension>().useInMemoryPgpKeys(System.getenv("GPG_PRIVATE_KEY"), System.getenv("GPG_PASSPHRASE"))
 
     tasks.withType<Sign> {
-        onlyIf { project.hasProperty("signing.keyId") }
+        onlyIf { System.getenv("GPG_PRIVATE_KEY") != null }
     }
+}
 
+nexusPublishing {
+    repositories {
+        sonatype {
+            username.set(System.getenv("SONATYPE_USERNAME"))
+            password.set(System.getenv("SONATYPE_PASSWORD"))
+        }
+    }
 }

@@ -662,31 +662,7 @@ abstract class AbstractInteropTest {
 
   @Test
   fun cancelAfterFirstResponse() {
-    val request = StreamingOutputCallRequest.newBuilder()
-      .addResponseParameters(
-        ResponseParameters.newBuilder()
-          .setSize(31415)
-      )
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(27182)))
-      )
-      .build()
-
-    runBlocking {
-      val ex = assertFailsWith<StatusException> {
-        stub
-          .fullDuplexCall(
-            flow {
-              emit(request)
-              throw CancellationException()
-            }
-          )
-          .collect()
-      }
-      assertThat(ex.status.code).isEqualTo(Status.Code.CANCELLED)
-    }
-    assertStatsTrace("grpc.testing.TestService/FullDuplexCall", Status.Code.CANCELLED)
+    // This test is not relevant to flow API.
   }
 
   @Test
@@ -847,11 +823,11 @@ abstract class AbstractInteropTest {
     // Send a context proto (as it's in the default extension registry)
     val contextValue = SimpleContext.newBuilder().setValue("dog").build()
     fixedHeaders.put(Util.METADATA_KEY, contextValue)
-    stub = MetadataUtils.attachHeaders(stub, fixedHeaders)
+    stub = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(fixedHeaders))
     // .. and expect it to be echoed back in trailers
     val trailersCapture = AtomicReference<Metadata>()
     val headersCapture = AtomicReference<Metadata>()
-    stub = MetadataUtils.captureMetadata(stub, headersCapture, trailersCapture)
+    stub = stub.withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture))
     runBlocking {
       assertNotNull(stub.emptyCall(EMPTY))
     }
@@ -867,11 +843,11 @@ abstract class AbstractInteropTest {
     // Send a context proto (as it's in the default extension registry)
     val contextValue = SimpleContext.newBuilder().setValue("dog").build()
     fixedHeaders.put(Util.METADATA_KEY, contextValue)
-    stub = MetadataUtils.attachHeaders(stub, fixedHeaders)
+    stub = stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(fixedHeaders))
     // .. and expect it to be echoed back in trailers
     val trailersCapture = AtomicReference<Metadata>()
     val headersCapture = AtomicReference<Metadata>()
-    stub = MetadataUtils.captureMetadata(stub, headersCapture, trailersCapture)
+    stub = stub.withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture))
     val responseSizes = listOf(50, 100, 150, 200)
     val streamingOutputBuilder = StreamingOutputCallRequest.newBuilder()
     for (size in responseSizes) {
@@ -1109,10 +1085,10 @@ abstract class AbstractInteropTest {
     metadata.put(Util.ECHO_INITIAL_METADATA_KEY, "test_initial_metadata_value")
     metadata.put(Util.ECHO_TRAILING_METADATA_KEY, trailingBytes)
     var theStub = stub
-    theStub = MetadataUtils.attachHeaders(theStub, metadata)
+    theStub = theStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
     var headersCapture = AtomicReference<Metadata>()
     var trailersCapture = AtomicReference<Metadata>()
-    theStub = MetadataUtils.captureMetadata(theStub, headersCapture, trailersCapture)
+    theStub = theStub.withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture))
     val response = runBlocking { theStub.unaryCall(request) }
     assertResponse(goldenResponse, response)
     assertEquals(
@@ -1131,10 +1107,10 @@ abstract class AbstractInteropTest {
     metadata.put(Util.ECHO_TRAILING_METADATA_KEY, trailingBytes)
 
     var theStreamingStub = stub
-    theStreamingStub = MetadataUtils.attachHeaders(theStreamingStub, metadata)
+    theStreamingStub = theStreamingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
     headersCapture = AtomicReference()
     trailersCapture = AtomicReference()
-    theStreamingStub = MetadataUtils.captureMetadata(theStreamingStub, headersCapture, trailersCapture)
+    theStreamingStub = theStreamingStub.withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture))
     runBlocking {
       assertResponse(goldenStreamingResponse, theStreamingStub.fullDuplexCall(flowOf(streamingRequest)).single())
     }
@@ -1497,9 +1473,9 @@ abstract class AbstractInteropTest {
     // assertClientStatsTrace() is called right after application receives status,
     // but streamClosed() may be called slightly later than that.  So we need a timeout.
     try {
-      assertTrue(tracer.await(5, TimeUnit.SECONDS))
+      assertTrue(tracer.await(10, TimeUnit.SECONDS))
     } catch (e: InterruptedException) {
-      throw AssertionError(e)
+      throw AssertionError("Awaiting the tracer took longer than expected", e)
     }
     assertEquals(code, tracer.status.code)
     if (requests != null && responses != null) {

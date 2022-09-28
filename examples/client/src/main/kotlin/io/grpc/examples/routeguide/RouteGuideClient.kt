@@ -19,14 +19,14 @@ package io.grpc.examples.routeguide
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import io.grpc.examples.routeguide.RouteGuideGrpcKt.RouteGuideCoroutineStub
-import java.io.Closeable
-import java.util.concurrent.TimeUnit
-import kotlin.random.Random
-import kotlin.random.nextLong
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
+import java.io.Closeable
+import java.util.concurrent.TimeUnit
+import kotlin.random.Random
+import kotlin.random.nextLong
 
 class RouteGuideClient(private val channel: ManagedChannel) : Closeable {
     private val random = Random(314159)
@@ -52,10 +52,10 @@ class RouteGuideClient(private val channel: ManagedChannel) : Closeable {
     suspend fun listFeatures(lowLat: Int, lowLon: Int, hiLat: Int, hiLon: Int) {
         println("*** ListFeatures: lowLat=$lowLat lowLon=$lowLon hiLat=$hiLat liLon=$hiLon")
 
-        val request = Rectangle.newBuilder()
-                .setLo(point(lowLat, lowLon))
-                .setHi(point(hiLat, hiLon))
-                .build()
+        val request = rectangle {
+            lo = point(lowLat, lowLon)
+            hi = point(hiLat, hiLon)
+        }
         var i = 1
         stub.listFeatures(request).collect { feature ->
             println("Result #${i++}: $feature")
@@ -92,26 +92,26 @@ class RouteGuideClient(private val channel: ManagedChannel) : Closeable {
 
     private fun generateOutgoingNotes(): Flow<RouteNote> = flow {
         val notes = listOf(
-                RouteNote.newBuilder().apply {
-                    message = "First message"
-                    location = point(0, 0)
-                }.build(),
-                RouteNote.newBuilder().apply {
-                    message = "Second message"
-                    location = point(0, 0)
-                }.build(),
-                RouteNote.newBuilder().apply {
-                    message = "Third message"
-                    location = point(10000000, 0)
-                }.build(),
-                RouteNote.newBuilder().apply {
-                    message = "Fourth message"
-                    location = point(10000000, 10000000)
-                }.build(),
-                RouteNote.newBuilder().apply {
-                    message = "Last message"
-                    location = point(0, 0)
-                }.build()
+            routeNote {
+                message = "First message"
+                location = point(0, 0)
+            },
+            routeNote {
+                message = "Second message"
+                location = point(0, 0)
+            },
+            routeNote {
+                message = "Third message"
+                location = point(10000000, 0)
+            },
+            routeNote {
+                message = "Fourth message"
+                location = point(10000000, 10000000)
+            },
+            routeNote {
+                message = "Last message"
+                location = point(0, 0)
+            },
         )
         for (note in notes) {
             println("Sending message \"${note.message}\" at ${note.location.toStr()}")
@@ -135,7 +135,7 @@ suspend fun main() {
     }
 }
 
-private fun point(lat: Int, lon: Int): Point = Point.newBuilder()
-    .setLatitude(lat)
-    .setLongitude(lon)
-    .build()
+private fun point(lat: Int, lon: Int): Point = point {
+    latitude = lat
+    longitude = lon
+}

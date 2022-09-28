@@ -20,9 +20,12 @@ dependencies {
 
     implementation("com.google.protobuf:protobuf-java:${rootProject.ext["protobufVersion"]}")
 
-    implementation("com.google.truth:truth:1.0.1")
+    implementation("com.google.truth:truth:1.1.3")
 
-    testImplementation("org.mockito:mockito-core:2.28.2")
+    testImplementation("org.mockito:mockito-core:4.5.1")
+    testImplementation("com.squareup.okhttp:okhttp:2.7.5") {
+        because("transitive dep for grpc-okhttp")
+    }
 }
 
 protobuf {
@@ -39,7 +42,7 @@ protobuf {
     }
     generateProtoTasks {
         all().forEach {
-            if (it.name.startsWith("generateTestProto")) {
+            if (it.name.startsWith("generateTestProto") || it.name.startsWith("generateProto")) {
                 it.dependsOn(":compiler:jar")
             }
 
@@ -52,14 +55,14 @@ protobuf {
 }
 
 val testServiceClientStartScripts = tasks.register<CreateStartScripts>("testServiceClientStartScripts") {
-    mainClassName = "io.grpc.testing.integration.TestServiceClient"
+    mainClass.set("io.grpc.testing.integration.TestServiceClient")
     applicationName = "test-service-client"
     outputDir = tasks.named<CreateStartScripts>("startScripts").get().outputDir
     classpath = tasks.named<CreateStartScripts>("startScripts").get().classpath
 }
 
 val testServiceServerStartScripts = tasks.register<CreateStartScripts>("testServiceServerStartScripts") {
-    mainClassName = "io.grpc.testing.integration.TestServiceServer"
+    mainClass.set("io.grpc.testing.integration.TestServiceServer")
     applicationName = "test-service-server"
     outputDir = tasks.named<CreateStartScripts>("startScripts").get().outputDir
     classpath = tasks.named<CreateStartScripts>("startScripts").get().classpath

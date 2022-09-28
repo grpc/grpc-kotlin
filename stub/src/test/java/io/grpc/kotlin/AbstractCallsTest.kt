@@ -153,7 +153,10 @@ abstract class AbstractCallsTest {
   fun makeChannel(impl: BindableService, vararg interceptors: ServerInterceptor): ManagedChannel =
     makeChannel(ServerInterceptors.intercept(impl, *interceptors))
 
-  fun makeChannel(serverServiceDefinition: ServerServiceDefinition): ManagedChannel {
+  fun makeChannel(
+    serverServiceDefinition: ServerServiceDefinition,
+    serviceConfig: Map<String, Any> = emptyMap()
+  ): ManagedChannel {
     val serverName = InProcessServerBuilder.generateName()
 
     grpcCleanup.register(
@@ -168,6 +171,8 @@ abstract class AbstractCallsTest {
     return grpcCleanup.register(
       InProcessChannelBuilder
         .forName(serverName)
+        .enableRetry()
+        .defaultServiceConfig(serviceConfig)
         .run { this as io.grpc.ManagedChannelBuilder<*> } // workaround b/123879662
         .executor(executor)
         .build()
@@ -187,6 +192,17 @@ abstract class AbstractCallsTest {
       }
     }
     return makeChannel(ServerInterceptors.intercept(builder.build(), *interceptors))
+  }
+
+  fun makeChannel(
+    serverServiceDefinition: ServerServiceDefinition,
+    config: Map<String, Any> = emptyMap(),
+    vararg interceptors: ServerInterceptor
+  ): ManagedChannel {
+    return makeChannel(
+      ServerInterceptors.intercept(serverServiceDefinition, *interceptors),
+      config
+    )
   }
 
   fun <R> runBlocking(block: suspend CoroutineScope.() -> R): Unit =

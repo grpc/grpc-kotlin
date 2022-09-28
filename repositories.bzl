@@ -8,10 +8,11 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 #     ] + IO_GRPC_GRPC_KOTLIN_ARTIFACTS + IO_GRPC_GRPC_JAVA_ARTIFACTS,
 # )
 IO_GRPC_GRPC_KOTLIN_ARTIFACTS = [
-    "com.google.guava:guava:29.0-jre",
-    "com.squareup:kotlinpoet:1.5.0",
-    "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5",
-    "org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.3.5",
+    "com.google.guava:guava:29.0-android",
+    "com.squareup:kotlinpoet:1.11.0",
+    "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2",
+    "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.2",
+    "org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.6.2",
 ]
 
 # For use with maven_install's override_targets.
@@ -35,27 +36,29 @@ def grpc_kt_repositories():
         io_grpc_grpc_java()
 
 def io_bazel_rules_kotlin():
-    rules_kotlin_version = "b40d920c5a5e044c541513f0d5e9260d0a4579c0"
+    rules_kotlin_version = "1.6.0-RC-1"
+    rules_kotlin_sha = "f1a4053eae0ea381147f5056bb51e396c5c494c7f8d50d0dee4cc2f9d5c701b0"
     http_archive(
         name = "io_bazel_rules_kotlin",
-        urls = ["https://github.com/bazelbuild/rules_kotlin/archive/%s.zip" % rules_kotlin_version],
-        sha256 = "3dadd0ad7272be6b1ed1274f62cadd4a1293c89990bcd7b4af32637a70ada63e",
-        type = "zip",
-        strip_prefix = "rules_kotlin-%s" % rules_kotlin_version,
+        urls = ["https://github.com/bazelbuild/rules_kotlin/releases/download/%s/rules_kotlin_release.tgz" % rules_kotlin_version],
+        sha256 = rules_kotlin_sha,
     )
 
 def com_google_protobuf():
+    protobuf_version = "3.20.1"
+    protobuf_sha = "3a400163728db996e8e8d21c7dfb3c239df54d0813270f086c4030addeae2fad"
+
     http_archive(
         name = "com_google_protobuf",
-        sha256 = "b37e96e81842af659605908a421960a5dc809acbc888f6b947bc320f8628e5b1",
-        strip_prefix = "protobuf-3.12.0",
-        urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.12.0.zip"],
+        sha256 = protobuf_sha,
+        strip_prefix = "protobuf-%s" % protobuf_version,
+        urls = ["https://github.com/protocolbuffers/protobuf/releases/download/v%s/protobuf-all-%s.tar.gz" % (protobuf_version, protobuf_version)],
     )
 
 def io_grpc_grpc_java():
     http_archive(
         name = "io_grpc_grpc_java",
-        sha256 = "e274597cc4de351b4f79e4c290de8175c51a403dc39f83f1dfc50a1d1c9e9a4f",
-        strip_prefix = "grpc-java-1.28.0",
-        url = "https://github.com/grpc/grpc-java/archive/v1.28.0.zip",
+        sha256 = "2f2ca0701cf23234e512f415318bfeae00036a980f6a83574264f41c0201e5cd",
+        strip_prefix = "grpc-java-1.46.0",
+        url = "https://github.com/grpc/grpc-java/archive/v1.46.0.zip",
     )

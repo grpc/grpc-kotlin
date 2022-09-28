@@ -18,23 +18,14 @@ package io.grpc.kotlin
 
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
-import io.grpc.CallOptions
-import io.grpc.ClientCall
-import io.grpc.Context
-import io.grpc.Contexts
-import io.grpc.Metadata
-import io.grpc.ServerCall
-import io.grpc.ServerCallHandler
-import io.grpc.ServerInterceptor
-import io.grpc.Status
-import io.grpc.StatusException
-import io.grpc.StatusRuntimeException
+import io.grpc.*
 import io.grpc.examples.helloworld.GreeterGrpc
 import io.grpc.examples.helloworld.HelloReply
 import io.grpc.examples.helloworld.HelloRequest
+import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineStub
+import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineImplBase
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -42,7 +33,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.channels.toList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asFlow
@@ -100,6 +91,27 @@ class ServerCallsTest : AbstractCallsTest() {
     requestReceived.join()
     future.cancel(true)
     cancelled.join()
+  }
+
+  @Test
+  fun unaryMethodCancellationContextWithJobPropagatedToServer() = runBlocking {
+    val completable = CompletableDeferred<Int>()
+    val requestReceived = Job()
+    val channel = makeChannel(
+      // Note that we use runBlocking's context here
+      ServerCalls.unaryServerMethodDefinition(coroutineContext, sayHelloMethod) {
+        requestReceived.complete()
+        suspendUntilCancelled {
+          completable.complete(42)
+        }
+      }
+    )
+
+    val stub = GreeterGrpc.newFutureStub(channel)
+    val future = stub.sayHello(helloRequest("Garnet"))
+    requestReceived.join()
+    future.cancel(true)
+    assertThat(completable.await()).isEqualTo(42)
   }
 
   @Test
@@ -344,7 +356,7 @@ class ServerCallsTest : AbstractCallsTest() {
     val responseChannel = Channel<HelloReply>()
     clientCall.start(object: ClientCall.Listener<HelloReply>() {
       override fun onMessage(message: HelloReply) {
-        responseChannel.sendBlocking(message)
+        responseChannel.trySendBlocking(message)
       }
 
       override fun onClose(status: Status, trailers: Metadata) {
@@ -797,5 +809,205 @@ class ServerCallsTest : AbstractCallsTest() {
     assertThat(
       ClientCalls.unaryRpc(channel, sayHelloMethod, helloRequest(""))
     ).isEqualTo(helloReply("Hello!"))
+  }
+
+  @Test
+  fun serverCallListenerDefersHeaders() = runBlocking {
+    val requestReceived = Job()
+    val responseReleased = Job()
+    val channel = makeChannel(
+      ServerCalls.unaryServerMethodDefinition(context, sayHelloMethod) {
+        requestReceived.complete()
+        responseReleased.join()
+        helloReply("Hello, ${it.name}")
+      }
+    )
+
+    val call = channel.newCall(sayHelloMethod, CallOptions.DEFAULT)
+
+    val headersReceived = Job()
+    val responseReceived = CompletableDeferred<HelloReply>()
+    val closeStatus = CompletableDeferred<Status>()
+
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onHeaders(headers: Metadata) {
+          headersReceived.complete()
+        }
+
+        override fun onMessage(message: HelloReply) {
+          responseReceived.complete(message)
+        }
+
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
+    call.sendMessage(helloRequest("Bob"))
+    call.request(1)
+    call.halfClose()
+    // wait for the handler to begin
+    requestReceived.join()
+    delay(200)
+    // headers should not have been sent
+    assertThat(headersReceived.isCompleted).isFalse()
+    // release the handler
+    responseReleased.complete()
+    headersReceived.join()
+    assertThat(responseReceived.await()).isEqualTo(helloReply("Hello, Bob"))
+    assertThat(closeStatus.await().code).isEqualTo(Status.Code.OK)
+  }
+
+  @Test
+  fun serverCallListenerDefersHeadersOnException() = runBlocking {
+    val requestReceived = Job()
+    val responseReleased = Job()
+    val channel = makeChannel(
+      ServerCalls.unaryServerMethodDefinition(context, sayHelloMethod) {
+        requestReceived.complete()
+        responseReleased.join()
+        throw StatusException(Status.INTERNAL.withDescription("no response frames"))
+      }
+    )
+
+    val call = channel.newCall(sayHelloMethod, CallOptions.DEFAULT)
+
+    val headersReceived = Job()
+    val closeStatus = CompletableDeferred<Status>()
+
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onHeaders(headers: Metadata) {
+          headersReceived.complete()
+        }
+
+        override fun onClose(status: Status, trailers: Metadata) {
+          headersReceived.complete()
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
+    call.sendMessage(helloRequest("Bob"))
+    call.request(1)
+    call.halfClose()
+    // wait for the handler to begin
+    requestReceived.join()
+    delay(200)
+    // headers should not have been sent
+    assertThat(headersReceived.isCompleted).isFalse()
+    // release the handler
+    responseReleased.complete()
+    headersReceived.join()
+    val status = closeStatus.await()
+    assertThat(status.code).isEqualTo(Status.Code.INTERNAL)
+    assertThat(status.description).contains("no response frames")
+  }
+
+  @Test
+  fun serverCallListenerDefersHeadersOnEmptyStream() = runBlocking {
+    val requestReceived = Job()
+    val responseReleased = Job()
+    val channel = makeChannel(
+      ServerCalls.serverStreamingServerMethodDefinition(context, serverStreamingSayHelloMethod) {
+        flow {
+          requestReceived.complete()
+          responseReleased.join()
+        }
+      }
+    )
+
+    val call = channel.newCall(serverStreamingSayHelloMethod, CallOptions.DEFAULT)
+
+    val headersReceived = Job()
+    val closeStatus = CompletableDeferred<Status>()
+
+    call.start(
+      object : ClientCall.Listener<HelloReply>() {
+        override fun onHeaders(headers: Metadata) {
+          headersReceived.complete()
+        }
+
+        override fun onClose(status: Status, trailers: Metadata) {
+          closeStatus.complete(status)
+        }
+      },
+      Metadata()
+    )
+    call.sendMessage(multiHelloRequest("Bob", "Fred"))
+    call.request(1)
+    call.halfClose()
+    // wait for the handler to begin
+    requestReceived.join()
+    delay(200)
+    // headers should not have been sent
+    assertThat(headersReceived.isCompleted).isFalse()
+    // release the handler
+    responseReleased.complete()
+    headersReceived.join()
+    val status = closeStatus.await()
+    assertThat(status.code).isEqualTo(Status.Code.OK)
+  }
+
+  @Test
+  fun coroutinesServerRetry() {
+    runBlocking {
+      val retryCount = 5
+      val config = getRetryingServiceConfig(retryCount.toDouble())
+      val coroutinesServer = object : GreeterCoroutineImplBase() {
+        var count = 0
+          private set
+
+        override suspend fun sayHello(request: HelloRequest): HelloReply {
+          count++
+          throw StatusRuntimeException(Status.UNKNOWN)
+        }
+      }
+
+      val channel = makeChannel(coroutinesServer.bindService(), config)
+
+      val coroutineStub = GreeterCoroutineStub(channel)
+
+      try {
+        coroutineStub.sayHello(helloRequest("hello"))
+      } catch (e: Exception) {
+        assertThat(coroutinesServer.count).isEqualTo(retryCount)
+      }
+    }
+  }
+
+  private fun getRetryingServiceConfig(
+    retryCount: Double
+  ): Map<String, Any> {
+    val config = hashMapOf<String, Any>()
+
+    val name = mutableListOf<Map<String, Any>>()
+    name.add(
+      mapOf(
+        "service" to "helloworld.Greeter",
+        "method" to "SayHello"
+      )
+    )
+
+    val retryPolicy = hashMapOf<String, Any>()
+    retryPolicy["maxAttempts"] = retryCount
+    retryPolicy["initialBackoff"] = "0.5s"
+    retryPolicy["maxBackoff"] = "30s"
+    retryPolicy["backoffMultiplier"] = 2.0
+    retryPolicy["retryableStatusCodes"] = listOf("UNKNOWN")
+
+    val methodConfig = mutableListOf<Map<String, Any>>()
+    val serviceConfig = hashMapOf<String, Any>()
+
+    serviceConfig["name"] = name
+    serviceConfig["retryPolicy"] = retryPolicy
+
+    methodConfig.add(serviceConfig)
+
+    config["methodConfig"] = methodConfig
+
+    return config
   }
 }

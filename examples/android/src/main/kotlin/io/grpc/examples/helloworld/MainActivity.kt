@@ -1,83 +1,107 @@
 package io.grpc.examples.helloworld
 
+import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.KeyEvent
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import io.grpc.ManagedChannel
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
 import io.grpc.ManagedChannelBuilder
-import java.net.URL
-import java.util.logging.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
+import java.io.Closeable
 
-// todo: suspend funs
 class MainActivity : AppCompatActivity() {
-    private val logger = Logger.getLogger(this.javaClass.name)
 
-    private fun channel(): ManagedChannel {
-        val url = URL(resources.getString(R.string.server_url))
-        val port = if (url.port == -1) url.defaultPort else url.port
+    private val uri by lazy { Uri.parse(resources.getString(R.string.server_url)) }
+    private val greeterService by lazy { GreeterRCP(uri) }
 
-        logger.info("Connecting to ${url.host}:$port")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-        val builder = ManagedChannelBuilder.forAddress(url.host, port)
-        if (url.protocol == "https") {
+        setContent {
+            Surface(color = MaterialTheme.colors.background) {
+                Greeter(greeterService)
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        greeterService.close()
+    }
+}
+
+class GreeterRCP(uri: Uri) : Closeable {
+    val responseState = mutableStateOf("")
+
+    private val channel = let {
+        println("Connecting to ${uri.host}:${uri.port}")
+
+        val builder = ManagedChannelBuilder.forAddress(uri.host, uri.port)
+        if (uri.scheme == "https") {
             builder.useTransportSecurity()
         } else {
             builder.usePlaintext()
         }
 
-        return builder.executor(Dispatchers.Default.asExecutor()).build()
+        builder.executor(Dispatchers.IO.asExecutor()).build()
     }
 
-    // lazy otherwise resources is null
-    private val greeter by lazy { GreeterGrpcKt.GreeterCoroutineStub(channel()) }
+    private val greeter = GreeterGrpcKt.GreeterCoroutineStub(channel)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        val button = findViewById<Button>(R.id.button)
-
-        val nameText = findViewById<EditText>(R.id.name)
-        nameText.addTextChangedListener(object : TextWatcher {
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                button.isEnabled = s.isNotEmpty()
-            }
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) { }
-            override fun afterTextChanged(s: Editable) { }
-        })
-
-        val responseText = findViewById<TextView>(R.id.response)
-
-        fun sendReq() = runBlocking {
-            try {
-                val request = HelloRequest.newBuilder().setName(nameText.text.toString()).build()
-                val response = greeter.sayHello(request)
-                responseText.text = response.message
-            } catch (e: Exception) {
-                responseText.text = e.message
-                e.printStackTrace()
-            }
+    suspend fun sayHello(name: String) {
+        try {
+            val request = helloRequest { this.name = name }
+            val response = greeter.sayHello(request)
+            responseState.value = response.message
+        } catch (e: Exception) {
+            responseState.value = e.message ?: "Unknown Error"
+            e.printStackTrace()
         }
+    }
 
-        button.setOnClickListener {
-            sendReq()
-        }
+    override fun close() {
+        channel.shutdownNow()
+    }
+}
 
-        nameText.setOnKeyListener { _, keyCode, event ->
-            if ((event.action == KeyEvent.ACTION_DOWN) && (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                sendReq()
-                true
-            } else {
-                false
-            }
+@Composable
+fun Greeter(greeterRCP: GreeterRCP) {
+
+    val scope = rememberCoroutineScope()
+
+    val nameState = remember { mutableStateOf(TextFieldValue()) }
+
+    Column(Modifier.fillMaxWidth().fillMaxHeight(), Arrangement.Top, Alignment.CenterHorizontally) {
+        Text(stringResource(R.string.name_hint), modifier = Modifier.padding(top = 10.dp))
+        OutlinedTextField(nameState.value, { nameState.value = it })
+
+        Button({ scope.launch { greeterRCP.sayHello(nameState.value.text) } }, Modifier.padding(10.dp)) {
+        Text(stringResource(R.string.send_request))
+    }
+
+        if (greeterRCP.responseState.value.isNotEmpty()) {
+            Text(stringResource(R.string.server_response), modifier = Modifier.padding(top = 10.dp))
+            Text(greeterRCP.responseState.value)
         }
     }
 }

@@ -21,7 +21,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Throwables;
-import com.squareup.okhttp.ConnectionSpec;
 import io.grpc.ManagedChannel;
 import io.grpc.ServerBuilder;
 import io.grpc.internal.testing.StreamRecorder;
@@ -32,16 +31,16 @@ import io.grpc.okhttp.OkHttpChannelBuilder;
 import io.grpc.okhttp.internal.Platform;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.integration.EmptyProtos.Empty;
-import io.netty.handler.ssl.OpenSsl;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.SupportedCipherSuiteFilter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLPeerUnverifiedException;
-import javax.net.ssl.SSLSession;
+import com.squareup.okhttp.ConnectionSpec;
+
+import org.jetbrains.annotations.NotNull;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,7 +66,7 @@ public class Http2OkHttpTest extends AbstractInteropTest {
     // Starts the server with HTTPS.
     try {
       SslProvider sslProvider = SslContext.defaultServerProvider();
-      if (sslProvider == SslProvider.OPENSSL && !OpenSsl.isAlpnSupported()) {
+      if (sslProvider == SslProvider.OPENSSL && !SslProvider.isAlpnSupported(SslProvider.OPENSSL)) {
         // OkHttp only supports Jetty ALPN on OpenJDK. So if OpenSSL doesn't support ALPN, then we
         // are forced to use Jetty ALPN for Netty instead of OpenSSL.
         sslProvider = SslProvider.JDK;
@@ -85,6 +84,7 @@ public class Http2OkHttpTest extends AbstractInteropTest {
     }
   }
 
+  @NotNull
   @Override
   protected ManagedChannel createChannel() {
     return createChannelBuilder().build();
@@ -94,8 +94,7 @@ public class Http2OkHttpTest extends AbstractInteropTest {
     int port = ((InetSocketAddress) getListenAddress()).getPort();
     OkHttpChannelBuilder builder = OkHttpChannelBuilder.forAddress("localhost", port)
         .maxInboundMessageSize(AbstractInteropTest.MAX_MESSAGE_SIZE)
-        .connectionSpec(new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-            .build())
+        .connectionSpec(ConnectionSpec.MODERN_TLS)
         .overrideAuthority(Util.authorityFromHostAndPort(
             TestUtils.TEST_SERVER_HOST, port));
     try {
@@ -160,12 +159,7 @@ public class Http2OkHttpTest extends AbstractInteropTest {
     ManagedChannel channel = createChannelBuilder()
         .overrideAuthority(Util.authorityFromHostAndPort(
             BAD_HOSTNAME, port))
-        .hostnameVerifier(new HostnameVerifier() {
-          @Override
-          public boolean verify(String hostname, SSLSession session) {
-            return true;
-          }
-        })
+        .hostnameVerifier((hostname, session) -> true)
         .build();
     TestServiceGrpc.TestServiceBlockingStub blockingStub =
         TestServiceGrpc.newBlockingStub(channel);
@@ -181,12 +175,7 @@ public class Http2OkHttpTest extends AbstractInteropTest {
     ManagedChannel channel = createChannelBuilder()
         .overrideAuthority(Util.authorityFromHostAndPort(
             TestUtils.TEST_SERVER_HOST, port))
-        .hostnameVerifier(new HostnameVerifier() {
-          @Override
-          public boolean verify(String hostname, SSLSession session) {
-            return false;
-          }
-        })
+        .hostnameVerifier((hostname, session) -> false)
         .build();
     TestServiceGrpc.TestServiceBlockingStub blockingStub =
         TestServiceGrpc.newBlockingStub(channel);

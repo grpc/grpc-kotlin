@@ -13,17 +13,30 @@ plugins {
 dependencies {
     protobuf(project(":protos"))
 
-    api(kotlin("stdlib"))
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3")
+    api(kotlin("stdlib-jdk8"))
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:${rootProject.ext["coroutinesVersion"]}")
 
+    api("io.grpc:grpc-stub:${rootProject.ext["grpcVersion"]}")
     api("io.grpc:grpc-protobuf-lite:${rootProject.ext["grpcVersion"]}")
     api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}")
-    api("com.google.protobuf:protobuf-javalite:${rootProject.ext["protobufVersion"]}")
+    api("com.google.protobuf:protobuf-kotlin-lite:${rootProject.ext["protobufVersion"]}")
 }
 
 android {
-    compileSdkVersion(30)
-    buildToolsVersion = "30.0.2"
+    compileSdk = 31
+    buildToolsVersion = "31.0.0"
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
+        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+    }
 }
 
 protobuf {
@@ -38,7 +51,7 @@ protobuf {
             artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.ext["grpcVersion"]}"
         }
         id("grpckt") {
-            artifact = "io.grpc:protoc-gen-grpc-kotlin:${rootProject.ext["grpcKotlinVersion"]}:jdk7@jar"
+            artifact = "io.grpc:protoc-gen-grpc-kotlin:${rootProject.ext["grpcKotlinVersion"]}:jdk8@jar"
         }
     }
     generateProtoTasks {
@@ -51,6 +64,11 @@ protobuf {
                     option("lite")
                 }
                 id("grpckt") {
+                    option("lite")
+                }
+            }
+            it.builtins {
+                id("kotlin") {
                     option("lite")
                 }
             }

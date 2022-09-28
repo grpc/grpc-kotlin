@@ -10,15 +10,6 @@ if (startParameter.taskRequests.find { it.args.contains("assemble") } == null) {
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        jcenter()
         google()
-    }
-
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id == "com.android.application") {
-                useModule("com.android.tools.build:gradle:${requested.version}")
-            }
-        }
     }
 }

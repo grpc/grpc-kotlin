@@ -42,6 +42,7 @@ The example sources are organized into the following top-level folders:
   ./gradlew :client:AnimalsClient --args=pig
   ./gradlew :client:AnimalsClient --args=sheep
   ```
+  </details>
 
 - <details>
   <summary>GraalVM native image example</summary>
@@ -58,9 +59,12 @@ The example sources are organized into the following top-level folders:
   ./gradlew :native-client:nativeImage
   native-client/build/graal/hello-world
   ```
+  </details>
 
 - <details>
   <summary>Android example</summary>
+
+  *NOTE: You must use JDK 11 or higher*
 
   Start the server:
 
@@ -82,7 +86,7 @@ The example sources are organized into the following top-level folders:
       mkdir cmdline-tools
       mv latest cmdline-tools
       cmdline-tools/latest/bin/sdkmanager --update
-      cmdline-tools/latest/bin/sdkmanager "platforms;android-30" "build-tools;30.0.2" "extras;google;m2repository" "extras;android;m2repository"
+      cmdline-tools/latest/bin/sdkmanager "platforms;android-31" "build-tools;31.0.0" "extras;google;m2repository" "extras;android;m2repository"
       cmdline-tools/latest/bin/sdkmanager --licenses
       ```
 
@@ -147,6 +151,7 @@ The example sources are organized into the following top-level folders:
               ```
 
           1. Navigate to `android/src/main/kotlin/io/grpc/examples/helloworld` and right-click on `MainActivity` and select `Run`.
+  </details>
 
 [Basics tutorial]: https://grpc.io/docs/languages/kotlin/basics/
 [grpc.io Kotlin/JVM]: https://grpc.io/docs/languages/kotlin/

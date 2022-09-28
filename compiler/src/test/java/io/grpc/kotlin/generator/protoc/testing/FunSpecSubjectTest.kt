@@ -38,9 +38,9 @@ class FunSpecSubjectTest {
 
   @Test
   fun generates() {
-    io.grpc.kotlin.generator.protoc.testing.assertThat(funSpec).generates(
+    assertThat(funSpec).generates(
       """
-      fun foo(bar: kotlin.Int): kotlin.String {
+      public fun foo(bar: kotlin.Int): kotlin.String {
       }
     """
     )
@@ -49,16 +49,10 @@ class FunSpecSubjectTest {
   @Test
   fun generatesFailure() {
     ExpectFailure.expectFailureAbout(
-      io.grpc.kotlin.generator.protoc.testing.funSpecs,
-      SimpleSubjectBuilderCallback { whenTesting ->
-        whenTesting.that(funSpec).generates("")
-      }
-    )
+      funSpecs
+    ) { it.that(funSpec).generates("") }
     ExpectFailure.expectFailureAbout(
-      io.grpc.kotlin.generator.protoc.testing.funSpecs,
-      SimpleSubjectBuilderCallback { whenTesting ->
-        whenTesting.that(funSpec).generates("fun bar")
-      }
-    )
+      funSpecs
+    ) { it.that(funSpec).generates("fun bar") }
   }
 }

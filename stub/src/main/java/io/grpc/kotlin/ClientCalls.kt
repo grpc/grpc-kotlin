@@ -20,10 +20,12 @@ import io.grpc.CallOptions
 import io.grpc.ClientCall
 import io.grpc.MethodDescriptor
 import io.grpc.Status
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -285,15 +287,19 @@ object ClientCalls {
       clientCall.start(
         object : ClientCall.Listener<ResponseT>() {
           override fun onMessage(message: ResponseT) {
-            if (!responses.offer(message)) {
-              throw AssertionError("onMessage should never be called until responses is ready")
+            responses.trySend(message).onFailure { e ->
+              throw e ?: AssertionError("onMessage should never be called until responses is ready")
             }
           }
 
           override fun onClose(status: Status, trailersMetadata: GrpcMetadata) {
-            responses.close(
-              cause = if (status.isOk) null else status.asException(trailersMetadata)
-            )
+            val cause =
+              when {
+                status.isOk -> null
+                status.cause is CancellationException -> status.cause
+                else -> status.asException(trailersMetadata)
+              }
+            responses.close(cause = cause)
           }
 
           override fun onReady() {

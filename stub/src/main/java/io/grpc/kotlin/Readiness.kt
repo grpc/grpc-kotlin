@@ -17,6 +17,7 @@
 package io.grpc.kotlin
 
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.onFailure
 
 /**
  * A simple helper allowing a notification of "ready" to be broadcast, and waited for.
@@ -29,8 +30,8 @@ internal class Readiness(
   private val channel = Channel<Unit>(Channel.CONFLATED)
 
   fun onReady() {
-    if (!channel.offer(Unit)) {
-      throw AssertionError(
+    channel.trySend(Unit).onFailure { e ->
+      throw e ?: AssertionError(
         "Should be impossible; a CONFLATED channel should never return false on offer"
       )
     }

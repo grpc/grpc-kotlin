@@ -27,19 +27,20 @@ import io.grpc.ServerMethodDefinition
 import io.grpc.Status
 import io.grpc.StatusException
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.channels.onFailure
 import io.grpc.Metadata as GrpcMetadata
 
 /**
@@ -211,8 +212,6 @@ object ServerCalls {
     call: ServerCall<RequestT, ResponseT>,
     implementation: (Flow<RequestT>) -> Flow<ResponseT>
   ): ServerCall.Listener<RequestT> {
-    call.sendHeaders(GrpcMetadata())
-
     val readiness = Readiness { call.isReady }
     val requestsChannel = Channel<RequestT>(1)
 
@@ -237,15 +236,28 @@ object ServerCalls {
       }
     }
 
-    val rpcScope = CoroutineScope(context)
-    rpcScope.async {
+    val rpcJob = CoroutineScope(context).launch {
       val mutex = Mutex()
+      val headersSent = AtomicBoolean(false) // enforces only sending headers once
       val failure = runCatching {
         implementation(requests).collect {
+          // once we have a response message, check if we've sent headers yet - if not, do so
+          if (headersSent.compareAndSet(false, true)) {
+            mutex.withLock {
+              call.sendHeaders(GrpcMetadata())
+            }
+          }
           readiness.suspendUntilReady()
           mutex.withLock { call.sendMessage(it) }
         }
       }.exceptionOrNull()
+      // check headers again once we're done collecting the response flow - if we received
+      // no elements or threw an exception, then we wouldn't have sent them
+      if (failure == null && headersSent.compareAndSet(false, true)) {
+        mutex.withLock {
+          call.sendHeaders(GrpcMetadata())
+        }
+      }
       val closeStatus = when (failure) {
         null -> Status.OK
         is CancellationException -> Status.CANCELLED.withCause(failure)
@@ -261,22 +273,22 @@ object ServerCalls {
       var isReceiving = true
 
       override fun onCancel() {
-        rpcScope.cancel("Cancellation received from client")
+        rpcJob.cancel("Cancellation received from client")
       }
 
       override fun onMessage(message: RequestT) {
         if (isReceiving) {
-          try {
-            if (!requestsChannel.offer(message)) {
+          val result = requestsChannel.trySend(message)
+          isReceiving = result.isSuccess
+          result.onFailure { ex ->
+            if (ex !is CancellationException) {
               throw Status.INTERNAL
                 .withDescription(
                   "onMessage should never be called when requestsChannel is unready"
                 )
+                .withCause(ex)
                 .asException()
             }
-          } catch (e: CancellationException) {
-            // we don't want any more client input; swallow it
-            isReceiving = false
           }
         }
         if (!isReceiving) {
