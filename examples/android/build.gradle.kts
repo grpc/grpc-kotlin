@@ -8,7 +8,7 @@ val composeCompilerVersion = "1.2.0"
 
 dependencies {
     implementation(project(":stub-android"))
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("stdlib"))
     implementation("androidx.activity:activity-compose:1.5.0")
     implementation("androidx.appcompat:appcompat:1.4.2")
 
