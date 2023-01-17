@@ -200,6 +200,7 @@ def _kt_jvm_proto_library_helper_impl(ctx):
         outputs = [gen_src_dir],
         executable = ctx.executable._protoc,
         arguments = [protoc_args],
+        mnemonic = "KtProtoGenerator",
         progress_message = "Generating kotlin proto extensions for " +
                            ", ".join([
                                str(dep.label)
@@ -216,6 +217,7 @@ def _kt_jvm_proto_library_helper_impl(ctx):
         arguments = [args],
         executable = ctx.executable._zip,
         inputs = [gen_src_dir],
+        mnemonic = "KtProtoSrcJar",
         outputs = [ctx.outputs.srcjar],
     )
 
