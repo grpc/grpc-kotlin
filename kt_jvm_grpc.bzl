@@ -25,12 +25,12 @@ def _build_srcjar(ctx, proto_dep, input_dir, source_jar):
     args.add("c")
     args.add(source_jar.path)
     args.add_all(depset([input_dir]))
-    ctx.actions.run_shell(
+    ctx.actions.run(
         outputs = [source_jar],
         inputs = [input_dir],
         tools = [ctx.executable._zipper],
         arguments = [args],
-        command = "{zipper} $@".format(zipper = ctx.executable._zipper.path),
+        executable = "{zipper}".format(zipper = ctx.executable._zipper.path),
         mnemonic = "KtGrpcSrcJar",
         progress_message = "Generating Kotlin gRPC srcjar for %s" % proto_dep.label,
     )
