@@ -3,18 +3,6 @@ import com.google.protobuf.gradle.id
 import com.google.protobuf.gradle.plugins
 import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
-import org.gradle.kotlin.dsl.api
-import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.ext
-import org.gradle.kotlin.dsl.getValue
-import org.gradle.kotlin.dsl.getting
-import org.gradle.kotlin.dsl.invoke
-import org.gradle.kotlin.dsl.java
-import org.gradle.kotlin.dsl.kotlin
-import org.gradle.kotlin.dsl.project
-import org.gradle.kotlin.dsl.sourceSets
-import org.gradle.kotlin.dsl.withType
 
 plugins {
     kotlin("jvm")
