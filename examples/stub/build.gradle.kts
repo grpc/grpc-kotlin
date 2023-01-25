@@ -3,6 +3,18 @@ import com.google.protobuf.gradle.id
 import com.google.protobuf.gradle.plugins
 import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
+import org.gradle.kotlin.dsl.api
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.ext
+import org.gradle.kotlin.dsl.getValue
+import org.gradle.kotlin.dsl.getting
+import org.gradle.kotlin.dsl.invoke
+import org.gradle.kotlin.dsl.java
+import org.gradle.kotlin.dsl.kotlin
+import org.gradle.kotlin.dsl.project
+import org.gradle.kotlin.dsl.sourceSets
+import org.gradle.kotlin.dsl.withType
 
 plugins {
     kotlin("jvm")
@@ -22,9 +34,6 @@ dependencies {
     api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}")
 }
 
-/*
-// this makes it so IntelliJ picks up the sources but then ktlint complains
-
 sourceSets {
     val main by getting { }
     main.java.srcDirs("build/generated/source/proto/main/java")
@@ -32,11 +41,19 @@ sourceSets {
     main.java.srcDirs("build/generated/source/proto/main/kotlin")
     main.java.srcDirs("build/generated/source/proto/main/grpckt")
 }
- */
 
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+
+tasks.named("runKtlintCheckOverMainSourceSet").configure { dependsOn("generateProto") }
+configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    filter {
+        exclude {
+            it.file.path.contains("$buildDir/generated/")
+        }
     }
 }
 
