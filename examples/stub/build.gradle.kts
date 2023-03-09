@@ -22,9 +22,6 @@ dependencies {
     api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}")
 }
 
-/*
-// this makes it so IntelliJ picks up the sources but then ktlint complains
-
 sourceSets {
     val main by getting { }
     main.java.srcDirs("build/generated/source/proto/main/java")
@@ -32,11 +29,19 @@ sourceSets {
     main.java.srcDirs("build/generated/source/proto/main/kotlin")
     main.java.srcDirs("build/generated/source/proto/main/grpckt")
 }
- */
 
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+
+tasks.named("runKtlintCheckOverMainSourceSet").configure { dependsOn("generateProto") }
+configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+    filter {
+        exclude {
+            it.file.path.contains("$buildDir/generated/")
+        }
     }
 }
 
