@@ -1,9 +1,3 @@
-import com.google.protobuf.gradle.generateProtoTasks
-import com.google.protobuf.gradle.id
-import com.google.protobuf.gradle.plugins
-import com.google.protobuf.gradle.protobuf
-import com.google.protobuf.gradle.protoc
-
 plugins {
     kotlin("jvm")
     id("com.google.protobuf")
@@ -12,7 +6,6 @@ plugins {
 dependencies {
     protobuf(project(":protos"))
 
-    api(kotlin("stdlib-jdk8"))
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext["coroutinesVersion"]}")
 
     api("io.grpc:grpc-stub:${rootProject.ext["grpcVersion"]}")
@@ -22,27 +15,8 @@ dependencies {
     api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}")
 }
 
-sourceSets {
-    val main by getting { }
-    main.java.srcDirs("build/generated/source/proto/main/java")
-    main.java.srcDirs("build/generated/source/proto/main/grpc")
-    main.java.srcDirs("build/generated/source/proto/main/kotlin")
-    main.java.srcDirs("build/generated/source/proto/main/grpckt")
-}
-
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    }
-}
-
-tasks.named("runKtlintCheckOverMainSourceSet").configure { dependsOn("generateProto") }
-configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
-    filter {
-        exclude {
-            it.file.path.contains("$buildDir/generated/")
-        }
-    }
+kotlin {
+    jvmToolchain(8)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
@@ -56,21 +30,21 @@ protobuf {
         artifact = "com.google.protobuf:protoc:${rootProject.ext["protobufVersion"]}"
     }
     plugins {
-        id("grpc") {
+        create("grpc") {
             artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.ext["grpcVersion"]}"
         }
-        id("grpckt") {
+        create("grpckt") {
             artifact = "io.grpc:protoc-gen-grpc-kotlin:${rootProject.ext["grpcKotlinVersion"]}:jdk8@jar"
         }
     }
     generateProtoTasks {
         all().forEach {
             it.plugins {
-                id("grpc")
-                id("grpckt")
+                create("grpc")
+                create("grpckt")
             }
             it.builtins {
-                id("kotlin")
+                create("kotlin")
             }
         }
     }

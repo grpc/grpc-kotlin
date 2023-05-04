@@ -4,10 +4,8 @@ plugins {
     id("com.palantir.graal") version "0.12.0"
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    }
+kotlin {
+    jvmToolchain(11)
 }
 
 dependencies {
@@ -24,7 +22,7 @@ application {
 // JAVA_HOME=~/.gradle/caches/com.palantir.graal/22.1.0/11/graalvm-ce-java11-22.1.0 JAVA_OPTS=-agentlib:native-image-agent=config-output-dir=native-client/src/graal native-client/build/install/native-client/bin/native-client
 
 graal {
-    graalVersion("22.1.0")
+    graalVersion("22.3.2")
     javaVersion("11")
     mainClass(application.mainClass.get())
     outputName("hello-world")

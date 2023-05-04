@@ -1,9 +1,3 @@
-import com.google.protobuf.gradle.generateProtoTasks
-import com.google.protobuf.gradle.id
-import com.google.protobuf.gradle.plugins
-import com.google.protobuf.gradle.protobuf
-import com.google.protobuf.gradle.protoc
-
 plugins {
     kotlin("jvm")
     id("com.google.protobuf")
@@ -20,10 +14,8 @@ dependencies {
     api("com.google.protobuf:protobuf-kotlin-lite:${rootProject.ext["protobufVersion"]}")
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    }
+kotlin {
+    jvmToolchain(8)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
@@ -37,10 +29,10 @@ protobuf {
         artifact = "com.google.protobuf:protoc:${rootProject.ext["protobufVersion"]}"
     }
     plugins {
-        id("grpc") {
+        create("grpc") {
             artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.ext["grpcVersion"]}"
         }
-        id("grpckt") {
+        create("grpckt") {
             artifact = "io.grpc:protoc-gen-grpc-kotlin:${rootProject.ext["grpcKotlinVersion"]}:jdk8@jar"
         }
     }
@@ -50,15 +42,15 @@ protobuf {
                 named("java") {
                     option("lite")
                 }
-                id("kotlin") {
+                create("kotlin") {
                     option("lite")
                 }
             }
             it.plugins {
-                id("grpc") {
+                create("grpc") {
                     option("lite")
                 }
-                id("grpckt") {
+                create("grpckt") {
                     option("lite")
                 }
             }

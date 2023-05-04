@@ -2,8 +2,8 @@ package io.grpc.examples.helloworld
 
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -29,7 +29,7 @@ import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.launch
 import java.io.Closeable
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
     private val uri by lazy { Uri.parse(resources.getString(R.string.server_url)) }
     private val greeterService by lazy { GreeterRCP(uri) }
