@@ -9,13 +9,13 @@ plugins {
 ext["grpcVersion"] = "1.54.1"
 ext["grpcKotlinVersion"] = "1.3.0" // CURRENT_GRPC_KOTLIN_VERSION
 ext["protobufVersion"] = "3.22.3"
-ext["coroutinesVersion"] = "1.6.4"
+ext["coroutinesVersion"] = "1.7.0"
 
 allprojects {
     repositories {
+        mavenLocal() // For testing new releases of gRPC Kotlin
         mavenCentral()
         google()
-        mavenLocal() // For testing new releases of gRPC Kotlin
     }
 
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
