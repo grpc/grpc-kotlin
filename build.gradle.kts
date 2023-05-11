@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.6.21" apply false
     id("com.google.protobuf") version "0.8.18" apply false
-
+    id("org.gradle.test-retry") version "1.5.2"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
@@ -22,6 +22,7 @@ subprojects {
         plugin("java")
         plugin("org.jetbrains.kotlin.jvm")
         plugin("com.google.protobuf")
+        plugin("org.gradle.test-retry")
         plugin("maven-publish")
         plugin("signing")
     }
@@ -48,8 +49,6 @@ subprojects {
 
     tasks.withType<Test> {
         testLogging {
-            showStandardStreams = true
-
             // set options for log level LIFECYCLE
             events = setOf(
                     TestLogEvent.FAILED,
@@ -59,6 +58,7 @@ subprojects {
             )
 
             exceptionFormat = TestExceptionFormat.FULL
+            showStandardStreams = true
             showExceptions = true
             showCauses = true
             showStackTraces = true
@@ -79,6 +79,10 @@ subprojects {
 
             info.events = debug.events
             info.exceptionFormat = debug.exceptionFormat
+        }
+
+        retry {
+            maxRetries.set(10)
         }
 
         afterSuite(

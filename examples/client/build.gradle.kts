@@ -3,10 +3,8 @@ plugins {
     kotlin("jvm")
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    }
+kotlin {
+    jvmToolchain(8)
 }
 
 dependencies {
