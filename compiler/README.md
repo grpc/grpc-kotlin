@@ -65,7 +65,7 @@ For Maven, include the [protobuf plugin](https://www.xolstice.org/protobuf-maven
     <java.version></java.version> <!-- you should already have this line -->
     <kotlin.version>1.5.31</kotlin.version> <!-- you should already have this line -->
 
-    <!- the version is the lower of the ones found in these two links
+    <!-- the version is the lower of the ones found in these two links
     (they should always be synced, but double checking is better than being stuck on an error):
     https://search.maven.org/search?q=a:protoc-gen-grpc-kotlin
     https://search.maven.org/search?q=a:grpc-kotlin-stub -->
