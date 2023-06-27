@@ -45,7 +45,7 @@ jobs:
         ./gradlew :server:HelloWorldServer &
         sleep 30
         OUTPUT=$(./gradlew :client:HelloWorldClient)
-        echo "::set-output name=stdout::${OUTPUT//$'\n'/'%0A'}"
+        echo "stdout=${OUTPUT//$'\n'/'%0A'}" >> $GITHUB_OUTPUT
 
     - name: Test HelloWorld
       if: matrix.java == '11'
