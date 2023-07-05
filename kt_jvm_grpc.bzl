@@ -347,3 +347,71 @@ def kt_jvm_proto_library(
         deprecation = deprecation,
         features = features,
     )
+
+def kt_jvm_proto_helper(
+        name,
+        protos = [],
+        deps = [],
+        tags = None,
+        testonly = None,
+        compatible_with = None,
+        restricted_to = None,
+        visibility = None,
+        deprecation = None,
+        features = []):
+    """
+    This rule accepts any number of proto_library targets in "protos", and should have the matching
+    java_proto_library dependencies in "deps". The rule will translate this to Kotlin and
+    returns the compiled Kotlin helper.
+
+    See also https://developers.google.com/protocol-buffers/docs/kotlintutorial for how to interact
+    with the generated Kotlin representation.
+
+    Note that the rule will also export the java version of the same protos as Kotlin protos depend
+    on the java version under the hood.
+
+    For standard attributes, see:
+      https://docs.bazel.build/versions/master/be/common-definitions.html#common-attributes
+
+    Args:
+      name: A name for the target
+      protos: One or more proto_library targets to turn into Kotlin.
+      deps: One or more java_proto_library targets to turn into Kotlin.
+      tags: Standard attribute
+      testonly: Standard attribute
+      compatible_with: Standard attribute
+      restricted_to: Standard attribute
+      visibility: Standard attribute
+      deprecation: Standard attribute
+      features: Standard attribute
+    """
+    helper_target = ":%s_DO_NOT_DEPEND_kt_proto" % name
+
+    _kt_jvm_proto_library_helper(
+        name = helper_target[1:],
+        protos = protos,
+        deps = deps,
+        testonly = testonly,
+        compatible_with = compatible_with,
+        visibility = ["//visibility:private"],
+        restricted_to = restricted_to,
+        tags = tags,
+        deprecation = deprecation,
+        features = features,
+    )
+
+    kt_jvm_library(
+        name = name,
+        srcs = [helper_target + ".srcjar"],
+        deps = [
+            "@maven//:com_google_protobuf_protobuf_kotlin",
+        ] + deps,
+        exports = deps,
+        testonly = testonly,
+        compatible_with = compatible_with,
+        visibility = visibility,
+        restricted_to = restricted_to,
+        tags = tags,
+        deprecation = deprecation,
+        features = features,
+    )
