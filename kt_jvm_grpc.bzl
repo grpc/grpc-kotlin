@@ -175,10 +175,10 @@ def _get_real_short_path(file):
 def _kt_jvm_proto_library_helper_impl(ctx):
     transitive_set = depset(
         transitive =
-            [dep[ProtoInfo].transitive_descriptor_sets for dep in ctx.attr.proto_deps],
+            [dep[ProtoInfo].transitive_descriptor_sets for dep in ctx.attr.srcs],
     )
     proto_sources = []
-    for dep in ctx.attr.proto_deps:
+    for dep in ctx.attr.srcs:
         for file in dep[ProtoInfo].direct_sources:
             proto_sources.append(_get_real_short_path(file))
 
@@ -204,7 +204,7 @@ def _kt_jvm_proto_library_helper_impl(ctx):
         progress_message = "Generating kotlin proto extensions for " +
                            ", ".join([
                                str(dep.label)
-                               for dep in ctx.attr.proto_deps
+                               for dep in ctx.attr.srcs
                            ]),
     )
 
@@ -223,7 +223,7 @@ def _kt_jvm_proto_library_helper_impl(ctx):
 
 _kt_jvm_proto_library_helper = rule(
     attrs = dict(
-        proto_deps = attr.label_list(
+        srcs = attr.label_list(
             providers = [ProtoInfo],
         ),
         deps = attr.label_list(
@@ -251,6 +251,7 @@ _kt_jvm_proto_library_helper = rule(
 
 def kt_jvm_proto_library(
         name,
+        srcs = None,
         deps = None,
         tags = None,
         testonly = None,
@@ -275,7 +276,11 @@ def kt_jvm_proto_library(
 
     Args:
       name: A name for the target
-      deps: One or more proto_library targets to turn into Kotlin.
+      srcs: One or more proto_library targets to turn into Kotlin. If this is not set (deprecated),
+        then the 'deps' arg must be set with the proto deps.
+      deps: One or more java_proto_library targets with the java-compiled classes for the proto
+        deps. If srcs is not set (deprecated), then this must be one or more proto_library targets to
+        turn into Kotlin.
       tags: Standard attribute
       testonly: Standard attribute
       compatible_with: Standard attribute
@@ -286,40 +291,46 @@ def kt_jvm_proto_library(
       deprecation: Standard attribute
       features: Standard attribute
     """
-    java_proto_target = ":%s_DO_NOT_DEPEND_java_proto" % name
     helper_target = ":%s_DO_NOT_DEPEND_kt_proto" % name
+    if srcs == None or (len(srcs or []) > 0 and len(deps or []) == 0):
+        java_proto_target = ":%s_DO_NOT_DEPEND_java_proto" % name
+        if (srcs == None):
+            # flip srcs and deps if deps was set, but not srcs, assuming it
+            # contains the proto_library deps. This is to keep compatibility
+            # behaviour when using 'deps' as 'srcs' and no ability to set java
+            # proto library dependencies.
+            srcs = deps
+        deps = [java_proto_target]
 
-    if flavor == "lite":
-        native.java_lite_proto_library(
-            name = java_proto_target[1:],
-            deps = deps,
-            testonly = testonly,
-            compatible_with = compatible_with,
-            visibility = ["//visibility:private"],
-            restricted_to = restricted_to,
-            tags = tags,
-            deprecation = deprecation,
-            features = features,
-        )
-    else:
-        native.java_proto_library(
-            name = java_proto_target[1:],
-            deps = deps,
-            testonly = testonly,
-            compatible_with = compatible_with,
-            visibility = ["//visibility:private"],
-            restricted_to = restricted_to,
-            tags = tags,
-            deprecation = deprecation,
-            features = features,
-        )
+        if flavor == "lite":
+            native.java_lite_proto_library(
+                name = java_proto_target[1:],
+                deps = srcs,
+                testonly = testonly,
+                compatible_with = compatible_with,
+                visibility = ["//visibility:private"],
+                restricted_to = restricted_to,
+                tags = tags,
+                deprecation = deprecation,
+                features = features,
+            )
+        else:
+            native.java_proto_library(
+                name = java_proto_target[1:],
+                deps = srcs,
+                testonly = testonly,
+                compatible_with = compatible_with,
+                visibility = ["//visibility:private"],
+                restricted_to = restricted_to,
+                tags = tags,
+                deprecation = deprecation,
+                features = features,
+            )
 
     _kt_jvm_proto_library_helper(
         name = helper_target[1:],
-        proto_deps = deps,
-        deps = [
-            java_proto_target,
-        ],
+        srcs = srcs,
+        deps = deps,
         testonly = testonly,
         compatible_with = compatible_with,
         visibility = ["//visibility:private"],
@@ -334,11 +345,8 @@ def kt_jvm_proto_library(
         srcs = [helper_target + ".srcjar"],
         deps = [
             "@maven//:com_google_protobuf_protobuf_kotlin",
-            java_proto_target,
-        ],
-        exports = [
-            java_proto_target,
-        ],
+        ] + deps,
+        exports = deps,
         testonly = testonly,
         compatible_with = compatible_with,
         visibility = visibility,
