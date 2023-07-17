@@ -348,10 +348,11 @@ def kt_jvm_proto_library(
         features = features,
     )
 
-def kt_jvm_proto_helper(
+def kt_jvm_proto_helper_library(
         name,
         protos = [],
         deps = [],
+        exports = [],
         tags = None,
         testonly = None,
         compatible_with = None,
@@ -367,16 +368,13 @@ def kt_jvm_proto_helper(
     See also https://developers.google.com/protocol-buffers/docs/kotlintutorial for how to interact
     with the generated Kotlin representation.
 
-    Note that the rule will also export the java version of the same protos as Kotlin protos depend
-    on the java version under the hood.
-
     For standard attributes, see:
       https://docs.bazel.build/versions/master/be/common-definitions.html#common-attributes
 
     Args:
       name: A name for the target
       protos: One or more proto_library targets to turn into Kotlin.
-      deps: One or more java_proto_library targets to turn into Kotlin.
+      deps: Dependent java_proto_library targets and dependencies to turn into Kotlin.
       tags: Standard attribute
       testonly: Standard attribute
       compatible_with: Standard attribute
@@ -389,7 +387,7 @@ def kt_jvm_proto_helper(
 
     _kt_jvm_proto_library_helper(
         name = helper_target[1:],
-        protos = protos,
+        proto_deps = protos,
         deps = deps,
         testonly = testonly,
         compatible_with = compatible_with,
@@ -406,7 +404,85 @@ def kt_jvm_proto_helper(
         deps = [
             "@maven//:com_google_protobuf_protobuf_kotlin",
         ] + deps,
-        exports = deps,
+        exports = exports,
+        testonly = testonly,
+        compatible_with = compatible_with,
+        visibility = visibility,
+        restricted_to = restricted_to,
+        tags = tags,
+        deprecation = deprecation,
+        features = features,
+    )
+
+def kt_jvm_grpc_helper_library(
+        name,
+        protos = [],
+        deps = [],
+        exports = [],
+        tags = None,
+        testonly = None,
+        compatible_with = None,
+        restricted_to = None,
+        visibility = None,
+        deprecation = None,
+        features = []):
+    """
+    This rule accepts any number of proto_library targets in "protos", and should have the matching
+    java_proto_library dependencies in "deps". The rule will translate this to Kotlin and
+    returns the compiled Kotlin helper.
+
+    See also https://developers.google.com/protocol-buffers/docs/kotlintutorial for how to interact
+    with the generated Kotlin representation.
+
+    For standard attributes, see:
+      https://docs.bazel.build/versions/master/be/common-definitions.html#common-attributes
+
+    Args:
+      name: A name for the target
+      protos: One or more proto_library targets to turn into Kotlin.
+      deps: Dependent java_grpc_library targets and dependencies to turn into Kotlin.
+      tags: Standard attribute
+      testonly: Standard attribute
+      compatible_with: Standard attribute
+      restricted_to: Standard attribute
+      visibility: Standard attribute
+      deprecation: Standard attribute
+      features: Standard attribute
+    """
+    proto_target = ":%s_DO_NOT_DEPEND_kt_proto" % name
+    grpc_target = ":%s_DO_NOT_DEPEND_kt_grpc" % name
+
+    _kt_jvm_proto_library_helper(
+        name = proto_target[1:],
+        proto_deps = protos,
+        deps = deps,
+        testonly = testonly,
+        compatible_with = compatible_with,
+        visibility = ["//visibility:private"],
+        restricted_to = restricted_to,
+        tags = tags,
+        deprecation = deprecation,
+        features = features,
+    )
+
+    _kt_grpc_generate_code(
+        name = grpc_target[1:],
+        srcs = protos,
+        deps = deps,
+    )
+
+    kt_jvm_library(
+        name = name,
+        srcs = [
+            proto_target + ".srcjar",
+            grpc_target,
+        ],
+        deps = [
+            "@maven//:com_google_protobuf_protobuf_kotlin",
+            "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:stub",
+            "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:context",
+        ] + deps,
+        exports = exports,
         testonly = testonly,
         compatible_with = compatible_with,
         visibility = visibility,
