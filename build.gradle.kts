@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "io.grpc"
-version = "1.3.0" // CURRENT_GRPC_KOTLIN_VERSION
+version = "1.3.1" // CURRENT_GRPC_KOTLIN_VERSION
 
 ext["grpcVersion"] = "1.46.0"
 ext["protobufVersion"] = "3.20.1"

@@ -1,5 +1,35 @@
 ## Change Log
 
+### 1.3.1
+
+#### Changes
+
+* bump coroutines to 1.6.2 by @jamesward in https://github.com/grpc/grpc-kotlin/pull/340
+* bump versions by @jamesward in https://github.com/grpc/grpc-kotlin/pull/346
+* Support generating lite protos with Bazel by @Kernald in https://github.com/grpc/grpc-kotlin/pull/350
+* Recover cancellation when close responses flow by @akandratovich in https://github.com/grpc/grpc-kotlin/pull/344
+* Fixed Examples by Updating to Gradle 7.5.1 and Java 11 by @handstandsam in https://github.com/grpc/grpc-kotlin/pull/362
+* Provide action mnemonics for kt_jvm_proto_library implementation. by @plobsing in https://github.com/grpc/grpc-kotlin/pull/368
+* Migrate run command to work on a windows machine by @jlyon12345 in https://github.com/grpc/grpc-kotlin/pull/375
+* Enable sourceSets in the stub example project by @nkhoshini in https://github.com/grpc/grpc-kotlin/pull/376
+* bumps and build cleanup by @jamesward in https://github.com/grpc/grpc-kotlin/pull/377
+* add foojar resolver convention plugin - fixes #391 by @jamesward in https://github.com/grpc/grpc-kotlin/pull/392
+* [README][fix] Adding missing character on readme by @andrsGutirrz in https://github.com/grpc/grpc-kotlin/pull/393
+* Replace deprecated command with environment file by @jongwooo in https://github.com/grpc/grpc-kotlin/pull/395
+* fix(ServerCalls): Ensure failure cause is propagated in Status to interceptors by @zakhenry in https://github.com/grpc/grpc-kotlin/pull/400
+
+## New Contributors
+* @akandratovich made their first contribution in https://github.com/grpc/grpc-kotlin/pull/344
+* @handstandsam made their first contribution in https://github.com/grpc/grpc-kotlin/pull/362
+* @plobsing made their first contribution in https://github.com/grpc/grpc-kotlin/pull/368
+* @jlyon12345 made their first contribution in https://github.com/grpc/grpc-kotlin/pull/375
+* @nkhoshini made their first contribution in https://github.com/grpc/grpc-kotlin/pull/376
+* @andrsGutirrz made their first contribution in https://github.com/grpc/grpc-kotlin/pull/393
+* @jongwooo made their first contribution in https://github.com/grpc/grpc-kotlin/pull/395
+* @zakhenry made their first contribution in https://github.com/grpc/grpc-kotlin/pull/400
+
+**Full Changelog**: https://github.com/grpc/grpc-kotlin/compare/v1.3.0...v1.3.1
+
 ### 1.3.0
 
 #### Changes
