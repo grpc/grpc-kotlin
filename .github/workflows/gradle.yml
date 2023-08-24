@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        java: ['8', '11']
+        java: ['8', '11', '17']
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
@@ -33,13 +33,13 @@ jobs:
       run: ./gradlew publishToMavenLocal
 
     - name: Build Examples
-      if: matrix.java == '11'
+      if: matrix.java == '17'
       run: ./gradlew build
       working-directory: ./examples
 
     - id: test-data
       name: Run HelloWorld
-      if: matrix.java == '11'
+      if: matrix.java == '17'
       working-directory: ./examples
       run: |-
         ./gradlew :server:HelloWorldServer &
@@ -48,7 +48,7 @@ jobs:
         echo "stdout=${OUTPUT//$'\n'/'%0A'}" >> $GITHUB_OUTPUT
 
     - name: Test HelloWorld
-      if: matrix.java == '11'
+      if: matrix.java == '17'
       uses: nick-invision/assert-action@v1
       with:
         expected: "Received: Hello world"
