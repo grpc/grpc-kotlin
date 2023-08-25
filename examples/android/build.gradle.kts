@@ -3,12 +3,12 @@ plugins {
     kotlin("android")
 }
 
-val composeVersion = "1.4.3"
-val composeCompilerVersion = "1.4.7"
+val composeVersion = "1.5.0"
+val composeCompilerVersion = "1.5.0"
 
 dependencies {
     implementation(project(":stub-android"))
-    implementation("androidx.activity:activity-compose:1.7.1")
+    implementation("androidx.activity:activity-compose:1.7.2")
     implementation("androidx.compose.foundation:foundation-layout:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
     implementation("androidx.compose.runtime:runtime:$composeVersion")
@@ -22,14 +22,14 @@ kotlin {
 }
 
 android {
-    compileSdk = 33
-    buildToolsVersion = "33.0.0"
+    compileSdk = 34
+    buildToolsVersion = "34.0.0"
     namespace = "io.grpc.examples.helloworld"
 
     defaultConfig {
         applicationId = "io.grpc.examples.hello"
         minSdk = 26
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
