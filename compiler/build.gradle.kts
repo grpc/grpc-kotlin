@@ -27,7 +27,7 @@ dependencies {
     testImplementation("com.google.jimfs:jimfs:1.2")
     testImplementation("com.google.protobuf:protobuf-gradle-plugin:0.8.18")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     testImplementation("org.mockito:mockito-core:4.5.1")
 }
 
