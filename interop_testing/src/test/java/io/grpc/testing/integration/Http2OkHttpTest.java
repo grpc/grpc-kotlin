@@ -37,6 +37,9 @@ import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.SupportedCipherSuiteFilter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import com.squareup.okhttp.ConnectionSpec;
 
@@ -74,12 +77,13 @@ public class Http2OkHttpTest extends AbstractInteropTest {
       SslContextBuilder contextBuilder = SslContextBuilder
           .forServer(TestUtils.loadCert("server1.pem"), TestUtils.loadCert("server1.key"));
       GrpcSslContexts.configure(contextBuilder, sslProvider);
-      contextBuilder.ciphers(TestUtils.preferredTestCiphers(), SupportedCipherSuiteFilter.INSTANCE);
+      Iterable<String> ciphers = Arrays.asList(SSLContext.getDefault().getDefaultSSLParameters().getCipherSuites());
+      contextBuilder.ciphers(ciphers, SupportedCipherSuiteFilter.INSTANCE);
       return NettyServerBuilder.forPort(0)
           .flowControlWindow(65 * 1024)
           .maxInboundMessageSize(AbstractInteropTest.MAX_MESSAGE_SIZE)
           .sslContext(contextBuilder.build());
-    } catch (IOException ex) {
+    } catch (IOException | NoSuchAlgorithmException ex) {
       throw new RuntimeException(ex);
     }
   }
