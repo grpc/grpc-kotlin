@@ -22,7 +22,7 @@ dependencies {
 
     implementation("com.google.truth:truth:1.1.3")
 
-    testImplementation("org.mockito:mockito-core:4.5.1")
+    testImplementation("org.mockito:mockito-core:5.5.0")
     testImplementation("com.squareup.okhttp:okhttp:2.7.5") {
         because("transitive dep for grpc-okhttp")
     }
