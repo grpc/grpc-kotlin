@@ -61,8 +61,8 @@ import io.grpc.testing.integration.Messages.StreamingInputCallRequest
 import io.grpc.testing.integration.Messages.StreamingInputCallResponse
 import io.grpc.testing.integration.Messages.StreamingOutputCallRequest
 import io.grpc.testing.integration.Messages.StreamingOutputCallResponse
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.toList
@@ -952,7 +952,7 @@ abstract class AbstractInteropTest {
       } catch (ex: StatusException) {
         assertEquals(Status.Code.DEADLINE_EXCEEDED, ex.status.code)
         assertThat(ex.status.description)
-          .startsWith("ClientCall started after deadline exceeded")
+          .startsWith("ClientCall started after CallOptions deadline was exceeded")
       }
       // warm up the channel
       stub.emptyCall(EmptyProtos.Empty.getDefaultInstance())
@@ -964,7 +964,7 @@ abstract class AbstractInteropTest {
       } catch (ex: StatusException) {
         assertEquals(Status.Code.DEADLINE_EXCEEDED, ex.status.code)
         assertThat(ex.status.description)
-          .startsWith("ClientCall started after deadline exceeded")
+          .startsWith("ClientCall started after CallOptions deadline was exceeded")
       }
       assertStatsTrace("grpc.testing.TestService/EmptyCall", Status.Code.OK)
     }
@@ -974,6 +974,7 @@ abstract class AbstractInteropTest {
     return 10485760
   }
 
+  @OptIn(DelicateCoroutinesApi::class)
   @Test
   fun gracefulShutdown() {
     runBlocking {

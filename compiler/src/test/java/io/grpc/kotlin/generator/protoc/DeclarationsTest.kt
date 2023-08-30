@@ -58,11 +58,10 @@ class DeclarationsTest {
       package com.foo.bar
 
       import kotlin.Int
-      import kotlin.Unit
 
       public val someProperty: Int
 
-      public fun someFunction(): Unit {
+      public fun someFunction() {
       }
       """.trimIndent()
     )
@@ -111,10 +110,8 @@ class DeclarationsTest {
       """
       package com.foo.bar
 
-      import kotlin.Unit
-
       public object SomeObject {
-        public fun someFunction(): Unit {
+        public fun someFunction() {
         }
       }
       """.trimIndent()
@@ -172,9 +169,7 @@ class DeclarationsTest {
     assertThat(decls)
       .generatesTopLevel(
         """
-        import kotlin.Unit
-
-        public fun someFunction(): Unit {
+        public fun someFunction() {
         }
         """
       )

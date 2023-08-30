@@ -61,9 +61,7 @@ class GeneratorConfigTest {
         """
         package com.google
 
-        import kotlin.Unit
-
-        public fun fooBar(): Unit {
+        public fun fooBar() {
         }
         """.trimIndent()
       )
@@ -77,9 +75,7 @@ class GeneratorConfigTest {
         """
         package com.google
 
-        import kotlin.Unit
-
-        public inline fun fooBar(): Unit {
+        public inline fun fooBar() {
         }
         """.trimIndent()
       )
