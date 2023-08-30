@@ -4,7 +4,7 @@ plugins {
 }
 
 val composeVersion = "1.5.0"
-val composeCompilerVersion = "1.5.0"
+val composeCompilerVersion = "1.5.3"
 
 dependencies {
     implementation(project(":stub-android"))
