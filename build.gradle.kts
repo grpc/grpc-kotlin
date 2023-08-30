@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.6.21" apply false
-    id("com.google.protobuf") version "0.8.18" apply false
+    id("com.google.protobuf") version "0.9.4" apply false
     id("org.gradle.test-retry") version "1.5.4"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
