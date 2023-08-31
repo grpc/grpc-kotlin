@@ -8,10 +8,10 @@ jobs:
   gradle_arm:
     runs-on: ubuntu-18.04
     steps:
-    - uses: actions/checkout@v2.1.0
+    - uses: actions/checkout@v3
     - name: test_on_arm
       continue-on-error: true
-      uses: uraimo/run-on-arch-action@v2.0.5
+      uses: uraimo/run-on-arch-action@v2.5.1
       with:
         arch: aarch64
         distro: ubuntu18.04
@@ -29,7 +29,7 @@ jobs:
           ./gradlew --console=plain build
     - name: test_on_arm_retry
       if: steps.test_on_arm.outcome=='failure'
-      uses: uraimo/run-on-arch-action@v2.0.5
+      uses: uraimo/run-on-arch-action@v2.5.1
       with:
         arch: aarch64
         distro: ubuntu18.04

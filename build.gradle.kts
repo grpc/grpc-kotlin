@@ -4,13 +4,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.6.21" apply false
-    id("com.google.protobuf") version "0.8.18" apply false
-    id("org.gradle.test-retry") version "1.5.2"
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("com.google.protobuf") version "0.9.4" apply false
+    id("org.gradle.test-retry") version "1.5.4"
+    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
 }
 
 group = "io.grpc"
-version = "1.3.0" // CURRENT_GRPC_KOTLIN_VERSION
+version = "1.3.1" // CURRENT_GRPC_KOTLIN_VERSION
 
 ext["grpcVersion"] = "1.46.0"
 ext["protobufVersion"] = "3.20.1"

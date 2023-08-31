@@ -20,10 +20,12 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
 import io.grpc.*
 import io.grpc.examples.helloworld.GreeterGrpc
+import io.grpc.examples.helloworld.GreeterGrpcKt
 import io.grpc.examples.helloworld.HelloReply
 import io.grpc.examples.helloworld.HelloRequest
 import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineStub
 import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineImplBase
+import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -31,7 +33,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.channels.toList
@@ -39,7 +40,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -197,7 +197,10 @@ class ServerCallsTest : AbstractCallsTest() {
     call.request(1)
     call.sendMessage(helloRequest("Garnet"))
     call.halfClose()
-    assertThat(closeTrailers.await()[key]).isEqualTo("value")
+
+    val closedTrailers = closeTrailers.await()
+
+    assertThat(closedTrailers[key]).isEqualTo("value")
   }
 
   @Test
@@ -1010,4 +1013,54 @@ class ServerCallsTest : AbstractCallsTest() {
 
     return config
   }
+
+  @Test
+  fun testStatusExceptionPropagatesStack() = runBlocking {
+
+    val serverImpl = object : GreeterCoroutineImplBase() {
+      override suspend fun sayHello(request: HelloRequest): HelloReply {
+        internalServerCall()
+      }
+
+      private fun internalServerCall(): Nothing {
+        throw StatusException(Status.INTERNAL)
+      }
+    }
+
+    val receivedStatusCause = CompletableDeferred<Throwable?>()
+
+    val interceptor = object : ServerInterceptor {
+      override fun <ReqT, RespT> interceptCall(
+        call: ServerCall<ReqT, RespT>,
+        requestHeaders: Metadata,
+        next: ServerCallHandler<ReqT, RespT>
+      ): ServerCall.Listener<ReqT> =
+        next.startCall(
+          object : ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
+            override fun close(status: Status, trailers: Metadata) {
+              receivedStatusCause.complete(status.cause)
+              super.close(status, trailers)
+            }
+          },
+          requestHeaders
+        )
+    }
+
+    val channel = makeChannel(serverImpl, interceptor)
+
+    val stub = GreeterGrpc.newBlockingStub(channel)
+    val clientException = assertThrows<StatusRuntimeException> {
+      stub.sayHello(helloRequest(""))
+    }
+
+    // the exception should not propagate to the client
+    assertThat(clientException.cause).isNull()
+
+    assertThat(clientException.status.code).isEqualTo(Status.Code.INTERNAL)
+    val statusCause = receivedStatusCause.await()
+    // but the exception should propagate to server interceptors, with stack trace intact
+    assertThat(statusCause).isNotNull()
+    assertThat(statusCause!!.stackTraceToString()).contains("internalServerCall")
+  }
+
 }
