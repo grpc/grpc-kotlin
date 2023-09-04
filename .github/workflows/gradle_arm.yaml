@@ -8,7 +8,7 @@ jobs:
   gradle_arm:
     runs-on: ubuntu-18.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: test_on_arm
       continue-on-error: true
       uses: uraimo/run-on-arch-action@v2.5.1
