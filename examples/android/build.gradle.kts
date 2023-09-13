@@ -3,39 +3,33 @@ plugins {
     kotlin("android")
 }
 
-val composeVersion = "1.1.1"
-val composeCompilerVersion = "1.2.0"
+val composeVersion = "1.5.1"
+val composeCompilerVersion = "1.5.3"
 
 dependencies {
     implementation(project(":stub-android"))
-    implementation(kotlin("stdlib"))
-    implementation("androidx.activity:activity-compose:1.5.0")
-    implementation("androidx.appcompat:appcompat:1.4.2")
-
+    implementation("androidx.activity:activity-compose:1.7.2")
     implementation("androidx.compose.foundation:foundation-layout:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
     implementation("androidx.compose.runtime:runtime:$composeVersion")
     implementation("androidx.compose.ui:ui:$composeVersion")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${rootProject.ext["coroutinesVersion"]}")
-
     runtimeOnly("io.grpc:grpc-okhttp:${rootProject.ext["grpcVersion"]}")
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
-    }
+kotlin {
+    jvmToolchain(8)
 }
 
 android {
-    compileSdk = 31
-    buildToolsVersion = "31.0.0"
+    compileSdk = 34
+    buildToolsVersion = "34.0.0"
+    namespace = "io.grpc.examples.helloworld"
 
     defaultConfig {
         applicationId = "io.grpc.examples.hello"
         minSdk = 26
-        targetSdk = 31
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -45,11 +39,6 @@ android {
         } else {
             resValue("string", "server_url", "http://10.0.2.2:50051/")
         }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
 
     buildFeatures {

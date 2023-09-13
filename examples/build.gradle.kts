@@ -1,24 +1,32 @@
 plugins {
-    id("com.android.application") version "7.0.4" apply false // Older for IntelliJ Support
-    id("com.google.protobuf") version "0.8.18" apply false
-    kotlin("jvm") version "1.7.0" apply false
-    id("org.jlleitschuh.gradle.ktlint") version "10.2.0"
+    id("com.android.application") version "8.1.1" apply false
+    id("com.google.protobuf") version "0.9.4" apply false
+    kotlin("jvm") version "1.9.10" apply false
+    id("org.jlleitschuh.gradle.ktlint") version "11.5.1" apply false
 }
 
 // todo: move to subprojects, but how?
-ext["grpcVersion"] = "1.47.0"
-ext["grpcKotlinVersion"] = "1.3.0" // CURRENT_GRPC_KOTLIN_VERSION
-ext["protobufVersion"] = "3.21.2"
-ext["coroutinesVersion"] = "1.6.2"
+ext["grpcVersion"] = "1.57.2"
+ext["grpcKotlinVersion"] = "1.3.1" // CURRENT_GRPC_KOTLIN_VERSION
+ext["protobufVersion"] = "3.24.1"
+ext["coroutinesVersion"] = "1.7.3"
 
-allprojects {
+subprojects {
     repositories {
-        mavenLocal()
+        mavenLocal() // For testing new releases of gRPC Kotlin
         mavenCentral()
         google()
     }
 
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
+
+    configure<org.jlleitschuh.gradle.ktlint.KtlintExtension> {
+        filter {
+            exclude {
+                it.file.path.startsWith(project.layout.buildDirectory.get().dir("generated").toString())
+            }
+        }
+    }
 }
 
 tasks.create("assemble").dependsOn(":server:installDist")

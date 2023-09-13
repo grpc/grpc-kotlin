@@ -1,9 +1,3 @@
-import com.google.protobuf.gradle.generateProtoTasks
-import com.google.protobuf.gradle.id
-import com.google.protobuf.gradle.plugins
-import com.google.protobuf.gradle.protobuf
-import com.google.protobuf.gradle.protoc
-
 plugins {
     id("com.android.library")
     kotlin("android")
@@ -13,8 +7,7 @@ plugins {
 dependencies {
     protobuf(project(":protos"))
 
-    api(kotlin("stdlib-jdk8"))
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-android:${rootProject.ext["coroutinesVersion"]}")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext["coroutinesVersion"]}")
 
     api("io.grpc:grpc-stub:${rootProject.ext["grpcVersion"]}")
     api("io.grpc:grpc-protobuf-lite:${rootProject.ext["grpcVersion"]}")
@@ -22,19 +15,18 @@ dependencies {
     api("com.google.protobuf:protobuf-kotlin-lite:${rootProject.ext["protobufVersion"]}")
 }
 
-android {
-    compileSdk = 31
-    buildToolsVersion = "31.0.0"
+kotlin {
+    jvmToolchain(8)
+}
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
+android {
+    compileSdk = 34
+    buildToolsVersion = "34.0.0"
+    namespace = "io.grpc.examples.stublite"
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
         freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
     }
 }
@@ -44,31 +36,31 @@ protobuf {
         artifact = "com.google.protobuf:protoc:${rootProject.ext["protobufVersion"]}"
     }
     plugins {
-        id("java") {
+        create("java") {
             artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.ext["grpcVersion"]}"
         }
-        id("grpc") {
+        create("grpc") {
             artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.ext["grpcVersion"]}"
         }
-        id("grpckt") {
+        create("grpckt") {
             artifact = "io.grpc:protoc-gen-grpc-kotlin:${rootProject.ext["grpcKotlinVersion"]}:jdk8@jar"
         }
     }
     generateProtoTasks {
         all().forEach {
             it.plugins {
-                id("java") {
+                create("java") {
                     option("lite")
                 }
-                id("grpc") {
+                create("grpc") {
                     option("lite")
                 }
-                id("grpckt") {
+                create("grpckt") {
                     option("lite")
                 }
             }
             it.builtins {
-                id("kotlin") {
+                create("kotlin") {
                     option("lite")
                 }
             }

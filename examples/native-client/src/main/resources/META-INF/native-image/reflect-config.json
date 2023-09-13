@@ -43,21 +43,17 @@
   "queryAllPublicConstructors":true,
   "methods":[
     {"name":"<init>","parameterTypes":[] }, 
-    {"name":"add","parameterTypes":["long"] }
-  ],
-  "queriedMethods":[{"name":"sum","parameterTypes":[] }]
+    {"name":"add","parameterTypes":["long"] }, 
+    {"name":"sum","parameterTypes":[] }
+  ]
 },
 {
   "name":"javax.naming.directory.InitialDirContext"
 },
 {
-  "name":"kotlin.internal.jdk8.JDK8PlatformImplementations",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "name":"sun.misc.Unsafe",
   "allDeclaredFields":true,
-  "queriedMethods":[
+  "methods":[
     {"name":"arrayBaseOffset","parameterTypes":["java.lang.Class"] }, 
     {"name":"arrayIndexScale","parameterTypes":["java.lang.Class"] }, 
     {"name":"copyMemory","parameterTypes":["long","long","long"] }, 

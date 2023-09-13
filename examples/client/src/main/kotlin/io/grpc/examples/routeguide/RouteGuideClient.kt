@@ -111,7 +111,7 @@ class RouteGuideClient(private val channel: ManagedChannel) : Closeable {
             routeNote {
                 message = "Last message"
                 location = point(0, 0)
-            },
+            }
         )
         for (note in notes) {
             println("Sending message \"${note.message}\" at ${note.location.toStr()}")
