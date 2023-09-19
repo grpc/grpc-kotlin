@@ -9,7 +9,7 @@ package(default_visibility = ["//compiler/src/test:__subpackages__"])
 proto_library(
     name = "example3_proto",
     srcs = ["example3.proto"],
-    strip_import_prefix = "//compiler/src/test/proto",
+    strip_import_prefix = "/compiler/src/test/proto",
     deps = ["@com_google_protobuf//:wrappers_proto"],
 )
 
@@ -21,7 +21,7 @@ java_proto_library(
 proto_library(
     name = "has_explicit_outer_class_name_proto",
     srcs = ["has_explicit_outer_class_name.proto"],
-    strip_import_prefix = "//compiler/src/test/proto",
+    strip_import_prefix = "/compiler/src/test/proto",
 )
 
 java_proto_library(
@@ -32,7 +32,7 @@ java_proto_library(
 proto_library(
     name = "has_nested_class_name_conflict_proto",
     srcs = ["has_nested_class_name_conflict.proto"],
-    strip_import_prefix = "//compiler/src/test/proto",
+    strip_import_prefix = "/compiler/src/test/proto",
 )
 
 java_proto_library(
@@ -43,7 +43,7 @@ java_proto_library(
 proto_library(
     name = "has_outer_class_name_conflict_proto",
     srcs = ["has_outer_class_name_conflict.proto"],
-    strip_import_prefix = "//compiler/src/test/proto",
+    strip_import_prefix = "/compiler/src/test/proto",
 )
 
 java_proto_library(
@@ -54,7 +54,7 @@ java_proto_library(
 proto_library(
     name = "implicit_java_package_proto",
     srcs = ["implicit_java_package.proto"],
-    strip_import_prefix = "//compiler/src/test/proto",
+    strip_import_prefix = "/compiler/src/test/proto",
 )
 
 java_proto_library(
@@ -65,7 +65,7 @@ java_proto_library(
 proto_library(
     name = "proto-file-with-hyphen_proto",
     srcs = ["proto-file-with-hyphen.proto"],
-    strip_import_prefix = "//compiler/src/test/proto",
+    strip_import_prefix = "/compiler/src/test/proto",
 )
 
 java_proto_library(
@@ -76,7 +76,7 @@ java_proto_library(
 proto_library(
     name = "service_name_conflicts_with_file_proto",
     srcs = ["service_name_conflicts_with_file.proto"],
-    strip_import_prefix = "//compiler/src/test/proto",
+    strip_import_prefix = "/compiler/src/test/proto",
 )
 
 java_proto_library(
@@ -87,7 +87,7 @@ java_proto_library(
 proto_library(
     name = "service_t_proto",
     srcs = ["serviceT.proto"],
-    strip_import_prefix = "//compiler/src/test/proto",
+    strip_import_prefix = "/compiler/src/test/proto",
 )
 
 java_proto_library(
@@ -98,7 +98,7 @@ java_proto_library(
 proto_library(
     name = "test_proto3_optional",
     srcs = ["test_proto3_optional.proto"],
-    strip_import_prefix = "//compiler/src/test/proto",
+    strip_import_prefix = "/compiler/src/test/proto",
 )
 
 java_proto_library(

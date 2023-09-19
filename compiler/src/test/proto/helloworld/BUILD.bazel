@@ -9,7 +9,7 @@ package(default_visibility = ["//compiler/src/test:__subpackages__"])
 proto_library(
     name = "hello_world_proto",
     srcs = ["helloworld.proto"],
-    strip_import_prefix = "//compiler/src/test/proto",
+    strip_import_prefix = "/compiler/src/test/proto",
 )
 
 java_proto_library(
