@@ -29,7 +29,7 @@ fun assertThat(typeSpec: TypeSpec): TypeSpecSubject = assertAbout(typeSpecs).tha
 /** A Truth subject for [TypeSpec]. */
 class TypeSpecSubject(
   failureMetadata: FailureMetadata,
-  private val actual: TypeSpec
+  private val actual: TypeSpec?
 ) : Subject(failureMetadata, actual) {
   fun generates(indentedCode: String) {
     val expectedCode = indentedCode.trimIndent()
