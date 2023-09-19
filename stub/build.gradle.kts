@@ -85,12 +85,12 @@ tasks.withType<DokkaTask>().configureEach {
             reportUndocumented.set(true)
 
             externalDocumentationLink(
-                url = URL("https://grpc.github.io/grpc-java/javadoc/")
-                //packageListUrl = "https://grpc.github.io/grpc-java/javadoc/package-list"
+                url = "https://grpc.github.io/grpc-java/javadoc/",
+                packageListUrl = "https://grpc.github.io/grpc-java/javadoc/element-list"
             )
 
             externalDocumentationLink(
-                url = URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
+                url = "https://kotlinlang.org/api/kotlinx.coroutines/"
             )
 
             perPackageOption {

@@ -20,7 +20,7 @@ dependencies {
 
     implementation("com.google.protobuf:protobuf-java:${rootProject.ext["protobufVersion"]}")
 
-    implementation("com.google.truth:truth:1.1.3")
+    implementation("com.google.truth:truth:1.1.5")
 
     testImplementation("org.mockito:mockito-core:4.11.0")
     testImplementation("com.squareup.okhttp:okhttp:2.7.5") {
