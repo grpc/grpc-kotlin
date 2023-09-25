@@ -8,7 +8,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 #     ] + IO_GRPC_GRPC_KOTLIN_ARTIFACTS + IO_GRPC_GRPC_JAVA_ARTIFACTS,
 # )
 IO_GRPC_GRPC_KOTLIN_ARTIFACTS = [
-    "com.google.guava:guava:29.0-android",
+    "com.google.guava:guava:32.0.1-android",
     "com.squareup:kotlinpoet:1.14.2",
     "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3",
     "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3",
