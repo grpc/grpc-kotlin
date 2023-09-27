@@ -32,12 +32,12 @@ fun assertThat(declarations: Declarations): DeclarationsSubject =
 /** A Truth subject for [Declarations]. */
 class DeclarationsSubject(
   failureMetadata: FailureMetadata,
-  private val actual: Declarations
+  private val actual: Declarations?
 ) : Subject(failureMetadata, actual) {
   fun generatesTopLevel(indentedCode: String) {
     val actualCode =
       FileSpec.builder("", "MyDeclarations.kt")
-        .apply { actual.writeOnlyTopLevel(this) }
+        .apply { actual?.writeOnlyTopLevel(this) }
         .build()
     check("topLevel").about(fileSpecs).that(actualCode).generates(indentedCode)
   }
@@ -45,7 +45,7 @@ class DeclarationsSubject(
   fun generatesEnclosed(indentedCode: String) {
     val actualCode =
       FileSpec.builder("", "MyDeclarations.kt")
-        .apply { actual.writeToEnclosingFile(this) }
+        .apply { actual?.writeToEnclosingFile(this) }
         .build()
     check("enclosed").about(fileSpecs).that(actualCode).generates(indentedCode)
   }
@@ -53,22 +53,22 @@ class DeclarationsSubject(
   fun generatesNoTopLevelMembers() {
     val actualCode =
       FileSpec.builder("", "MyDeclarations.kt")
-        .apply { actual.writeOnlyTopLevel(this) }
+        .apply { actual?.writeOnlyTopLevel(this) }
         .build()
     check("topLevel")
       .withMessage("top level declarations: %s", actualCode)
-      .that(actual.hasTopLevelDeclarations)
+      .that(actual?.hasTopLevelDeclarations)
       .isFalse()
   }
 
   fun generatesNoEnclosedMembers() {
     val actualCode =
       FileSpec.builder("", "MyDeclarations.kt")
-        .apply { actual.writeToEnclosingFile(this) }
+        .apply { actual?.writeToEnclosingFile(this) }
         .build()
     check("enclosed")
       .withMessage("enclosed declarations: %s", actualCode)
-      .that(actual.hasEnclosingScopeDeclarations)
+      .that(actual?.hasEnclosingScopeDeclarations)
       .isFalse()
   }
 }

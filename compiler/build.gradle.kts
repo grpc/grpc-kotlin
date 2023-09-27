@@ -18,12 +18,12 @@ dependencies {
 
     // Misc
     implementation(kotlin("reflect"))
-    implementation("com.squareup:kotlinpoet:1.11.0")
-    implementation("com.google.truth:truth:1.1.3")
+    implementation("com.squareup:kotlinpoet:1.14.2")
+    implementation("com.google.truth:truth:1.1.5")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
-    testImplementation("com.google.guava:guava:29.0-jre")
+    testImplementation("com.google.guava:guava:32.1.2-jre")
     testImplementation("com.google.jimfs:jimfs:1.3.0")
     testImplementation("com.google.protobuf:protobuf-gradle-plugin:0.9.4")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
