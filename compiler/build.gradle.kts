@@ -23,7 +23,7 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
-    testImplementation("com.google.guava:guava:32.1.2-jre")
+    testImplementation("com.google.guava:guava:32.1.3-jre")
     testImplementation("com.google.jimfs:jimfs:1.3.0")
     testImplementation("com.google.protobuf:protobuf-gradle-plugin:0.9.4")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
