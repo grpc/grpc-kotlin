@@ -26,13 +26,13 @@ import io.grpc.ServerCallHandler
 import io.grpc.ServerMethodDefinition
 import io.grpc.Status
 import io.grpc.StatusException
+import io.grpc.StatusRuntimeException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -40,7 +40,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.channels.onFailure
 import io.grpc.Metadata as GrpcMetadata
 
 /**
@@ -262,6 +261,7 @@ object ServerCalls {
       val closeStatus = when (failure) {
         null -> Status.OK
         is CancellationException -> Status.CANCELLED.withCause(failure)
+        is StatusException, is StatusRuntimeException -> Status.fromThrowable(failure)
         else -> Status.fromThrowable(failure).withCause(failure)
       }
       val trailers = failure?.let { Status.trailersFromThrowable(it) } ?: GrpcMetadata()
