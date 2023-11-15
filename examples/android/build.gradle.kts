@@ -3,7 +3,7 @@ plugins {
     kotlin("android")
 }
 
-val composeVersion = "1.5.3"
+val composeVersion = "1.5.4"
 val composeCompilerVersion = "1.5.3"
 
 dependencies {
