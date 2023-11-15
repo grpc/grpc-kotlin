@@ -27,7 +27,7 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.1")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-debug:${rootProject.ext["coroutinesVersion"]}")
     testImplementation("com.google.truth.extensions:truth-proto-extension:1.1.5")
     testImplementation("io.grpc:grpc-protobuf:${rootProject.ext["grpcVersion"]}")
