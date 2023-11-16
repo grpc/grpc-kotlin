@@ -1013,7 +1013,7 @@ class ServerCallsTest : AbstractCallsTest() {
   }
 
   @Test
-  fun testStatusExceptionPropagatesStackForStatusException() = runBlocking {
+  fun testPropagateStackTraceForStatusException() = runBlocking {
     val thrownStatusCause = CompletableDeferred<Throwable?>()
 
     val serverImpl = object : GreeterCoroutineImplBase() {
@@ -1065,7 +1065,7 @@ class ServerCallsTest : AbstractCallsTest() {
   }
 
   @Test
-  fun testStatusExceptionPropagatesStackForStatusRuntimeException() = runBlocking {
+  fun testPropagateStackTraceForStatusRuntimeException() = runBlocking {
     val thrownStatusCause = CompletableDeferred<Throwable?>()
 
     val serverImpl = object : GreeterCoroutineImplBase() {
@@ -1117,7 +1117,7 @@ class ServerCallsTest : AbstractCallsTest() {
   }
 
   @Test
-  fun testStatusExceptionPropagatesStackForNonStatusException() = runBlocking {
+  fun testPropagateStackTraceForNonStatusException() = runBlocking {
     val thrownStatusCause = CompletableDeferred<Throwable?>()
 
     val serverImpl = object : GreeterCoroutineImplBase() {
