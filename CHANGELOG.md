@@ -1,5 +1,32 @@
 ## Change Log
 
+### 1.4.1
+
+#### Changes
+
+* fix(ServerCalls): Fix regression in Status cause for exceptions thrown by implementations by @andrewparmet in https://github.com/grpc/grpc-kotlin/pull/456
+* Bazel: update to use guava 32.0.1 consistently. by @brettchabot in https://github.com/grpc/grpc-kotlin/pull/436
+* Bump composeVersion from 1.5.1 to 1.5.2 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/438
+* Bump org.gradle.test-retry from 1.5.5 to 1.5.6 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/439
+* Bump androidx.activity:activity-compose from 1.7.2 to 1.8.0 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/441
+* Bump composeVersion from 1.5.2 to 1.5.3 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/440
+* Bump org.jetbrains.dokka from 1.9.0 to 1.9.10 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/446
+* Bump org.jlleitschuh.gradle.ktlint from 11.6.0 to 11.6.1 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/443
+* Bump com.google.guava:guava from 32.1.2-jre to 32.1.3-jre by @dependabot in https://github.com/grpc/grpc-kotlin/pull/445
+* FIXED: Missing double quotes in compiler docs leading to error. by @prodbyola in https://github.com/grpc/grpc-kotlin/pull/453
+* Bump androidx.activity:activity-compose from 1.8.0 to 1.8.1 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/457
+* Bump composeVersion from 1.5.3 to 1.5.4 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/447
+* Bump jvm from 1.9.10 to 1.9.20 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/450
+* Bump org.junit.jupiter:junit-jupiter-engine from 5.10.0 to 5.10.1 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/454
+
+#### New Contributors
+* @brettchabot made their first contribution in https://github.com/grpc/grpc-kotlin/pull/436
+* @prodbyola made their first contribution in https://github.com/grpc/grpc-kotlin/pull/453
+* @andrewparmet made their first contribution in https://github.com/grpc/grpc-kotlin/pull/456
+
+**Full Changelog**: https://github.com/grpc/grpc-kotlin/compare/v1.4.0...v1.4.1
+
+
 ### 1.4.0
 
 #### Changes
