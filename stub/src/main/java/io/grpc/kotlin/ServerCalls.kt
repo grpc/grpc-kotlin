@@ -262,7 +262,9 @@ object ServerCalls {
         null -> Status.OK
         is CancellationException -> Status.CANCELLED.withCause(failure)
         is StatusException, is StatusRuntimeException -> Status.fromThrowable(failure)
-        else -> Status.fromThrowable(failure).withCause(failure)
+        else -> Status.UNKNOWN
+          .withDescription("Unknown Exception")
+          .withCause(failure)
       }
       val trailers = failure?.let { Status.trailersFromThrowable(it) } ?: GrpcMetadata()
       mutex.withLock { call.close(closeStatus, trailers) }
