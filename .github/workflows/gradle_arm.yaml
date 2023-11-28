@@ -11,7 +11,7 @@ jobs:
     - uses: actions/checkout@v4
     - name: test_on_arm
       continue-on-error: true
-      uses: uraimo/run-on-arch-action@v2.5.1
+      uses: uraimo/run-on-arch-action@v2.6.0
       with:
         arch: aarch64
         distro: ubuntu18.04
@@ -29,7 +29,7 @@ jobs:
           ./gradlew --console=plain build
     - name: test_on_arm_retry
       if: steps.test_on_arm.outcome=='failure'
-      uses: uraimo/run-on-arch-action@v2.5.1
+      uses: uraimo/run-on-arch-action@v2.6.0
       with:
         arch: aarch64
         distro: ubuntu18.04
