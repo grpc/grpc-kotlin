@@ -18,7 +18,7 @@ dependencies {
 
     // Misc
     implementation(kotlin("reflect"))
-    implementation("com.squareup:kotlinpoet:1.15.1")
+    implementation("com.squareup:kotlinpoet:1.15.2")
     implementation("com.google.truth:truth:1.1.5")
 
     // Testing
