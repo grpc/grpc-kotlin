@@ -1,5 +1,63 @@
 ## Change Log
 
+### 1.4.1
+
+#### Changes
+
+* fix(ServerCalls): Fix regression in Status cause for exceptions thrown by implementations by @andrewparmet in https://github.com/grpc/grpc-kotlin/pull/456
+* Bazel: update to use guava 32.0.1 consistently. by @brettchabot in https://github.com/grpc/grpc-kotlin/pull/436
+* Bump composeVersion from 1.5.1 to 1.5.2 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/438
+* Bump org.gradle.test-retry from 1.5.5 to 1.5.6 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/439
+* Bump androidx.activity:activity-compose from 1.7.2 to 1.8.0 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/441
+* Bump composeVersion from 1.5.2 to 1.5.3 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/440
+* Bump org.jetbrains.dokka from 1.9.0 to 1.9.10 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/446
+* Bump org.jlleitschuh.gradle.ktlint from 11.6.0 to 11.6.1 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/443
+* Bump com.google.guava:guava from 32.1.2-jre to 32.1.3-jre by @dependabot in https://github.com/grpc/grpc-kotlin/pull/445
+* FIXED: Missing double quotes in compiler docs leading to error. by @prodbyola in https://github.com/grpc/grpc-kotlin/pull/453
+* Bump androidx.activity:activity-compose from 1.8.0 to 1.8.1 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/457
+* Bump composeVersion from 1.5.3 to 1.5.4 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/447
+* Bump jvm from 1.9.10 to 1.9.20 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/450
+* Bump org.junit.jupiter:junit-jupiter-engine from 5.10.0 to 5.10.1 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/454
+
+#### New Contributors
+* @brettchabot made their first contribution in https://github.com/grpc/grpc-kotlin/pull/436
+* @prodbyola made their first contribution in https://github.com/grpc/grpc-kotlin/pull/453
+* @andrewparmet made their first contribution in https://github.com/grpc/grpc-kotlin/pull/456
+
+**Full Changelog**: https://github.com/grpc/grpc-kotlin/compare/v1.4.0...v1.4.1
+
+
+### 1.4.0
+
+#### Changes
+
+* Bump org.gradle.test-retry from 1.5.2 to 1.5.4 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/413
+* Bump uraimo/run-on-arch-action from 2.0.5 to 2.5.1 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/404
+* Bump actions/cache from 1 to 3 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/406
+* Bump actions/checkout from 1 to 3 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/408
+* Bump actions/setup-java from 2 to 3 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/409
+* Bump org.junit.jupiter:junit-jupiter-engine from 5.8.2 to 5.10.0 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/405
+* Bump com.google.jimfs:jimfs from 1.2 to 1.3.0 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/407
+* Bump com.google.protobuf from 0.8.18 to 0.9.4 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/412
+* Bump org.jetbrains.dokka from 1.6.21 to 1.8.20 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/416
+* Bump jvm from 1.9.0 to 1.9.10 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/410
+* Bump com.google.truth.extensions:truth-proto-extension from 1.1.3 to 1.1.5 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/419
+* Bump io.github.gradle-nexus.publish-plugin from 1.1.0 to 1.3.0 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/418
+* Bump org.mockito:mockito-core from 4.5.1 to 4.11.0 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/422
+* Bump com.google.protobuf:protobuf-gradle-plugin from 0.8.18 to 0.9.4 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/421
+* Bump org.jetbrains.dokka from 1.8.20 to 1.9.0 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/424
+* Bump actions/checkout from 3 to 4 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/426
+* Bump composeVersion from 1.5.0 to 1.5.1 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/427
+* Bump org.gradle.test-retry from 1.5.4 to 1.5.5 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/430
+* version bumps and related fixes by @jamesward in https://github.com/grpc/grpc-kotlin/pull/417
+
+## New Contributors
+* @brettchabot made their first contribution in https://github.com/grpc/grpc-kotlin/pull/417
+* @dependabot made their first contribution in https://github.com/grpc/grpc-kotlin/pull/413
+
+**Full Changelog**: https://github.com/grpc/grpc-kotlin/compare/v1.3.1...v1.4.0
+
+
 ### 1.3.1
 
 #### Changes

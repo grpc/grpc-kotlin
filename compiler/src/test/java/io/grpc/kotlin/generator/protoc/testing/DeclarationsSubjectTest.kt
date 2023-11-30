@@ -16,7 +16,6 @@
 
 package io.grpc.kotlin.generator.protoc.testing
 
-import com.google.common.truth.ExpectFailure.SimpleSubjectBuilderCallback
 import com.google.common.truth.ExpectFailure.expectFailureAbout
 import com.squareup.kotlinpoet.INT
 import com.squareup.kotlinpoet.PropertySpec

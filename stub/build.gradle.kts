@@ -3,7 +3,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 import java.net.URL
 
 plugins {
-    id("org.jetbrains.dokka") version "1.9.0"
+    id("org.jetbrains.dokka") version "1.9.10"
 }
 
 repositories {
@@ -27,7 +27,7 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.1")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-debug:${rootProject.ext["coroutinesVersion"]}")
     testImplementation("com.google.truth.extensions:truth-proto-extension:1.1.5")
     testImplementation("io.grpc:grpc-protobuf:${rootProject.ext["grpcVersion"]}")
@@ -85,12 +85,12 @@ tasks.withType<DokkaTask>().configureEach {
             reportUndocumented.set(true)
 
             externalDocumentationLink(
-                url = URL("https://grpc.github.io/grpc-java/javadoc/")
-                //packageListUrl = "https://grpc.github.io/grpc-java/javadoc/package-list"
+                url = "https://grpc.github.io/grpc-java/javadoc/",
+                packageListUrl = "https://grpc.github.io/grpc-java/javadoc/element-list"
             )
 
             externalDocumentationLink(
-                url = URL("https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/")
+                url = "https://kotlinlang.org/api/kotlinx.coroutines/"
             )
 
             perPackageOption {

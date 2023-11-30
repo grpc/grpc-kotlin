@@ -32,9 +32,9 @@ load(
 # Maven
 maven_install(
     artifacts = [
-        "com.google.jimfs:jimfs:1.1",
-        "com.google.truth.extensions:truth-proto-extension:1.0.1",
-        "com.google.protobuf:protobuf-kotlin:3.18.0",
+        "com.google.jimfs:jimfs:1.3.0",
+        "com.google.truth.extensions:truth-proto-extension:1.1.3",
+        "com.google.protobuf:protobuf-kotlin:3.24.1",
     ] + IO_GRPC_GRPC_KOTLIN_ARTIFACTS + IO_GRPC_GRPC_JAVA_ARTIFACTS,
     override_targets = dict(
         IO_GRPC_GRPC_KOTLIN_OVERRIDE_TARGETS.items() +

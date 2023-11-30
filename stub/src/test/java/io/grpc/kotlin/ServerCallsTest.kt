@@ -20,12 +20,10 @@ import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
 import io.grpc.*
 import io.grpc.examples.helloworld.GreeterGrpc
-import io.grpc.examples.helloworld.GreeterGrpcKt
 import io.grpc.examples.helloworld.HelloReply
 import io.grpc.examples.helloworld.HelloRequest
 import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineStub
 import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineImplBase
-import io.grpc.stub.StreamObserver
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -1015,7 +1013,8 @@ class ServerCallsTest : AbstractCallsTest() {
   }
 
   @Test
-  fun testStatusExceptionPropagatesStack() = runBlocking {
+  fun testPropagateStackTraceForStatusException() = runBlocking {
+    val thrownStatusCause = CompletableDeferred<Throwable?>()
 
     val serverImpl = object : GreeterCoroutineImplBase() {
       override suspend fun sayHello(request: HelloRequest): HelloReply {
@@ -1023,7 +1022,9 @@ class ServerCallsTest : AbstractCallsTest() {
       }
 
       private fun internalServerCall(): Nothing {
-        throw StatusException(Status.INTERNAL)
+        val exception = Exception("causal exception")
+        thrownStatusCause.complete(exception)
+        throw Status.INTERNAL.withCause(exception).asException()
       }
     }
 
@@ -1059,7 +1060,163 @@ class ServerCallsTest : AbstractCallsTest() {
     assertThat(clientException.status.code).isEqualTo(Status.Code.INTERNAL)
     val statusCause = receivedStatusCause.await()
     // but the exception should propagate to server interceptors, with stack trace intact
-    assertThat(statusCause).isNotNull()
+    assertThat(statusCause).isEqualTo(thrownStatusCause.await())
+    assertThat(statusCause!!.stackTraceToString()).contains("internalServerCall")
+  }
+
+  @Test
+  fun testPropagateStackTraceForStatusRuntimeException() = runBlocking {
+    val thrownStatusCause = CompletableDeferred<Throwable?>()
+
+    val serverImpl = object : GreeterCoroutineImplBase() {
+      override suspend fun sayHello(request: HelloRequest): HelloReply {
+        internalServerCall()
+      }
+
+      private fun internalServerCall(): Nothing {
+        val exception = Exception("causal exception")
+        thrownStatusCause.complete(exception)
+        throw Status.INTERNAL.withCause(exception).asRuntimeException()
+      }
+    }
+
+    val receivedStatusCause = CompletableDeferred<Throwable?>()
+
+    val interceptor = object : ServerInterceptor {
+      override fun <ReqT, RespT> interceptCall(
+        call: ServerCall<ReqT, RespT>,
+        requestHeaders: Metadata,
+        next: ServerCallHandler<ReqT, RespT>
+      ): ServerCall.Listener<ReqT> =
+        next.startCall(
+          object : ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
+            override fun close(status: Status, trailers: Metadata) {
+              receivedStatusCause.complete(status.cause)
+              super.close(status, trailers)
+            }
+          },
+          requestHeaders
+        )
+    }
+
+    val channel = makeChannel(serverImpl, interceptor)
+
+    val stub = GreeterGrpc.newBlockingStub(channel)
+    val clientException = assertThrows<StatusRuntimeException> {
+      stub.sayHello(helloRequest(""))
+    }
+
+    // the exception should not propagate to the client
+    assertThat(clientException.cause).isNull()
+
+    assertThat(clientException.status.code).isEqualTo(Status.Code.INTERNAL)
+    val statusCause = receivedStatusCause.await()
+    // but the exception should propagate to server interceptors, with stack trace intact
+    assertThat(statusCause).isEqualTo(thrownStatusCause.await())
+    assertThat(statusCause!!.stackTraceToString()).contains("internalServerCall")
+  }
+
+  @Test
+  fun testPropagateStackTraceForNonStatusException() = runBlocking {
+    val thrownStatusCause = CompletableDeferred<Throwable?>()
+
+    val serverImpl = object : GreeterCoroutineImplBase() {
+      override suspend fun sayHello(request: HelloRequest): HelloReply {
+        internalServerCall()
+      }
+
+      private fun internalServerCall(): Nothing {
+        val exception = Exception("causal exception")
+        thrownStatusCause.complete(exception)
+        throw exception
+      }
+    }
+
+    val receivedStatusCause = CompletableDeferred<Throwable?>()
+
+    val interceptor = object : ServerInterceptor {
+      override fun <ReqT, RespT> interceptCall(
+        call: ServerCall<ReqT, RespT>,
+        requestHeaders: Metadata,
+        next: ServerCallHandler<ReqT, RespT>
+      ): ServerCall.Listener<ReqT> =
+        next.startCall(
+          object : ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
+            override fun close(status: Status, trailers: Metadata) {
+              receivedStatusCause.complete(status.cause)
+              super.close(status, trailers)
+            }
+          },
+          requestHeaders
+        )
+    }
+
+    val channel = makeChannel(serverImpl, interceptor)
+
+    val stub = GreeterGrpc.newBlockingStub(channel)
+    val clientException = assertThrows<StatusRuntimeException> {
+      stub.sayHello(helloRequest(""))
+    }
+
+    // the exception should not propagate to the client
+    assertThat(clientException.cause).isNull()
+
+    assertThat(clientException.status.code).isEqualTo(Status.Code.UNKNOWN)
+    val statusCause = receivedStatusCause.await()
+    // but the exception should propagate to server interceptors, with stack trace intact
+    assertThat(statusCause).isEqualTo(thrownStatusCause.await())
+    assertThat(statusCause!!.stackTraceToString()).contains("internalServerCall")
+  }
+
+  @Test
+  fun testPropagateStackTraceForNonStatusExceptionWithStatusExceptionCause() = runBlocking {
+    val thrownStatusCause = CompletableDeferred<Throwable?>()
+
+    val serverImpl = object : GreeterCoroutineImplBase() {
+      override suspend fun sayHello(request: HelloRequest): HelloReply {
+        internalServerCall()
+      }
+
+      private fun internalServerCall(): Nothing {
+        val exception = Exception("causal exception", Status.INTERNAL.asException())
+        thrownStatusCause.complete(exception)
+        throw exception
+      }
+    }
+
+    val receivedStatusCause = CompletableDeferred<Throwable?>()
+
+    val interceptor = object : ServerInterceptor {
+      override fun <ReqT, RespT> interceptCall(
+        call: ServerCall<ReqT, RespT>,
+        requestHeaders: Metadata,
+        next: ServerCallHandler<ReqT, RespT>
+      ): ServerCall.Listener<ReqT> =
+        next.startCall(
+          object : ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
+            override fun close(status: Status, trailers: Metadata) {
+              receivedStatusCause.complete(status.cause)
+              super.close(status, trailers)
+            }
+          },
+          requestHeaders
+        )
+    }
+
+    val channel = makeChannel(serverImpl, interceptor)
+
+    val stub = GreeterGrpc.newBlockingStub(channel)
+    val clientException = assertThrows<StatusRuntimeException> {
+      stub.sayHello(helloRequest(""))
+    }
+
+    // the exception should not propagate to the client
+    assertThat(clientException.cause).isNull()
+
+    assertThat(clientException.status.code).isEqualTo(Status.Code.INTERNAL)
+    val statusCause = receivedStatusCause.await()
+    // but the exception should propagate to server interceptors, with stack trace intact
+    assertThat(statusCause).isEqualTo(thrownStatusCause.await())
     assertThat(statusCause!!.stackTraceToString()).contains("internalServerCall")
   }
 

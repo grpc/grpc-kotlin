@@ -29,7 +29,7 @@ fun assertThat(fileSpec: FileSpec): FileSpecSubject = assertAbout(fileSpecs).tha
 /** A Truth subject for [FileSpec]. */
 class FileSpecSubject(
   failureMetadata: FailureMetadata,
-  private val actual: FileSpec
+  private val actual: FileSpec?
 ) : Subject(failureMetadata, actual) {
   fun generates(indentedCode: String) {
     val expectedCode = indentedCode.trimIndent()
@@ -38,6 +38,6 @@ class FileSpecSubject(
   }
 
   fun hasName(name: String) {
-    check("name").that(actual.name).isEqualTo(name)
+    check("name").that(actual?.name).isEqualTo(name)
   }
 }
