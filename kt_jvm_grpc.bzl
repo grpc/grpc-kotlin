@@ -360,6 +360,7 @@ def kt_jvm_proto_library(
         java_protos = java_deps
         java_exports = []
     else:
+        java_proto_target = ":%s_DO_NOT_DEPEND_java_proto" % name
         if flavor == "lite":
             native.java_lite_proto_library(
                 name = java_proto_target[1:],
