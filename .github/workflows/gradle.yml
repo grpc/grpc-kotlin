@@ -24,7 +24,10 @@ jobs:
 
     - name: Setup docker (missing on MacOS)
       if: matrix.os == 'macos-latest'
-      uses: crazy-max/ghaction-setup-docker@v2
+      run: |
+        brew install docker
+        colima start
+        sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
 
     - name: Test
       run: |
