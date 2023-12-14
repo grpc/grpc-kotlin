@@ -1,6 +1,6 @@
 plugins {
     application
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.jvm)
 }
 
 kotlin {
@@ -9,7 +9,7 @@ kotlin {
 
 dependencies {
     implementation(project(":stub"))
-    runtimeOnly("io.grpc:grpc-netty:${rootProject.ext["grpcVersion"]}")
+    runtimeOnly(libs.grpc.netty)
 }
 
 tasks.register<JavaExec>("HelloWorldClient") {

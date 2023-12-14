@@ -5,36 +5,35 @@ plugins {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
     implementation(kotlin("test"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext["coroutinesVersion"]}")
+    implementation(libs.kotlinx.coroutines.core)
 
     implementation(project(":stub"))
 
-    implementation("io.grpc:grpc-protobuf:${rootProject.ext["grpcVersion"]}")
-    implementation("io.grpc:grpc-auth:${rootProject.ext["grpcVersion"]}")
-    implementation("io.grpc:grpc-alts:${rootProject.ext["grpcVersion"]}")
-    implementation("io.grpc:grpc-netty:${rootProject.ext["grpcVersion"]}")
-    implementation("io.grpc:grpc-okhttp:${rootProject.ext["grpcVersion"]}")
-    implementation("io.grpc:grpc-testing:${rootProject.ext["grpcVersion"]}")
+    implementation(libs.grpc.protobuf)
+    implementation(libs.grpc.auth)
+    implementation(libs.grpc.alts)
+    implementation(libs.grpc.netty)
+    implementation(libs.grpc.okhttp)
+    implementation(libs.grpc.testing)
 
-    implementation("com.google.protobuf:protobuf-java:${rootProject.ext["protobufVersion"]}")
+    implementation(libs.protobuf.java)
 
-    implementation("com.google.truth:truth:1.1.5")
+    implementation(libs.truth)
 
-    testImplementation("org.mockito:mockito-core:4.11.0")
-    testImplementation("com.squareup.okhttp:okhttp:2.7.5") {
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.okhttp) {
         because("transitive dep for grpc-okhttp")
     }
 }
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:${rootProject.ext["protobufVersion"]}"
+        artifact = libs.protoc.asProvider().get().toString()
     }
     plugins {
         id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.ext["grpcVersion"]}"
+            artifact = libs.protoc.gen.grpc.java.get().toString()
         }
         id("grpckt") {
             path = project(":compiler").tasks.jar.get().archiveFile.get().asFile.absolutePath

@@ -1,6 +1,7 @@
 plugins {
     application
-    kotlin("jvm")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.jib)
 }
 
 kotlin {
@@ -9,10 +10,11 @@ kotlin {
 
 dependencies {
     implementation(project(":stub"))
-    runtimeOnly("io.grpc:grpc-netty:${rootProject.ext["grpcVersion"]}")
 
-    testImplementation(kotlin("test-junit"))
-    testImplementation("io.grpc:grpc-testing:${rootProject.ext["grpcVersion"]}")
+    runtimeOnly(libs.grpc.netty)
+
+    testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.grpc.testing)
 }
 
 tasks.register<JavaExec>("HelloWorldServer") {
@@ -67,5 +69,11 @@ tasks.withType<Test> {
         events = setOf(org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED, org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED, org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED)
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         showStandardStreams = true
+    }
+}
+
+jib {
+    container {
+        mainClass = "io.grpc.examples.helloworld.HelloWorldServerKt"
     }
 }

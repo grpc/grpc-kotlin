@@ -3,7 +3,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 import java.net.URL
 
 plugins {
-    id("org.jetbrains.dokka") version "1.9.10"
+    alias(libs.plugins.dokka)
 }
 
 repositories {
@@ -17,34 +17,37 @@ repositories {
 dependencies {
     // Kotlin
     implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:${rootProject.ext["coroutinesVersion"]}")
+    implementation(libs.kotlinx.coroutines.core.jvm)
 
     // Grpc
-    api("io.grpc:grpc-stub:${rootProject.ext["grpcVersion"]}")
+    api(libs.grpc.stub)
 
     // Java
-    api("javax.annotation:javax.annotation-api:1.3.2")
+    api(libs.javax.annotation.api)
 
     // Testing
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.10.1")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-debug:${rootProject.ext["coroutinesVersion"]}")
-    testImplementation("com.google.truth.extensions:truth-proto-extension:1.1.5")
-    testImplementation("io.grpc:grpc-protobuf:${rootProject.ext["grpcVersion"]}")
-    testImplementation("io.grpc:grpc-testing:${rootProject.ext["grpcVersion"]}") // gRCP testing utilities
+    testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter.engine)
+    testImplementation(libs.kotlinx.coroutines.debug)
+    testImplementation(libs.truth.proto.extension)
+    testImplementation(libs.grpc.protobuf)
+    testImplementation(libs.grpc.testing)
 }
 
 java {
     withSourcesJar()
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
 }
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:${rootProject.ext["protobufVersion"]}"
+        artifact = libs.protoc.asProvider().get().toString()
     }
     plugins {
         id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.ext["grpcVersion"]}"
+            artifact = libs.protoc.gen.grpc.java.get().toString()
         }
         id("grpckt") {
             path = project(":compiler").tasks.jar.get().archiveFile.get().asFile.absolutePath
