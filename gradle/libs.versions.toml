@@ -1,0 +1,33 @@
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "1.8.0" }
+protobuf = { id = "com.google.protobuf", version = "0.9.4" }
+test-retry = { id = "org.gradle.test-retry", version = "1.5.7" }
+publish-plugin = { id = "io.github.gradle-nexus.publish-plugin", version = "1.3.0" }
+dokka = { id = "org.jetbrains.dokka", version = "1.9.10" }
+
+[libraries]
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.7.3" }
+kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version = "1.7.3" }
+kotlinx-coroutines-debug = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-debug", version = "1.7.3" }
+grpc-protobuf = { group = "io.grpc", name = "grpc-protobuf", version = "1.60.0" }
+grpc-alts = { group = "io.grpc", name = "grpc-alts", version = "1.60.0" }
+grpc-auth = { group = "io.grpc", name = "grpc-auth", version = "1.60.0" }
+grpc-netty = { group = "io.grpc", name = "grpc-netty", version = "1.60.0" }
+grpc-okhttp = { group = "io.grpc", name = "grpc-okhttp", version = "1.60.0" }
+grpc-testing = { group = "io.grpc", name = "grpc-testing", version = "1.60.0" }
+grpc-stub = { group = "io.grpc", name = "grpc-stub", version = "1.60.0" }
+kotlinpoet = { group = "com.squareup", name = "kotlinpoet", version = "1.15.1" }
+junit = { group = "junit", name = "junit", version = "4.13.2" }
+guava = { group = "com.google.guava", name = "guava", version = "32.1.3-jre" }
+jimfs = { group = "com.google.jimfs", name = "jimfs", version = "1.3.0" }
+protobuf-gradle-plugin = { group = "com.google.protobuf", name = "protobuf-gradle-plugin", version = "0.9.4" }
+mockito-kotlin = { group = "com.nhaarman.mockitokotlin2", name = "mockito-kotlin", version = "2.2.0" }
+junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version = "5.10.1" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version = "4.11.0" }
+protoc = { group = "com.google.protobuf", name = "protoc", version = "3.24.1" }
+protobuf-java = { group = "com.google.protobuf", name = "protobuf-java", version = "3.24.1" }
+protoc-gen-grpc-java = { group = "io.grpc", name = "protoc-gen-grpc-java", version = "1.60.0" }
+truth = { group = "com.google.truth", name = "truth", version = "1.1.5" }
+truth-proto-extension = { group = "com.google.truth.extensions", name = "truth-proto-extension", version = "1.1.5" }
+okhttp = { group = "com.squareup.okhttp", name = "okhttp", version = "2.7.5" }
+javax-annotation-api = { group = "javax.annotation", name = "javax.annotation-api", version = "1.3.2" }

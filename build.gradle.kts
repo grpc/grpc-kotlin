@@ -3,18 +3,14 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.0" apply false
-    id("com.google.protobuf") version "0.9.4" apply false
-    id("org.gradle.test-retry") version "1.5.7"
-    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.protobuf) apply false
+    alias(libs.plugins.test.retry)
+    alias(libs.plugins.publish.plugin)
 }
 
 group = "io.grpc"
 version = "1.4.1" // CURRENT_GRPC_KOTLIN_VERSION
-
-ext["grpcVersion"] = "1.57.2"
-ext["protobufVersion"] = "3.24.1"
-ext["coroutinesVersion"] = "1.7.3"
 
 subprojects {
 
