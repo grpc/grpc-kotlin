@@ -11,7 +11,6 @@ kotlin {
 
 dependencies {
     testImplementation(gradleTestKit())
-    testImplementation(libs.kotlinx.coroutines.core)
     testImplementation(libs.testcontainers)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
@@ -20,7 +19,8 @@ dependencies {
 tasks.named<Test>("test") {
     val examplesDir = File(rootDir, "examples")
     inputs.dir(examplesDir)
-    dependsOn("publishAllPublicationsToMavenRepository")
+    dependsOn(":compiler:publishAllPublicationsToMavenRepository")
+    dependsOn(":stub:publishAllPublicationsToMavenRepository")
 
     useJUnitPlatform()
 

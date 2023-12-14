@@ -1,6 +1,5 @@
 package io.grpc.kotlin
 
-import kotlinx.coroutines.runBlocking
 import org.gradle.internal.impldep.org.apache.commons.io.FileUtils
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -15,7 +14,7 @@ class ExamplesTest {
 
     // todo: add test to verify jdk8 usage
     @Test
-    fun server_client(@TempDir tempDir: Path): Unit = runBlocking {
+    fun server_client(@TempDir tempDir: Path) {
         val grpcKotlinVersion = System.getProperty("grpc-kotlin-version")
         val examplesDir = System.getProperty("examples-dir")
         val testRepo = System.getProperty("test-repo")
