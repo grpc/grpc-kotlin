@@ -7,10 +7,22 @@ plugins {
     alias(libs.plugins.protobuf) apply false
     alias(libs.plugins.test.retry)
     alias(libs.plugins.publish.plugin)
+    alias(libs.plugins.qoomon.git.versioning)
 }
 
 group = "io.grpc"
-version = "1.4.1" // CURRENT_GRPC_KOTLIN_VERSION
+
+gitVersioning.apply {
+    refs {
+        tag("v(?<version>.*)") {
+            version = "\${ref.version}"
+        }
+    }
+
+    rev {
+        version = "\${commit}"
+    }
+}
 
 subprojects {
 
@@ -88,6 +100,12 @@ subprojects {
                 }
             })
         )
+    }
+
+    extensions.getByType<PublishingExtension>().repositories {
+        maven {
+            url = uri(rootProject.layout.buildDirectory.dir("maven-repo"))
+        }
     }
 
     extensions.getByType<PublishingExtension>().publications {

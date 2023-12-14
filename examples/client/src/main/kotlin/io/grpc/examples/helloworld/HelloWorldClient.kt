@@ -41,7 +41,7 @@ class HelloWorldClient(private val channel: ManagedChannel) : Closeable {
  * greets "world" otherwise.
  */
 suspend fun main(args: Array<String>) {
-    val port = 50051
+    val port = System.getenv("PORT")?.toInt() ?: 50051
 
     val channel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build()
 

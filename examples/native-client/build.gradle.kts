@@ -1,7 +1,7 @@
 plugins {
     application
-    kotlin("jvm")
-    id("com.palantir.graal") version "0.12.0"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.palantir.graal)
 }
 
 kotlin {
@@ -10,7 +10,8 @@ kotlin {
 
 dependencies {
     implementation(project(":stub-lite"))
-    runtimeOnly("io.grpc:grpc-okhttp:${rootProject.ext["grpcVersion"]}")
+
+    runtimeOnly(libs.grpc.okhttp)
 }
 
 application {

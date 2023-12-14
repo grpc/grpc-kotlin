@@ -8,6 +8,13 @@ application {
     mainClass.set("io.grpc.kotlin.generator.GeneratorRunner")
 }
 
+java {
+    withSourcesJar()
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
 dependencies {
     // Kotlin and Java
     implementation(libs.kotlinx.coroutines.core)

@@ -1,20 +1,18 @@
 plugins {
-    id("com.android.application")
-    kotlin("android")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
-
-val composeVersion = "1.5.4"
-val composeCompilerVersion = "1.5.4"
 
 dependencies {
     implementation(project(":stub-android"))
-    implementation("androidx.activity:activity-compose:1.8.2")
-    implementation("androidx.compose.foundation:foundation-layout:$composeVersion")
-    implementation("androidx.compose.material:material:$composeVersion")
-    implementation("androidx.compose.runtime:runtime:$composeVersion")
-    implementation("androidx.compose.ui:ui:$composeVersion")
 
-    runtimeOnly("io.grpc:grpc-okhttp:${rootProject.ext["grpcVersion"]}")
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.ui)
+
+    runtimeOnly(libs.grpc.okhttp)
 }
 
 kotlin {
@@ -46,6 +44,6 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = composeCompilerVersion
+        kotlinCompilerExtensionVersion = libs.androidx.compose.compiler.get().version
     }
 }

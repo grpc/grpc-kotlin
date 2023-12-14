@@ -10,7 +10,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        java: ['8', '11', '17']
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
@@ -18,42 +17,12 @@ jobs:
     - uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: ${{ matrix.java }}
+        java-version: '11'
         cache: 'gradle'
 
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
 
-    - name: Build Library
-      uses: nick-invision/retry@v2
-      with:
-        timeout_minutes: 10
-        max_attempts: 5
-        command: |
-          ./gradlew build
-
-    - name: Publish to Maven Local
-      run: ./gradlew publishToMavenLocal
-
-    - name: Build Examples
-      if: matrix.java == '17'
-      run: ./gradlew build
-      working-directory: ./examples
-
-    - id: test-data
-      name: Run HelloWorld
-      if: matrix.java == '17'
-      working-directory: ./examples
-      run: |-
-        ./gradlew :server:HelloWorldServer &
-        sleep 30
-        OUTPUT=$(./gradlew :client:HelloWorldClient)
-        echo "stdout=${OUTPUT//$'\n'/'%0A'}" >> $GITHUB_OUTPUT
-
-    - name: Test HelloWorld
-      if: matrix.java == '17'
-      uses: nick-invision/assert-action@v1
-      with:
-        expected: "Received: Hello world"
-        actual: ${{ steps.test-data.outputs.stdout }}
-        comparison: contains
+    - name: Test
+      run: |
+        ./gradlew test

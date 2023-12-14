@@ -1,18 +1,18 @@
 plugins {
-    id("com.android.library")
-    kotlin("android")
-    id("com.google.protobuf")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.protobuf)
 }
 
 dependencies {
     protobuf(project(":protos"))
 
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext["coroutinesVersion"]}")
+    api(libs.kotlinx.coroutines.core)
 
-    api("io.grpc:grpc-stub:${rootProject.ext["grpcVersion"]}")
-    api("io.grpc:grpc-protobuf-lite:${rootProject.ext["grpcVersion"]}")
-    api("io.grpc:grpc-kotlin-stub:${rootProject.ext["grpcKotlinVersion"]}")
-    api("com.google.protobuf:protobuf-kotlin-lite:${rootProject.ext["protobufVersion"]}")
+    api(libs.grpc.stub)
+    api(libs.grpc.protobuf.lite)
+    api(libs.grpc.kotlin.stub)
+    api(libs.protobuf.kotlin.lite)
 }
 
 kotlin {
@@ -33,17 +33,17 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:${rootProject.ext["protobufVersion"]}"
+        artifact = libs.protoc.asProvider().get().toString()
     }
     plugins {
         create("java") {
-            artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.ext["grpcVersion"]}"
+            artifact = libs.protoc.gen.grpc.java.get().toString()
         }
         create("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.ext["grpcVersion"]}"
+            artifact = libs.protoc.gen.grpc.java.get().toString()
         }
         create("grpckt") {
-            artifact = "io.grpc:protoc-gen-grpc-kotlin:${rootProject.ext["grpcKotlinVersion"]}:jdk8@jar"
+            artifact = libs.protoc.gen.grpc.kotlin.get().toString() + ":jdk8@jar"
         }
     }
     generateProtoTasks {

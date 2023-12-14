@@ -4,6 +4,8 @@ protobuf = { id = "com.google.protobuf", version = "0.9.4" }
 test-retry = { id = "org.gradle.test-retry", version = "1.5.7" }
 publish-plugin = { id = "io.github.gradle-nexus.publish-plugin", version = "1.3.0" }
 dokka = { id = "org.jetbrains.dokka", version = "1.9.10" }
+qoomon-git-versioning = { id = "me.qoomon.git-versioning", version = "6.4.3" }
+kotlin-power-assert = { id = "com.bnorm.power.kotlin-power-assert", version = "0.13.0" }
 
 [libraries]
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.7.3" }
@@ -18,10 +20,12 @@ grpc-testing = { group = "io.grpc", name = "grpc-testing", version = "1.60.0" }
 grpc-stub = { group = "io.grpc", name = "grpc-stub", version = "1.60.0" }
 kotlinpoet = { group = "com.squareup", name = "kotlinpoet", version = "1.15.1" }
 junit = { group = "junit", name = "junit", version = "4.13.2" }
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version = "1.10.1" }
 guava = { group = "com.google.guava", name = "guava", version = "32.1.3-jre" }
 jimfs = { group = "com.google.jimfs", name = "jimfs", version = "1.3.0" }
 protobuf-gradle-plugin = { group = "com.google.protobuf", name = "protobuf-gradle-plugin", version = "0.9.4" }
 mockito-kotlin = { group = "com.nhaarman.mockitokotlin2", name = "mockito-kotlin", version = "2.2.0" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version = "5.10.1" }
 junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version = "5.10.1" }
 mockito-core = { group = "org.mockito", name = "mockito-core", version = "4.11.0" }
 protoc = { group = "com.google.protobuf", name = "protoc", version = "3.24.1" }
@@ -31,3 +35,4 @@ truth = { group = "com.google.truth", name = "truth", version = "1.1.5" }
 truth-proto-extension = { group = "com.google.truth.extensions", name = "truth-proto-extension", version = "1.1.5" }
 okhttp = { group = "com.squareup.okhttp", name = "okhttp", version = "2.7.5" }
 javax-annotation-api = { group = "javax.annotation", name = "javax.annotation-api", version = "1.3.2" }
+testcontainers = { group = "org.testcontainers", name = "testcontainers", version = "1.18.3" }
