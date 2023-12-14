@@ -16,6 +16,9 @@ jobs:
           java-version: '8'
           cache: 'gradle'
 
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
       - name: release
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
