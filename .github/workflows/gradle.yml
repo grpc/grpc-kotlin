@@ -23,7 +23,7 @@ jobs:
     - uses: gradle/gradle-build-action@v2
 
     - name: Setup docker (missing on MacOS)
-      if: runner.os == 'macos-latest'
+      if: matrix.os == 'macos-latest'
       run: |
         brew install docker
         colima start
