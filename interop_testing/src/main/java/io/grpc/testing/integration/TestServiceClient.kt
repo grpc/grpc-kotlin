@@ -57,7 +57,6 @@ class TestServiceClient {
   private var defaultServiceAccount: String = ""
   private var serviceAccountKeyFile: String = ""
   private var oauthScope: String = ""
-  private var fullStreamDecompression = false
   private val tester = Tester()
 
   @VisibleForTesting
@@ -102,7 +101,6 @@ class TestServiceClient {
         "default_service_account" -> defaultServiceAccount = value
         "service_account_key_file" -> serviceAccountKeyFile = value
         "oauth_scope" -> oauthScope = value
-        "full_stream_decompression" -> fullStreamDecompression = value.toBoolean()
         else -> {
           System.err.println("Unknown argument: $key")
           usage = true
@@ -138,7 +136,6 @@ class TestServiceClient {
           | --default_service_account   Email of GCE default service account. Default ${c.defaultServiceAccount}
           | --service_account_key_file  Path to service account json key file.${c.serviceAccountKeyFile}
           | --oauth_scope               Scope for OAuth tokens. Default ${c.oauthScope}
-          | --full_stream_decompression Enable full-stream decompression. Default ${c.fullStreamDecompression}
         """.trimMargin()
       )
       exitProcess(1)
@@ -260,9 +257,6 @@ class TestServiceClient {
         if (serverHostOverride != null) {
           nettyBuilder.overrideAuthority(serverHostOverride)
         }
-        if (fullStreamDecompression) {
-          nettyBuilder.enableFullStreamDecompression()
-        }
         builder = nettyBuilder
       } else {
         val okBuilder = OkHttpChannelBuilder.forAddress(serverHost, serverPort)
@@ -279,9 +273,6 @@ class TestServiceClient {
           }
         } else {
           okBuilder.usePlaintext()
-        }
-        if (fullStreamDecompression) {
-          okBuilder.enableFullStreamDecompression()
         }
         builder = okBuilder
       }
