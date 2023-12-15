@@ -20,12 +20,13 @@ import io.grpc.Server
 import io.grpc.ServerBuilder
 
 class AnimalsServer constructor(private val port: Int) {
-    val server: Server = ServerBuilder
-        .forPort(port)
-        .addService(DogService())
-        .addService(PigService())
-        .addService(SheepService())
-        .build()
+    val server: Server =
+        ServerBuilder
+            .forPort(port)
+            .addService(DogService())
+            .addService(PigService())
+            .addService(SheepService())
+            .build()
 
     fun start() {
         server.start()
@@ -35,7 +36,7 @@ class AnimalsServer constructor(private val port: Int) {
                 println("*** shutting down gRPC server since JVM is shutting down")
                 this@AnimalsServer.stop()
                 println("*** server shut down")
-            }
+            },
         )
     }
 
@@ -48,21 +49,24 @@ class AnimalsServer constructor(private val port: Int) {
     }
 
     internal class DogService : DogGrpcKt.DogCoroutineImplBase() {
-        override suspend fun bark(request: BarkRequest) = barkReply {
-            message = "Bark!"
-        }
+        override suspend fun bark(request: BarkRequest) =
+            barkReply {
+                message = "Bark!"
+            }
     }
 
     internal class PigService : PigGrpcKt.PigCoroutineImplBase() {
-        override suspend fun oink(request: OinkRequest) = oinkReply {
-            message = "Oink!"
-        }
+        override suspend fun oink(request: OinkRequest) =
+            oinkReply {
+                message = "Oink!"
+            }
     }
 
     internal class SheepService : SheepGrpcKt.SheepCoroutineImplBase() {
-        override suspend fun baa(request: BaaRequest) = baaReply {
-            message = "Baa!"
-        }
+        override suspend fun baa(request: BaaRequest) =
+            baaReply {
+                message = "Baa!"
+            }
     }
 }
 

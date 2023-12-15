@@ -23,20 +23,20 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class HelloWorldServerTest {
-
     @get:Rule
     val grpcServerRule: GrpcServerRule = GrpcServerRule().directExecutor()
 
     @Test
-    fun sayHello() = runBlocking {
-        val service = HelloWorldServer.HelloWorldService()
-        grpcServerRule.serviceRegistry.addService(service)
+    fun sayHello() =
+        runBlocking {
+            val service = HelloWorldServer.HelloWorldService()
+            grpcServerRule.serviceRegistry.addService(service)
 
-        val stub = GreeterGrpcKt.GreeterCoroutineStub(grpcServerRule.channel)
-        val testName = "test name"
+            val stub = GreeterGrpcKt.GreeterCoroutineStub(grpcServerRule.channel)
+            val testName = "test name"
 
-        val reply = stub.sayHello(helloRequest { name = testName })
+            val reply = stub.sayHello(helloRequest { name = testName })
 
-        assertEquals("Hello $testName", reply.message)
-    }
+            assertEquals("Hello $testName", reply.message)
+        }
 }

@@ -33,6 +33,7 @@ dependencies {
     testImplementation(libs.guava)
     testImplementation(libs.jimfs)
     testImplementation(libs.protobuf.gradle.plugin)
+    testImplementation(libs.protobuf.java)
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.junit.jupiter.engine)
     testImplementation(libs.mockito.core)

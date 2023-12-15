@@ -35,26 +35,29 @@ tasks.register<JavaExec>("AnimalsServer") {
     mainClass.set("io.grpc.examples.animals.AnimalsServerKt")
 }
 
-val helloWorldServerStartScripts = tasks.register<CreateStartScripts>("helloWorldServerStartScripts") {
-    mainClass.set("io.grpc.examples.helloworld.HelloWorldServerKt")
-    applicationName = "hello-world-server"
-    outputDir = tasks.named<CreateStartScripts>("startScripts").get().outputDir
-    classpath = tasks.named<CreateStartScripts>("startScripts").get().classpath
-}
+val helloWorldServerStartScripts =
+    tasks.register<CreateStartScripts>("helloWorldServerStartScripts") {
+        mainClass.set("io.grpc.examples.helloworld.HelloWorldServerKt")
+        applicationName = "hello-world-server"
+        outputDir = tasks.named<CreateStartScripts>("startScripts").get().outputDir
+        classpath = tasks.named<CreateStartScripts>("startScripts").get().classpath
+    }
 
-val routeGuideServerStartScripts = tasks.register<CreateStartScripts>("routeGuideServerStartScripts") {
-    mainClass.set("io.grpc.examples.routeguide.RouteGuideServerKt")
-    applicationName = "route-guide-server"
-    outputDir = tasks.named<CreateStartScripts>("startScripts").get().outputDir
-    classpath = tasks.named<CreateStartScripts>("startScripts").get().classpath
-}
+val routeGuideServerStartScripts =
+    tasks.register<CreateStartScripts>("routeGuideServerStartScripts") {
+        mainClass.set("io.grpc.examples.routeguide.RouteGuideServerKt")
+        applicationName = "route-guide-server"
+        outputDir = tasks.named<CreateStartScripts>("startScripts").get().outputDir
+        classpath = tasks.named<CreateStartScripts>("startScripts").get().classpath
+    }
 
-val animalsServerStartScripts = tasks.register<CreateStartScripts>("animalsServerStartScripts") {
-    mainClass.set("io.grpc.examples.animals.AnimalsServerKt")
-    applicationName = "animals-server"
-    outputDir = tasks.named<CreateStartScripts>("startScripts").get().outputDir
-    classpath = tasks.named<CreateStartScripts>("startScripts").get().classpath
-}
+val animalsServerStartScripts =
+    tasks.register<CreateStartScripts>("animalsServerStartScripts") {
+        mainClass.set("io.grpc.examples.animals.AnimalsServerKt")
+        applicationName = "animals-server"
+        outputDir = tasks.named<CreateStartScripts>("startScripts").get().outputDir
+        classpath = tasks.named<CreateStartScripts>("startScripts").get().classpath
+    }
 
 tasks.named("startScripts") {
     dependsOn(helloWorldServerStartScripts)
@@ -66,7 +69,12 @@ tasks.withType<Test> {
     useJUnit()
 
     testLogging {
-        events = setOf(org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED, org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED, org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED)
+        events =
+            setOf(
+                org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED,
+                org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED,
+                org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED,
+            )
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         showStandardStreams = true
     }

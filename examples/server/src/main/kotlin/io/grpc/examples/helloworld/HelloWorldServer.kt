@@ -20,10 +20,11 @@ import io.grpc.Server
 import io.grpc.ServerBuilder
 
 class HelloWorldServer(private val port: Int) {
-    val server: Server = ServerBuilder
-        .forPort(port)
-        .addService(HelloWorldService())
-        .build()
+    val server: Server =
+        ServerBuilder
+            .forPort(port)
+            .addService(HelloWorldService())
+            .build()
 
     fun start() {
         server.start()
@@ -33,7 +34,7 @@ class HelloWorldServer(private val port: Int) {
                 println("*** shutting down gRPC server since JVM is shutting down")
                 this@HelloWorldServer.stop()
                 println("*** server shut down")
-            }
+            },
         )
     }
 
@@ -46,9 +47,10 @@ class HelloWorldServer(private val port: Int) {
     }
 
     internal class HelloWorldService : GreeterGrpcKt.GreeterCoroutineImplBase() {
-        override suspend fun sayHello(request: HelloRequest) = helloReply {
-            message = "Hello ${request.name}"
-        }
+        override suspend fun sayHello(request: HelloRequest) =
+            helloReply {
+                message = "Hello ${request.name}"
+            }
     }
 }
 
