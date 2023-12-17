@@ -33,21 +33,21 @@ protobuf {
         artifact = "com.google.protobuf:protoc:YOUR_PROTOBUF_VERSION"
     }
     plugins {
-        id("grpc") {
+        create("grpc") {
             artifact = "io.grpc:protoc-gen-grpc-java:YOUR_GRPC_VERSION"
         }
-        id("grpckt") {
+        create("grpckt") {
             artifact = "io.grpc:protoc-gen-grpc-kotlin:YOUR_GRPC_KOTLIN_VERSION:jdk8@jar"
         }
     }
     generateProtoTasks {
         all().forEach {
             it.plugins {
-                id("grpc")
-                id("grpckt")
+                create("grpc")
+                create("grpckt")
             }
             it.builtins {
-                id("kotlin")
+                create("kotlin")
             }
         }
     }
