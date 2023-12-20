@@ -160,6 +160,74 @@ def kt_jvm_grpc_library(
         features = features,
     )
 
+def kt_jvm_grpc_no_java_library(
+        name,
+        srcs = None,
+        deps = None,
+        java_grpc_dep = None,
+        tags = None,
+        testonly = None,  # None to not override Bazel's default
+        compatible_with = None,
+        restricted_to = None,
+        visibility = None,
+        deprecation = None,
+        features = []):
+    """This rule compiles Kotlin APIs for gRPC services from the proto_library in srcs.
+
+    Unlike kt_jvm_grpc_library, this rule will not generate a java_grpc_library target
+    implicitly but instead expects one as an input to java_grpc_dep.
+
+    For standard attributes, see:
+      https://docs.bazel.build/versions/master/be/common-definitions.html#common-attributes
+
+    Args:
+      name: A name for the target
+      srcs: Exactly one proto_library target to generate Kotlin APIs for
+      deps: Exactly one java_proto_library target for srcs[0]
+      java_grpc_dep: java_grpc_library target for the java_proto_library in deps
+      tags: A list of string tags passed to generated targets.
+      testonly: Whether this target is intended only for tests.
+      compatible_with: Standard attribute
+      restricted_to: Standard attribute
+      visibility: A list of targets allowed to depend on this rule.
+      deprecation: Standard attribute
+      features: Features enabled.
+    """
+    srcs = srcs or []
+    deps = deps or []
+
+    if len(srcs) != 1:
+        fail("Expected exactly one src", "srcs")
+    if len(deps) != 1:
+        fail("Expected exactly one dep", "deps")
+    if not java_grpc_dep:
+        fail("A java_grpc_dep is required", "java_grpc_dep")
+
+    kt_grpc_label = ":%s_DO_NOT_DEPEND_kt_grpc" % name
+    kt_grpc_name = kt_grpc_label[1:]
+
+    _kt_grpc_generate_code(
+        name = kt_grpc_name,
+        srcs = srcs,
+        deps = deps,
+    )
+
+    kt_jvm_library(
+        name = name,
+        srcs = [kt_grpc_label],
+        deps = [
+            java_grpc_dep,
+            "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:stub",
+            "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:context",
+        ],
+        compatible_with = compatible_with,
+        restricted_to = restricted_to,
+        testonly = testonly,
+        visibility = visibility,
+        deprecation = deprecation,
+        features = features,
+    )
+
 def _get_real_short_path(file):
     """Returns the correct short path file name to be used by protoc."""
     short_path = file.short_path
@@ -200,7 +268,6 @@ def _kt_jvm_proto_library_helper_impl(ctx):
         outputs = [gen_src_dir],
         executable = ctx.executable._protoc,
         arguments = [protoc_args],
-        mnemonic = "KtProtoGenerator",
         progress_message = "Generating kotlin proto extensions for " +
                            ", ".join([
                                str(dep.label)
@@ -252,6 +319,7 @@ _kt_jvm_proto_library_helper = rule(
 def kt_jvm_proto_library(
         name,
         deps = None,
+        java_deps = None,
         tags = None,
         testonly = None,
         compatible_with = None,
@@ -267,8 +335,9 @@ def kt_jvm_proto_library(
     See also https://developers.google.com/protocol-buffers/docs/kotlintutorial for how to interact
     with the generated Kotlin representation.
 
-    Note that the rule will also export the java version of the same protos as Kotlin protos depend
-    on the java version under the hood.
+    If "java_deps" are set, they must be exactly the java_proto_library targets for "deps". If
+    "java_deps" are not set, this rule will generate and export the java protos for all "deps",
+    using "flavor" to determine their type.
 
     For standard attributes, see:
       https://docs.bazel.build/versions/master/be/common-definitions.html#common-attributes
@@ -276,6 +345,7 @@ def kt_jvm_proto_library(
     Args:
       name: A name for the target
       deps: One or more proto_library targets to turn into Kotlin.
+      java_deps: (optional) java_proto_library targets corresponding to deps
       tags: Standard attribute
       testonly: Standard attribute
       compatible_with: Standard attribute
@@ -286,40 +356,43 @@ def kt_jvm_proto_library(
       deprecation: Standard attribute
       features: Standard attribute
     """
-    java_proto_target = ":%s_DO_NOT_DEPEND_java_proto" % name
-    helper_target = ":%s_DO_NOT_DEPEND_kt_proto" % name
-
-    if flavor == "lite":
-        native.java_lite_proto_library(
-            name = java_proto_target[1:],
-            deps = deps,
-            testonly = testonly,
-            compatible_with = compatible_with,
-            visibility = ["//visibility:private"],
-            restricted_to = restricted_to,
-            tags = tags,
-            deprecation = deprecation,
-            features = features,
-        )
+    if (java_deps != None and len(java_deps) > 0):
+        java_protos = java_deps
+        java_exports = []
     else:
-        native.java_proto_library(
-            name = java_proto_target[1:],
-            deps = deps,
-            testonly = testonly,
-            compatible_with = compatible_with,
-            visibility = ["//visibility:private"],
-            restricted_to = restricted_to,
-            tags = tags,
-            deprecation = deprecation,
-            features = features,
-        )
+        java_proto_target = ":%s_DO_NOT_DEPEND_java_proto" % name
+        if flavor == "lite":
+            native.java_lite_proto_library(
+                name = java_proto_target[1:],
+                deps = deps,
+                testonly = testonly,
+                compatible_with = compatible_with,
+                visibility = ["//visibility:private"],
+                restricted_to = restricted_to,
+                tags = tags,
+                deprecation = deprecation,
+                features = features,
+            )
+        else:
+            native.java_proto_library(
+                name = java_proto_target[1:],
+                deps = deps,
+                testonly = testonly,
+                compatible_with = compatible_with,
+                visibility = ["//visibility:private"],
+                restricted_to = restricted_to,
+                tags = tags,
+                deprecation = deprecation,
+                features = features,
+            )
+        java_protos = [java_proto_target]
+        java_exports = [java_proto_target]
 
+    helper_target = ":%s_DO_NOT_DEPEND_kt_proto" % name
     _kt_jvm_proto_library_helper(
         name = helper_target[1:],
         proto_deps = deps,
-        deps = [
-            java_proto_target,
-        ],
+        deps = java_protos,
         testonly = testonly,
         compatible_with = compatible_with,
         visibility = ["//visibility:private"],
@@ -334,11 +407,8 @@ def kt_jvm_proto_library(
         srcs = [helper_target + ".srcjar"],
         deps = [
             "@maven//:com_google_protobuf_protobuf_kotlin",
-            java_proto_target,
-        ],
-        exports = [
-            java_proto_target,
-        ],
+        ] + java_protos,
+        exports = java_exports,
         testonly = testonly,
         compatible_with = compatible_with,
         visibility = visibility,
