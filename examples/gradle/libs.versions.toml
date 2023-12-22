@@ -22,7 +22,7 @@ protoc = { group = "com.google.protobuf", name = "protoc", version = "3.25.1" }
 protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version = "3.25.1" }
 protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version = "3.25.1" }
 protobuf-java-util = { group = "com.google.protobuf", name = "protobuf-java-util", version = "3.25.1" }
-protoc-gen-grpc-java = { group = "io.grpc", name = "protoc-gen-grpc-java", version = "1.60.0" }
+protoc-gen-grpc-java = { group = "io.grpc", name = "protoc-gen-grpc-java", version = "1.60.1" }
 protoc-gen-grpc-kotlin = { group = "io.grpc", name = "protoc-gen-grpc-kotlin", version = "1.4.1" }
 
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.8.2" }
