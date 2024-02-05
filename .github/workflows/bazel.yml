@@ -21,14 +21,14 @@ jobs:
         mv bazelisk-linux-amd64 "${GITHUB_WORKSPACE}/bin/bazel"
         chmod +x "${GITHUB_WORKSPACE}/bin/bazel"
     - name: Test
-      uses: nick-invision/retry@v2
+      uses: nick-invision/retry@v3
       with:
         timeout_minutes: 10
         max_attempts: 3
         command: |
           "${GITHUB_WORKSPACE}/bin/bazel" test //...
     - name: Build
-      uses: nick-invision/retry@v2
+      uses: nick-invision/retry@v3
       with:
         timeout_minutes: 10
         max_attempts: 3
