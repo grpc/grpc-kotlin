@@ -1,5 +1,5 @@
 [plugins]
-android-application = { id = "com.android.application", version = "8.2.0" }
+android-application = { id = "com.android.application", version = "8.2.2" }
 android-library = { id = "com.android.library", version = "8.2.0" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "1.9.22" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version = "1.9.21" }
