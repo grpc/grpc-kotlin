@@ -20,7 +20,7 @@ grpc-testing = { group = "io.grpc", name = "grpc-testing", version = "1.60.0" }
 grpc-stub = { group = "io.grpc", name = "grpc-stub", version = "1.60.0" }
 kotlinpoet = { group = "com.squareup", name = "kotlinpoet", version = "1.16.0" }
 junit = { group = "junit", name = "junit", version = "4.13.2" }
-junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version = "1.10.1" }
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version = "1.10.2" }
 guava = { group = "com.google.guava", name = "guava", version = "33.0.0-jre" }
 jimfs = { group = "com.google.jimfs", name = "jimfs", version = "1.3.0" }
 protobuf-gradle-plugin = { group = "com.google.protobuf", name = "protobuf-gradle-plugin", version = "0.9.4" }
