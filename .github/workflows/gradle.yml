@@ -33,5 +33,6 @@ jobs:
         ./gradlew test
 
     - name: Test on Ubuntu
+      if: matrix.os == 'ubuntu-latest'
       run: |
         ./gradlew test
