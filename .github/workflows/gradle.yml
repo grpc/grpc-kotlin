@@ -22,7 +22,7 @@ jobs:
 
     - uses: gradle/gradle-build-action@v3
 
-    - name: Setup docker (missing on MacOS)
+    - name: Test on Mac
       if: matrix.os == 'macos-latest'
       run: |
         brew install docker
@@ -30,7 +30,8 @@ jobs:
         export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
         export TESTCONTAINERS_HOST_OVERRIDE=$(colima ls -j | jq -r '.address')
         export DOCKER_HOST="unix://${HOME}/.colima/default/docker.sock"
+        ./gradlew test
 
-    - name: Test
+    - name: Test on Ubuntu
       run: |
         ./gradlew test
