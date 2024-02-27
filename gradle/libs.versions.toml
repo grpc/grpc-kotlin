@@ -9,7 +9,7 @@ kotlin-power-assert = { id = "com.bnorm.power.kotlin-power-assert", version = "0
 
 [libraries]
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.7.3" }
-kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version = "1.7.3" }
+kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version = "1.8.0" }
 kotlinx-coroutines-debug = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-debug", version = "1.8.0" }
 grpc-protobuf = { group = "io.grpc", name = "grpc-protobuf", version = "1.62.2" }
 grpc-protobuf-lite = { group = "io.grpc", name = "grpc-protobuf-lite", version = "1.62.2" }
