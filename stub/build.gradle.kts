@@ -32,6 +32,7 @@ dependencies {
     testImplementation(libs.truth.proto.extension)
     testImplementation(libs.grpc.protobuf)
     testImplementation(libs.grpc.testing)
+    testImplementation(libs.grpc.inprocess)
 }
 
 java {

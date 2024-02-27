@@ -22,15 +22,9 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-import io.grpc.CallOptions;
-import io.grpc.Channel;
-import io.grpc.ClientCall;
-import io.grpc.Deadline;
-import io.grpc.MethodDescriptor;
-import io.grpc.internal.NoopClientCall;
+import io.grpc.*;
 import io.grpc.testing.integration.Messages.SimpleRequest;
 import io.grpc.testing.integration.Messages.SimpleResponse;
 import io.grpc.testing.integration.TestServiceGrpc;
@@ -54,13 +48,15 @@ public class StubConfigTest {
   @Mock
   private StreamObserver<SimpleResponse> responseObserver;
 
+  @Mock
+  private ClientCall<SimpleRequest, SimpleResponse> call;
+
   /**
    * Sets up mocks.
    */
   @Before public void setUp() {
     MockitoAnnotations.openMocks(this);
-    ClientCall<SimpleRequest, SimpleResponse> call =
-        new NoopClientCall<>();
+
     when(channel.newCall(
             ArgumentMatchers.<MethodDescriptor<SimpleRequest, SimpleResponse>>any(),
             any(CallOptions.class)))

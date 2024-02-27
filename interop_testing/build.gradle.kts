@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":stub"))
 
     implementation(libs.grpc.protobuf)
+    implementation(libs.grpc.protobuf.lite)
     implementation(libs.grpc.auth)
     implementation(libs.grpc.alts)
     implementation(libs.grpc.netty)

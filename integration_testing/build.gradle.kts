@@ -11,10 +11,9 @@ kotlin {
 
 dependencies {
     testImplementation(libs.testcontainers)
-    testImplementation("org.gradle:gradle-test-kit:6.1")
-    testImplementation("org.gradle:gradle-test-kit:6.1")
-    testImplementation("commons-io:commons-io:2.15.1")
-    testImplementation("org.gradle:gradle-tooling-api:8.6")
+    testImplementation(libs.gradle.test.kit)
+    testImplementation(libs.gradle.tooling.api)
+    testImplementation(libs.commons.io)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
     testRuntimeOnly(libs.slf4j.simple)
