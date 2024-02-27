@@ -29,7 +29,7 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version = "1.6.2" }
 androidx-compose-material = { group = "androidx.compose.material", name = "material", version = "1.6.2" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version = "1.5.4" }
-androidx-compose-ui = { group = "androidx.compose.ui", name = "ui", version = "1.5.4" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui", version = "1.6.2" }
 androidx-compose-compiler = { group = "androidx.compose.compiler", name = "compiler", version = "1.5.6" }
 
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version = "1.9.22" }
