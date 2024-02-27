@@ -36,3 +36,4 @@ truth-proto-extension = { group = "com.google.truth.extensions", name = "truth-p
 okhttp = { group = "com.squareup.okhttp", name = "okhttp", version = "2.7.5" }
 javax-annotation-api = { group = "javax.annotation", name = "javax.annotation-api", version = "1.3.2" }
 testcontainers = { group = "org.testcontainers", name = "testcontainers", version = "1.19.6" }
+slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version = "2.0.12" }

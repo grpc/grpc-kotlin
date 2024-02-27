@@ -10,10 +10,14 @@ kotlin {
 }
 
 dependencies {
-    testImplementation(gradleTestKit())
     testImplementation(libs.testcontainers)
+    testImplementation("org.gradle:gradle-test-kit:6.1")
+    testImplementation("org.gradle:gradle-test-kit:6.1")
+    testImplementation("commons-io:commons-io:2.15.1")
+    testImplementation("org.gradle:gradle-tooling-api:8.6")
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
+    testRuntimeOnly(libs.slf4j.simple)
 }
 
 tasks.named<Test>("test") {
@@ -27,7 +31,7 @@ tasks.named<Test>("test") {
     testLogging {
         showStandardStreams = true
         exceptionFormat = TestExceptionFormat.FULL
-        events(TestLogEvent.STARTED, TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
+        events(TestLogEvent.STANDARD_OUT, TestLogEvent.STANDARD_ERROR, TestLogEvent.STARTED, TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
     }
 
     retry {

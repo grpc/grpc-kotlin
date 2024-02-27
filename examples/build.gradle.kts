@@ -20,3 +20,4 @@ subprojects {
 }
 
 tasks.create("assemble").dependsOn(":server:installDist")
+

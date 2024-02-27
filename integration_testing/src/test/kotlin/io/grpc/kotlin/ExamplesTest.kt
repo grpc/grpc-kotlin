@@ -1,6 +1,6 @@
 package io.grpc.kotlin
 
-import org.gradle.internal.impldep.org.apache.commons.io.FileUtils
+import org.apache.commons.io.FileUtils
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -8,7 +8,12 @@ import org.junit.jupiter.api.io.TempDir
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.wait.strategy.Wait
 import java.io.File
+import java.net.URI
 import java.nio.file.Path
+import java.util.Properties
+import kotlin.io.path.div
+import kotlin.io.path.inputStream
+
 
 class ExamplesTest {
 
@@ -50,9 +55,14 @@ class ExamplesTest {
         }
         settingsGradle.writeText(settingsGradleNewLines.joinToString("\n"))
 
+        val gradleWrapperProperties = Properties()
+        gradleWrapperProperties.load((tempDir / "gradle/wrapper/gradle-wrapper.properties").inputStream())
+        val distributionUrl = URI.create(gradleWrapperProperties.getProperty("distributionUrl"))
+
         val dependencyResult = GradleRunner.create()
             .withProjectDir(tempDir.toFile())
             .withArguments(":stub:dependencies")
+            .withGradleDistribution(distributionUrl)
             .build()
 
         assertTrue(dependencyResult.output.contains("io.grpc:grpc-kotlin-stub:$grpcKotlinVersion"))
@@ -60,6 +70,7 @@ class ExamplesTest {
         GradleRunner.create()
             .withProjectDir(tempDir.toFile())
             .withArguments(":server:jibDockerBuild", "--image=grpc-kotlin-examples-server")
+            .withGradleDistribution(distributionUrl)
             .build()
 
         val container = GenericContainer("grpc-kotlin-examples-server")
@@ -70,8 +81,9 @@ class ExamplesTest {
 
         val clientResult = GradleRunner.create()
             .withProjectDir(tempDir.toFile())
-            .withEnvironment(mapOf("PORT" to container.getFirstMappedPort().toString()))
+            .withEnvironment(mapOf("PORT" to container.firstMappedPort.toString()))
             .withArguments(":client:HelloWorldClient")
+            .withGradleDistribution(distributionUrl)
             .build()
 
         assertTrue(clientResult.output.contains("Received: Hello world"))
