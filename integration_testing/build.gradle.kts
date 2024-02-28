@@ -34,7 +34,8 @@ tasks.named<Test>("test") {
     }
 
     retry {
-        maxRetries = 3
+        maxRetries = 1
+        maxFailures = 1
     }
 
     systemProperties["grpc-kotlin-version"] = project.version
