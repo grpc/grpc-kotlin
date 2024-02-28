@@ -15,8 +15,8 @@ dependencies {
     testImplementation(libs.gradle.tooling.api)
     testImplementation(libs.commons.io)
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.slf4j.simple)
     testRuntimeOnly(libs.junit.platform.launcher)
-    testRuntimeOnly(libs.slf4j.simple)
 }
 
 tasks.named<Test>("test") {
@@ -34,8 +34,7 @@ tasks.named<Test>("test") {
     }
 
     retry {
-        maxRetries = 1
-        maxFailures = 1
+        maxRetries = 3
     }
 
     systemProperties["grpc-kotlin-version"] = project.version

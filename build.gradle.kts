@@ -86,7 +86,7 @@ subprojects {
         }
 
         retry {
-            maxRetries.set(10)
+            maxRetries = 10
         }
 
         afterSuite(

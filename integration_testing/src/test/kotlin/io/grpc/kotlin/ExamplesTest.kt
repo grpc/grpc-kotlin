@@ -5,7 +5,9 @@ import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.slf4j.LoggerFactory
 import org.testcontainers.containers.GenericContainer
+import org.testcontainers.containers.output.Slf4jLogConsumer
 import org.testcontainers.containers.wait.strategy.Wait
 import java.io.File
 import java.net.URI
@@ -16,6 +18,8 @@ import kotlin.io.path.inputStream
 
 
 class ExamplesTest {
+
+    private val logger = LoggerFactory.getLogger(ExamplesTest::class.java)
 
     // todo: add test to verify jdk8 usage
     @Test
@@ -73,11 +77,14 @@ class ExamplesTest {
             .withGradleDistribution(distributionUrl)
             .build()
 
+        val logConsumer = Slf4jLogConsumer(logger)
+
         val container = GenericContainer("grpc-kotlin-examples-server")
             .withExposedPorts(50051)
             .waitingFor(Wait.forListeningPort())
 
         container.start()
+        container.followOutput(logConsumer)
 
         val clientResult = GradleRunner.create()
             .withProjectDir(tempDir.toFile())
