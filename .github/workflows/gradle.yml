@@ -9,7 +9,7 @@ jobs:
   gradle:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-12]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
@@ -23,7 +23,7 @@ jobs:
     - uses: gradle/gradle-build-action@v3
 
     - name: Test on Mac
-      if: matrix.os == 'macos-latest'
+      if: matrix.os == 'macos-12'
       run: |
         brew install docker
         colima start --network-address

@@ -73,6 +73,12 @@ class ExamplesTest {
 
         GradleRunner.create()
             .withProjectDir(tempDir.toFile())
+            .withArguments(":client:build")
+            .withGradleDistribution(distributionUrl)
+            .build()
+
+        GradleRunner.create()
+            .withProjectDir(tempDir.toFile())
             .withArguments(":server:jibDockerBuild", "--image=grpc-kotlin-examples-server")
             .withGradleDistribution(distributionUrl)
             .build()
