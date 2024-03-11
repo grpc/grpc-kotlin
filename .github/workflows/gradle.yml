@@ -25,7 +25,7 @@ jobs:
     - name: Test on Mac
       if: matrix.os == 'macos-13'
       run: |
-        brew install docker
+        brew install docker colima
         colima start --network-address
         export TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
         export TESTCONTAINERS_HOST_OVERRIDE=$(colima ls -j | jq -r '.address')
