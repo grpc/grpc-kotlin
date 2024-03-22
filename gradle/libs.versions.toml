@@ -40,5 +40,5 @@ javax-annotation-api = { group = "javax.annotation", name = "javax.annotation-ap
 testcontainers = { group = "org.testcontainers", name = "testcontainers", version = "1.19.7" }
 slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version = "2.0.12" }
 gradle-test-kit = { group = "org.gradle", name = "gradle-test-kit", version = "6.1" }
-gradle-tooling-api = { group = "org.gradle", name = "gradle-tooling-api", version = "8.6" }
+gradle-tooling-api = { group = "org.gradle", name = "gradle-tooling-api", version = "8.7" }
 commons-io = { group = "commons-io", name = "commons-io", version = "2.15.1" }
