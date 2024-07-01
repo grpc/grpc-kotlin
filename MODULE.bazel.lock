@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "a4d1a6ea808a23fdc643e02f668e431c0111467da6e0523e976f064cb914a5e3",
+  "moduleFileHash": "ab41bb7835e4b81b7561a648a08a20881fbd32f046224a55d0e0fb18e70cdd68",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -35,13 +35,14 @@
           },
           "imports": {
             "com_google_guava_guava": "com_google_guava_guava",
-            "maven": "maven"
+            "maven": "grpc_kotlin_maven"
           },
           "devImports": [],
           "tags": [
             {
               "tagName": "install",
               "attributeValues": {
+                "name": "grpc_kotlin_maven",
                 "artifacts": [
                   "io.grpc:protoc-gen-grpc-kotlin:1.4.1",
                   "com.google.jimfs:jimfs:1.3.0",
@@ -3749,7 +3750,7 @@
             "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
             "ruleClassName": "compat_repository",
             "attributes": {
-              "generating_repository": "maven",
+              "generating_repository": "grpc_kotlin_maven",
               "target_name": "org_jetbrains_kotlinx_kotlinx_coroutines_core"
             }
           },
@@ -3839,14 +3840,6 @@
                 "https://repo1.maven.org/maven2/org/apache/maven/maven-repository-metadata/3.9.6/maven-repository-metadata-3.9.6.jar"
               ],
               "downloaded_file_path": "v1/org/apache/maven/maven-repository-metadata/3.9.6/maven-repository-metadata-3.9.6.jar"
-            }
-          },
-          "com_google_truth_truth": {
-            "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
-            "ruleClassName": "compat_repository",
-            "attributes": {
-              "generating_repository": "maven",
-              "target_name": "com_google_truth_truth"
             }
           },
           "com_google_api_client_google_api_client_2_4_0": {
@@ -4187,7 +4180,7 @@
             "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
             "ruleClassName": "compat_repository",
             "attributes": {
-              "generating_repository": "maven",
+              "generating_repository": "grpc_kotlin_maven",
               "target_name": "com_google_truth_extensions_truth_proto_extension"
             }
           },
@@ -4466,14 +4459,6 @@
                 "https://repo1.maven.org/maven2/org/apache/maven/maven-settings-builder/3.9.6/maven-settings-builder-3.9.6-sources.jar"
               ],
               "downloaded_file_path": "v1/org/apache/maven/maven-settings-builder/3.9.6/maven-settings-builder-3.9.6-sources.jar"
-            }
-          },
-          "com_google_code_gson_gson": {
-            "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
-            "ruleClassName": "compat_repository",
-            "attributes": {
-              "generating_repository": "maven",
-              "target_name": "com_google_code_gson_gson"
             }
           },
           "io_netty_netty_tcnative_boringssl_static_jar_linux_x86_64_2_0_61_Final": {
@@ -4870,7 +4855,7 @@
             "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
             "ruleClassName": "compat_repository",
             "attributes": {
-              "generating_repository": "maven",
+              "generating_repository": "grpc_kotlin_maven",
               "target_name": "com_google_jimfs_jimfs"
             }
           },
@@ -4895,6 +4880,68 @@
                 "https://repo1.maven.org/maven2/software/amazon/awssdk/annotations/2.25.23/annotations-2.25.23.jar"
               ],
               "downloaded_file_path": "v1/software/amazon/awssdk/annotations/2.25.23/annotations-2.25.23.jar"
+            }
+          },
+          "grpc_kotlin_maven": {
+            "bzlFile": "@@rules_jvm_external~//:coursier.bzl",
+            "ruleClassName": "coursier_fetch",
+            "attributes": {
+              "user_provided_name": "grpc_kotlin_maven",
+              "repositories": [
+                "{ \"repo_url\": \"https://repo.maven.apache.org/maven2/\" }"
+              ],
+              "artifacts": [
+                "{ \"group\": \"io.grpc\", \"artifact\": \"protoc-gen-grpc-kotlin\", \"version\": \"1.4.1\" }",
+                "{ \"group\": \"com.google.jimfs\", \"artifact\": \"jimfs\", \"version\": \"1.3.0\" }",
+                "{ \"group\": \"com.google.truth.extensions\", \"artifact\": \"truth-proto-extension\", \"version\": \"1.1.3\" }",
+                "{ \"group\": \"com.google.protobuf\", \"artifact\": \"protobuf-kotlin\", \"version\": \"4.27.1\" }",
+                "{ \"group\": \"com.google.guava\", \"artifact\": \"guava\", \"version\": \"32.0.1-android\" }",
+                "{ \"group\": \"com.squareup\", \"artifact\": \"kotlinpoet\", \"version\": \"1.14.2\" }",
+                "{ \"group\": \"org.jetbrains.kotlinx\", \"artifact\": \"kotlinx-coroutines-core\", \"version\": \"1.7.3\" }",
+                "{ \"group\": \"org.jetbrains.kotlinx\", \"artifact\": \"kotlinx-coroutines-core-jvm\", \"version\": \"1.7.3\" }",
+                "{ \"group\": \"org.jetbrains.kotlinx\", \"artifact\": \"kotlinx-coroutines-debug\", \"version\": \"1.7.3\" }"
+              ],
+              "fail_on_missing_checksum": true,
+              "fetch_sources": false,
+              "fetch_javadoc": false,
+              "excluded_artifacts": [],
+              "generate_compat_repositories": false,
+              "version_conflict_policy": "default",
+              "override_targets": {
+                "com.google.protobuf:protobuf-java": "'@@protobuf~//:protobuf_java'",
+                "com.google.protobuf:protobuf-java-util": "'@@protobuf~//:protobuf_java_util'",
+                "com.google.protobuf:protobuf-javalite": "'@@[unknown repo 'com_google_protobuf_javalite' requested from @@grpc-java~]//:protobuf_javalite'",
+                "io.grpc:grpc-alts": "'@@grpc-java~//alts:alts'",
+                "io.grpc:grpc-api": "'@@grpc-java~//api:api'",
+                "io.grpc:grpc-auth": "'@@grpc-java~//auth:auth'",
+                "io.grpc:grpc-census": "'@@grpc-java~//census:census'",
+                "io.grpc:grpc-context": "'@@grpc-java~//context:context'",
+                "io.grpc:grpc-core": "'@@grpc-java~//core:core_maven'",
+                "io.grpc:grpc-googleapis": "'@@grpc-java~//googleapis:googleapis'",
+                "io.grpc:grpc-grpclb": "'@@grpc-java~//grpclb:grpclb'",
+                "io.grpc:grpc-inprocess": "'@@grpc-java~//inprocess:inprocess'",
+                "io.grpc:grpc-netty": "'@@grpc-java~//netty:netty'",
+                "io.grpc:grpc-netty-shaded": "'@@grpc-java~//netty:shaded_maven'",
+                "io.grpc:grpc-okhttp": "'@@grpc-java~//okhttp:okhttp'",
+                "io.grpc:grpc-protobuf": "'@@grpc-java~//protobuf:protobuf'",
+                "io.grpc:grpc-protobuf-lite": "'@@grpc-java~//protobuf-lite:protobuf-lite'",
+                "io.grpc:grpc-rls": "'@@grpc-java~//rls:rls'",
+                "io.grpc:grpc-services": "'@@grpc-java~//services:services_maven'",
+                "io.grpc:grpc-stub": "'@@grpc-java~//stub:stub'",
+                "io.grpc:grpc-testing": "'@@grpc-java~//testing:testing'",
+                "io.grpc:grpc-xds": "'@@grpc-java~//xds:xds_maven'",
+                "io.grpc:grpc-util": "'@@grpc-java~//util:util'"
+              },
+              "strict_visibility": false,
+              "strict_visibility_value": [
+                "@@//visibility:private"
+              ],
+              "use_credentials_from_home_netrc_file": false,
+              "resolve_timeout": 600,
+              "use_starlark_android_rules": false,
+              "aar_import_bzl_label": "@build_bazel_rules_android//android:rules.bzl",
+              "duplicate_version_warning": "warn",
+              "ignore_empty_files": false
             }
           },
           "com_google_inject_guice_jar_sources_5_1_0": {
@@ -4934,7 +4981,7 @@
             "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
             "ruleClassName": "compat_repository",
             "attributes": {
-              "generating_repository": "maven",
+              "generating_repository": "grpc_kotlin_maven",
               "target_name": "org_jetbrains_kotlinx_kotlinx_coroutines_debug"
             }
           },
@@ -5289,14 +5336,6 @@
                 "https://repo1.maven.org/maven2/com/google/guava/guava/33.1.0-jre/guava-33.1.0-jre-sources.jar"
               ],
               "downloaded_file_path": "v1/com/google/guava/guava/33.1.0-jre/guava-33.1.0-jre-sources.jar"
-            }
-          },
-          "com_google_j2objc_j2objc_annotations": {
-            "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
-            "ruleClassName": "compat_repository",
-            "attributes": {
-              "generating_repository": "maven",
-              "target_name": "com_google_j2objc_j2objc_annotations"
             }
           },
           "unpinned_rules_jvm_external_deps": {
@@ -6044,7 +6083,7 @@
             "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
             "ruleClassName": "compat_repository",
             "attributes": {
-              "generating_repository": "maven",
+              "generating_repository": "grpc_kotlin_maven",
               "target_name": "org_jetbrains_kotlinx_kotlinx_coroutines_core_jvm"
             }
           },
@@ -6063,7 +6102,7 @@
             "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
             "ruleClassName": "compat_repository",
             "attributes": {
-              "generating_repository": "maven",
+              "generating_repository": "grpc_kotlin_maven",
               "target_name": "io_grpc_protoc_gen_grpc_kotlin"
             }
           },
@@ -6071,7 +6110,7 @@
             "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
             "ruleClassName": "compat_repository",
             "attributes": {
-              "generating_repository": "maven",
+              "generating_repository": "grpc_kotlin_maven",
               "target_name": "com_squareup_kotlinpoet"
             }
           },
@@ -6117,14 +6156,6 @@
                 "https://repo1.maven.org/maven2/io/grpc/grpc-protobuf/1.62.2/grpc-protobuf-1.62.2-sources.jar"
               ],
               "downloaded_file_path": "v1/io/grpc/grpc-protobuf/1.62.2/grpc-protobuf-1.62.2-sources.jar"
-            }
-          },
-          "com_google_guava_guava_testlib": {
-            "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
-            "ruleClassName": "compat_repository",
-            "attributes": {
-              "generating_repository": "maven",
-              "target_name": "com_google_guava_guava_testlib"
             }
           },
           "io_netty_netty_transport_classes_epoll_jar_sources_4_1_108_Final": {
@@ -6189,7 +6220,7 @@
             "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
             "ruleClassName": "compat_repository",
             "attributes": {
-              "generating_repository": "maven",
+              "generating_repository": "grpc_kotlin_maven",
               "target_name": "com_google_protobuf_protobuf_kotlin"
             }
           },
@@ -6492,14 +6523,6 @@
                 "https://repo1.maven.org/maven2/com/google/cloud/google-cloud-core-http/2.36.1/google-cloud-core-http-2.36.1-sources.jar"
               ],
               "downloaded_file_path": "v1/com/google/cloud/google-cloud-core-http/2.36.1/google-cloud-core-http-2.36.1-sources.jar"
-            }
-          },
-          "org_mockito_mockito_core": {
-            "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
-            "ruleClassName": "compat_repository",
-            "attributes": {
-              "generating_repository": "maven",
-              "target_name": "org_mockito_mockito_core"
             }
           },
           "com_google_api_grpc_gapic_google_cloud_storage_v2_2_36_1_alpha": {
@@ -6859,14 +6882,6 @@
               "downloaded_file_path": "v1/com/google/apis/google-api-services-storage/v1-rev20240311-2.0.0/google-api-services-storage-v1-rev20240311-2.0.0-sources.jar"
             }
           },
-          "com_google_code_findbugs_jsr305": {
-            "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
-            "ruleClassName": "compat_repository",
-            "attributes": {
-              "generating_repository": "maven",
-              "target_name": "com_google_code_findbugs_jsr305"
-            }
-          },
           "io_grpc_grpc_protobuf_lite_jar_sources_1_62_2": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_file",
@@ -7013,14 +7028,6 @@
               "downloaded_file_path": "v1/org/conscrypt/conscrypt-openjdk-uber/2.5.2/conscrypt-openjdk-uber-2.5.2.jar"
             }
           },
-          "com_google_errorprone_error_prone_annotations": {
-            "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
-            "ruleClassName": "compat_repository",
-            "attributes": {
-              "generating_repository": "maven",
-              "target_name": "com_google_errorprone_error_prone_annotations"
-            }
-          },
           "org_apache_maven_maven_core_3_9_6": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_file",
@@ -7121,24 +7128,37 @@
               "downloaded_file_path": "v1/org/codehaus/plexus/plexus-classworlds/2.7.0/plexus-classworlds-2.7.0-sources.jar"
             }
           },
+          "com_google_oauth_client_google_oauth_client_1_35_0": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_file",
+            "attributes": {
+              "sha256": "2f11345608d5537c8d1791cf8724268396e21149f3a2f9c35f0739438f262d40",
+              "urls": [
+                "https://repo1.maven.org/maven2/com/google/oauth-client/google-oauth-client/1.35.0/google-oauth-client-1.35.0.jar"
+              ],
+              "downloaded_file_path": "v1/com/google/oauth-client/google-oauth-client/1.35.0/google-oauth-client-1.35.0.jar"
+            }
+          },
+          "org_codehaus_plexus_plexus_cipher_jar_sources_2_1_0": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_file",
+            "attributes": {
+              "sha256": "9a05e2b3b472fcd1ab252270465dec441258736ae6737a70b9730518bb39bee9",
+              "urls": [
+                "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-cipher/2.1.0/plexus-cipher-2.1.0-sources.jar"
+              ],
+              "downloaded_file_path": "v1/org/codehaus/plexus/plexus-cipher/2.1.0/plexus-cipher-2.1.0-sources.jar"
+            }
+          },
           "maven": {
             "bzlFile": "@@rules_jvm_external~//:coursier.bzl",
             "ruleClassName": "coursier_fetch",
             "attributes": {
               "user_provided_name": "maven",
               "repositories": [
-                "{ \"repo_url\": \"https://repo.maven.apache.org/maven2/\" }"
+                "{ \"repo_url\": \"https://repo1.maven.org/maven2\" }"
               ],
               "artifacts": [
-                "{ \"group\": \"io.grpc\", \"artifact\": \"protoc-gen-grpc-kotlin\", \"version\": \"1.4.1\" }",
-                "{ \"group\": \"com.google.jimfs\", \"artifact\": \"jimfs\", \"version\": \"1.3.0\" }",
-                "{ \"group\": \"com.google.truth.extensions\", \"artifact\": \"truth-proto-extension\", \"version\": \"1.1.3\" }",
-                "{ \"group\": \"com.google.protobuf\", \"artifact\": \"protobuf-kotlin\", \"version\": \"4.27.1\" }",
-                "{ \"group\": \"com.google.guava\", \"artifact\": \"guava\", \"version\": \"32.0.1-android\" }",
-                "{ \"group\": \"com.squareup\", \"artifact\": \"kotlinpoet\", \"version\": \"1.14.2\" }",
-                "{ \"group\": \"org.jetbrains.kotlinx\", \"artifact\": \"kotlinx-coroutines-core\", \"version\": \"1.7.3\" }",
-                "{ \"group\": \"org.jetbrains.kotlinx\", \"artifact\": \"kotlinx-coroutines-core-jvm\", \"version\": \"1.7.3\" }",
-                "{ \"group\": \"org.jetbrains.kotlinx\", \"artifact\": \"kotlinx-coroutines-debug\", \"version\": \"1.7.3\" }",
                 "{ \"group\": \"com.google.code.findbugs\", \"artifact\": \"jsr305\", \"version\": \"3.0.2\" }",
                 "{ \"group\": \"com.google.code.gson\", \"artifact\": \"gson\", \"version\": \"2.8.9\" }",
                 "{ \"group\": \"com.google.errorprone\", \"artifact\": \"error_prone_annotations\", \"version\": \"2.3.2\" }",
@@ -7190,28 +7210,6 @@
               "aar_import_bzl_label": "@build_bazel_rules_android//android:rules.bzl",
               "duplicate_version_warning": "warn",
               "ignore_empty_files": false
-            }
-          },
-          "com_google_oauth_client_google_oauth_client_1_35_0": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_file",
-            "attributes": {
-              "sha256": "2f11345608d5537c8d1791cf8724268396e21149f3a2f9c35f0739438f262d40",
-              "urls": [
-                "https://repo1.maven.org/maven2/com/google/oauth-client/google-oauth-client/1.35.0/google-oauth-client-1.35.0.jar"
-              ],
-              "downloaded_file_path": "v1/com/google/oauth-client/google-oauth-client/1.35.0/google-oauth-client-1.35.0.jar"
-            }
-          },
-          "org_codehaus_plexus_plexus_cipher_jar_sources_2_1_0": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_file",
-            "attributes": {
-              "sha256": "9a05e2b3b472fcd1ab252270465dec441258736ae6737a70b9730518bb39bee9",
-              "urls": [
-                "https://repo1.maven.org/maven2/org/codehaus/plexus/plexus-cipher/2.1.0/plexus-cipher-2.1.0-sources.jar"
-              ],
-              "downloaded_file_path": "v1/org/codehaus/plexus/plexus-cipher/2.1.0/plexus-cipher-2.1.0-sources.jar"
             }
           },
           "com_google_auth_google_auth_library_oauth2_http_jar_sources_1_23_0": {
@@ -7659,14 +7657,6 @@
               "downloaded_file_path": "v1/com/google/apis/google-api-services-storage/v1-rev20240311-2.0.0/google-api-services-storage-v1-rev20240311-2.0.0.jar"
             }
           },
-          "junit_junit": {
-            "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
-            "ruleClassName": "compat_repository",
-            "attributes": {
-              "generating_repository": "maven",
-              "target_name": "junit_junit"
-            }
-          },
           "software_amazon_awssdk_auth_2_25_23": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_file",
@@ -7862,7 +7852,7 @@
             "bzlFile": "@@rules_jvm_external~//private:compat_repository.bzl",
             "ruleClassName": "compat_repository",
             "attributes": {
-              "generating_repository": "maven",
+              "generating_repository": "grpc_kotlin_maven",
               "target_name": "com_google_guava_guava"
             }
           },
