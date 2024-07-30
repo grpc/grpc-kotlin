@@ -1,5 +1,81 @@
 ## Change Log
 
+### 1.4.2
+
+#### What's Changed
+* Add regression test capturing need for `withCause` call by @andrewparmet in https://github.com/grpc/grpc-kotlin/pull/460
+* Bump com.squareup:kotlinpoet from 1.14.2 to 1.15.1 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/462
+* Bump org.gradle.test-retry from 1.5.6 to 1.5.7 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/466
+* Bump uraimo/run-on-arch-action from 2.5.1 to 2.6.0 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/465
+* Remove unneeded concurrency things by @taer in https://github.com/grpc/grpc-kotlin/pull/360
+* Remove full_stream_decompression from TestServiceClient.kt by @larry-safran in https://github.com/grpc/grpc-kotlin/pull/475
+* Bump androidx.activity:activity-compose from 1.8.1 to 1.8.2 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/478
+* bumps and switch to version catalogs - fixes #479 by @jamesward in https://github.com/grpc/grpc-kotlin/pull/480
+* Bump actions/setup-java from 3 to 4 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/470
+* Bump com.squareup:kotlinpoet from 1.15.1 to 1.15.3 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/471
+* Bump org.jlleitschuh.gradle.ktlint from 11.6.1 to 12.0.3 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/474
+* Bump com.google.protobuf:protobuf-kotlin-lite from 3.24.1 to 3.25.1 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/482
+* Bump com.google.protobuf:protoc from 3.24.1 to 3.25.1 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/481
+* Bump com.google.protobuf:protobuf-java-util from 3.24.1 to 3.25.1 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/484
+* Bump com.google.protobuf:protobuf-kotlin from 3.24.1 to 3.25.1 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/483
+* Bump com.google.protobuf:protobuf-java from 3.24.1 to 3.25.1 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/487
+* Bump org.testcontainers:testcontainers from 1.18.3 to 1.19.3 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/485
+* Add kt_jvm_proto_helper as individual rule. by @steineldar in https://github.com/grpc/grpc-kotlin/pull/396
+* Bump com.google.truth:truth from 1.1.5 to 1.4.1 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/521
+* Bump io.grpc:grpc-okhttp from 1.60.0 to 1.61.1 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/516
+* Bump io.grpc:protoc-gen-grpc-java from 1.60.0 to 1.61.1 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/515
+* Bump gradle/gradle-build-action from 2 to 3 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/513
+* Bump actions/cache from 3 to 4 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/509
+* Bump org.jetbrains.kotlin:kotlin-test-junit from 1.9.21 to 1.9.22 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/496
+* Bump org.jetbrains.kotlin.jvm from 1.9.21 to 1.9.22 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/495
+* Bump com.google.protobuf:protoc from 3.25.1 to 3.25.3 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/520
+* Bump com.google.guava:guava from 32.1.3-jre to 33.0.0-jre by @dependabot in https://github.com/grpc/grpc-kotlin/pull/490
+* Bump nick-invision/retry from 2 to 3 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/514
+* Bump org.junit.jupiter:junit-jupiter-engine from 5.10.1 to 5.10.2 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/525
+* Bump org.junit.jupiter:junit-jupiter from 5.10.1 to 5.10.2 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/523
+* Bump com.android.application from 8.2.0 to 8.2.2 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/530
+* Bump com.google.protobuf:protobuf-kotlin from 3.25.1 to 3.25.3 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/529
+* Bump org.jlleitschuh.gradle.ktlint from 12.0.3 to 12.1.0 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/534
+* Bump org.gradle.toolchains.foojay-resolver-convention from 0.7.0 to 0.8.0 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/533
+* Bump io.grpc:protoc-gen-grpc-java from 1.60.0 to 1.61.1 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/532
+* Bump com.squareup:kotlinpoet from 1.15.3 to 1.16.0 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/531
+* Bump org.jetbrains.kotlinx:kotlinx-coroutines-debug from 1.7.3 to 1.8.0 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/526
+* Bump androidx.compose.foundation:foundation-layout from 1.5.4 to 1.6.2 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/535
+* Bump org.junit.platform:junit-platform-launcher from 1.10.1 to 1.10.2 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/524
+* Bump androidx.compose.material:material from 1.5.4 to 1.6.2 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/536
+* Bump io.grpc:grpc-auth from 1.60.0 to 1.62.2 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/548
+* Bump androidx.compose.ui:ui from 1.5.4 to 1.6.2 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/541
+* Bump com.google.protobuf:protobuf-java from 3.25.1 to 3.25.3 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/543
+* Bump androidx.compose.runtime:runtime from 1.5.4 to 1.6.2 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/538
+* Bump androidx.compose.compiler:compiler from 1.5.6 to 1.5.10 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/537
+* Bump org.jetbrains.kotlinx:kotlinx-coroutines-core from 1.7.3 to 1.8.0 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/554
+* Bump com.google.cloud.tools.jib from 3.4.0 to 3.4.1 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/549
+* Bump org.jetbrains.kotlinx:kotlinx-coroutines-core from 1.7.3 to 1.8.0 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/551
+* Bump com.google.protobuf:protoc from 3.25.1 to 3.25.3 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/550
+* Bump io.grpc:protoc-gen-grpc-java from 1.61.1 to 1.62.2 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/552
+* Bump io.grpc:grpc-okhttp from 1.61.1 to 1.62.2 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/556
+* Bump com.android.application from 8.2.2 to 8.3.0 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/557
+* Bump com.google.truth.extensions:truth-proto-extension from 1.4.1 to 1.4.2 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/559
+* Bump org.jetbrains.dokka from 1.9.10 to 1.9.20 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/561
+* Bump androidx.compose.material:material from 1.6.2 to 1.6.3 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/564
+* Bump com.google.truth:truth from 1.4.1 to 1.4.2 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/560
+* Bump com.android.library from 8.2.2 to 8.3.0 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/558
+* Bump androidx.compose.foundation:foundation-layout from 1.6.2 to 1.6.3 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/563
+* Bump org.testcontainers:testcontainers from 1.19.6 to 1.19.7 by @dependabot in https://github.com/grpc/grpc-kotlin/pull/562
+* try to fix mac tests with build before testcontainer start and macos-14 by @jamesward in https://github.com/grpc/grpc-kotlin/pull/569
+* Bump androidx.compose.runtime:runtime from 1.6.2 to 1.6.3 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/565
+* Bump org.jetbrains.kotlin.jvm from 1.9.22 to 1.9.23 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/571
+* Bump androidx.compose.ui:ui from 1.6.2 to 1.6.3 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/570
+* Bump org.jetbrains.kotlin:kotlin-test-junit from 1.9.22 to 1.9.23 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/573
+* Bump org.jetbrains.kotlin.android from 1.9.22 to 1.9.23 in /examples by @dependabot in https://github.com/grpc/grpc-kotlin/pull/572
+
+#### New Contributors
+* @taer made their first contribution in https://github.com/grpc/grpc-kotlin/pull/360
+* @larry-safran made their first contribution in https://github.com/grpc/grpc-kotlin/pull/475
+* @steineldar made their first contribution in https://github.com/grpc/grpc-kotlin/pull/396
+
+**Full Changelog**: https://github.com/grpc/grpc-kotlin/compare/v1.4.1...v1.4.2
+
 ### 1.4.1
 
 #### Changes
