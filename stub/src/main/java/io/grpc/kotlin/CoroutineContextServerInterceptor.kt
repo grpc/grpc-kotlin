@@ -16,9 +16,7 @@ import io.grpc.Context as GrpcContext
  */
 abstract class CoroutineContextServerInterceptor : ServerInterceptor {
   companion object {
-    // This is deliberately kept visibility-restricted; it's intentional that the only way to affect
-    // the CoroutineContext is to extend CoroutineContextServerInterceptor.
-    internal val COROUTINE_CONTEXT_KEY : GrpcContext.Key<CoroutineContext> =
+    val COROUTINE_CONTEXT_KEY : GrpcContext.Key<CoroutineContext> =
       GrpcContext.keyWithDefault("grpc-kotlin-coroutine-context", EmptyCoroutineContext)
 
     private fun GrpcContext.extendCoroutineContext(coroutineContext: CoroutineContext): GrpcContext {
