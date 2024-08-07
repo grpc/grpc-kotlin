@@ -22,13 +22,13 @@ import io.grpc.MethodDescriptor
 import io.grpc.Status
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -309,7 +309,10 @@ object ClientCalls {
         headers.copy()
       )
 
-      val sender = launch(CoroutineName("SendMessage worker for ${method.fullMethodName}")) {
+      val sender = launch(
+        context = CoroutineName("SendMessage worker for ${method.fullMethodName}"),
+        start = CoroutineStart.UNDISPATCHED
+      ) {
         try {
           request.sendTo(clientCall, readiness)
           clientCall.halfClose()
