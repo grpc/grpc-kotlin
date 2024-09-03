@@ -28,9 +28,11 @@ class HelloWorldServer(private val port: Int) {
             .addService(HelloWorldService())
             .build()
 
+    // 서버 시작 함수
     fun start() {
         server.start()
         println("Server started, listening on $port")
+        // addShutdownHook 함수를 사용하여 JVM 종료 시 서버를 안전하게 종료
         Runtime.getRuntime().addShutdownHook(
             Thread {
                 println("*** shutting down gRPC server since JVM is shutting down")
@@ -44,10 +46,12 @@ class HelloWorldServer(private val port: Int) {
         server.shutdown()
     }
 
+    // 서버가 종료될 때까지 대기하는 함수
     fun blockUntilShutdown() {
         server.awaitTermination()
     }
 
+    // GreeterCoroutineImplBase 클래스를 상속받아 구현한 HelloWorldService 클래스
     internal class HelloWorldService : GreeterGrpcKt.GreeterCoroutineImplBase() {
         override suspend fun sayHello(request: HelloRequest) =
             helloReply {
