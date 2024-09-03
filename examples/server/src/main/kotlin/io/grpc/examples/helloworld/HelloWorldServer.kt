@@ -19,7 +19,9 @@ package io.grpc.examples.helloworld
 import io.grpc.Server
 import io.grpc.ServerBuilder
 
+// gRPC 서버를 구현하는 클래스
 class HelloWorldServer(private val port: Int) {
+    // HelloWorldService 서비스를 서버에 추가
     val server: Server =
         ServerBuilder
             .forPort(port)
@@ -55,6 +57,16 @@ class HelloWorldServer(private val port: Int) {
         override suspend fun sayHelloAgain(request: HelloRequest) =
             helloReply {
                 message = "Hello again ${request.name}"
+            }
+
+        override suspend fun sayHello2(request: HelloRequest) =
+            helloReply {
+                message = "Hello 2 ${request.name}"
+            }
+
+        override suspend fun sayHelloAgain2(request: HelloRequest) =
+            helloReply {
+                message = "Hello again 2 ${request.name}"
             }
     }
 }

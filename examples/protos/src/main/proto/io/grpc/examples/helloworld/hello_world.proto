@@ -11,24 +11,49 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+/**
+사용하는 프로토콜 버퍼 버전
+공식 문서
+https://cloud.google.com/apis/design/proto3?hl=ko
+https://protobuf.dev/
+ */
 syntax = "proto3";
 
+// 아래 옵션을 활성화하면 정의한 메세지, 서비스, enum 등이 독립된 java 파일로 생성됨. 기본값은 false
 option java_multiple_files = true;
+
+// 프로토콜 버퍼 파일을 컴파일 시 생성되는 자바 파일의 패키지 이름을 지정
 option java_package = "io.grpc.examples.helloworld";
+
+// 프로토콜 버퍼 파일이 컴파일 시 생성되는 자바 파일의 외부 클래스 이름을 지정
+// 이름 충돌 방지, 접근 편의성 등의 효과 있음
 option java_outer_classname = "HelloWorldProto";
 
+// 언어마다 상이하지만 Jvm 환경 언어에서는 "option java_package" 설정이 없는 경우 자바의 패키지 경로로 사용된다
 package helloworld;
 
 // The greeting service definition.
+// RPC 로 서비스를 정의하고자 할 경우 아래와 같이 인터페이스를 정의한다
+// https://protobuf.dev/programming-guides/proto3/#services
 service Greeter {
   // Sends a greeting
   rpc SayHello (HelloRequest) returns (HelloReply) {}
   // Sends another greeting
   rpc SayHelloAgain (HelloRequest) returns (HelloReply) {}
+
+  // Sends a greeting
+  rpc SayHello2 (HelloRequest) returns (HelloReply) {}
+  // Sends another greeting
+  rpc SayHelloAgain2 (HelloRequest) returns (HelloReply) {}
 }
 
 // The request message containing the user's name.
+// add age, height
+// age return 0 when value not assigned
+// height return 0.0 when value not assigned
+// https://protobuf.dev/programming-guides/proto3/#simple
 message HelloRequest {
+  // 사용 가능 타입 : https://protobuf.dev/programming-guides/proto3/#scalar
   string name = 1;
   int64 age = 2;
   double height = 3;
