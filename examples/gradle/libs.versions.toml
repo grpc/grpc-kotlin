@@ -19,8 +19,8 @@ grpc-stub = { group = "io.grpc", name = "grpc-stub", version = "1.62.2" }
 grpc-kotlin-stub = { group = "io.grpc", name = "grpc-kotlin-stub", version = "1.4.1" }
 
 protoc = { group = "com.google.protobuf", name = "protoc", version = "3.25.3" }
-protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version = "3.25.3" }
-protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version = "3.25.3" }
+protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version = "4.27.1" }
+protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version = "4.27.1" }
 protobuf-java-util = { group = "com.google.protobuf", name = "protobuf-java-util", version = "3.25.3" }
 protoc-gen-grpc-java = { group = "io.grpc", name = "protoc-gen-grpc-java", version = "1.62.2" }
 protoc-gen-grpc-kotlin = { group = "io.grpc", name = "protoc-gen-grpc-kotlin", version = "1.4.1" }
