@@ -28,7 +28,9 @@ class HelloWorldClient(private val channel: ManagedChannel) : Closeable {
     suspend fun greet(name: String) {
         val request = helloRequest { this.name = name }
         val response = stub.sayHello(request)
-        println("Received: ${response.message}")
+        println("Received: ${response.message}, ${response.age}, ${response.height}")
+        val againResponse = stub.sayHelloAgain(request)
+        println("Received: ${againResponse.message}, ${response.age}, ${response.height}")
     }
 
     override fun close() {
