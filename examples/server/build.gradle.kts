@@ -1,6 +1,8 @@
 plugins {
     application
     alias(libs.plugins.kotlin.jvm)
+    // 자바 애플리케이션을 docker 이미지로 패키징하는 플러그인
+    // https://jh-labs.tistory.com/509
     alias(libs.plugins.jib)
 }
 
@@ -17,6 +19,7 @@ dependencies {
     testImplementation(libs.grpc.testing)
 }
 
+// HelloWorldServer, RouteGuideServer, AnimalsServer 실행을 위한 task 설정
 tasks.register<JavaExec>("HelloWorldServer") {
     dependsOn("classes")
     classpath = sourceSets["main"].runtimeClasspath
@@ -35,6 +38,7 @@ tasks.register<JavaExec>("AnimalsServer") {
     mainClass.set("io.grpc.examples.animals.AnimalsServerKt")
 }
 
+// HelloWorldServer, RouteGuideServer, AnimalsServer 실행을 위한 스크립트 설정
 val helloWorldServerStartScripts =
     tasks.register<CreateStartScripts>("helloWorldServerStartScripts") {
         mainClass.set("io.grpc.examples.helloworld.HelloWorldServerKt")
@@ -65,6 +69,7 @@ tasks.named("startScripts") {
     dependsOn(animalsServerStartScripts)
 }
 
+// 테스트 실행 시 로그 설정
 tasks.withType<Test> {
     useJUnit()
 
@@ -81,6 +86,7 @@ tasks.withType<Test> {
 }
 
 jib {
+    // docker 컨테이너의 메인 클래스 설정
     container {
         mainClass = "io.grpc.examples.helloworld.HelloWorldServerKt"
     }

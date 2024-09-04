@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
 }
 
+// JVM 버전 설정
 kotlin {
     jvmToolchain(8)
 }
@@ -12,10 +13,11 @@ dependencies {
     runtimeOnly(libs.grpc.netty)
 }
 
+// HelloWorldClient, RouteGuideClient, AnimalsClient 실행을 위한 task 설정
 tasks.register<JavaExec>("HelloWorldClient") {
     dependsOn("classes")
     classpath = sourceSets["main"].runtimeClasspath
-    mainClass.set("io.grpc.examples.helloworld.HelloWorldClientKt")
+    mainClass.set("io.grpc.examples.helloworld.HelloWorldClientKt") // mainClass 설정
 }
 
 tasks.register<JavaExec>("RouteGuideClient") {
@@ -30,6 +32,7 @@ tasks.register<JavaExec>("AnimalsClient") {
     mainClass.set("io.grpc.examples.animals.AnimalsClientKt")
 }
 
+// HelloWorldClient, RouteGuideClient, AnimalsClient 실행을 위한 task 설정
 val helloWorldClientStartScripts =
     tasks.register<CreateStartScripts>("helloWorldClientStartScripts") {
         mainClass.set("io.grpc.examples.helloworld.HelloWorldClientKt")
