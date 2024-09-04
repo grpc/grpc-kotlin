@@ -18,7 +18,7 @@ package io.grpc.examples.helloworld
 
 import io.grpc.ManagedChannel   // gRPC 채널을 관리하는 클래스
 import io.grpc.ManagedChannelBuilder    // gRPC 채널을 생성하는 데 사용되는 빌더 클래스
-import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineStub   // gRPC 서비스에 대한 비동기 호출을 지원하는 Kotlin 코루틴 스텁(stub) 클래스 ?
+import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineStub   // gRPC 서비스에 대한 비동기 호출을 지원하는 Kotlin 코루틴 스텁(stub) 클래스
 import io.grpc.examples.helloworld.GoodbyeGrpcKt.GoodbyeCoroutineStub // Goodbye 서비스용 스텁
 import java.io.Closeable    // 안전한 자원 반납을 위한 인터페이스
 import java.util.concurrent.TimeUnit
