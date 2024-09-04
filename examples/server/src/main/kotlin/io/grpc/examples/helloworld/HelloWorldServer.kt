@@ -26,6 +26,7 @@ class HelloWorldServer(private val port: Int) {
         ServerBuilder
             .forPort(port)
             .addService(HelloWorldService())
+            .addService(GoodbyeService()) // 새로운 서비스 추가
             .build()
 
     // 서버 시작 함수
@@ -71,6 +72,19 @@ class HelloWorldServer(private val port: Int) {
         override suspend fun sayHelloAgain2(request: HelloRequest) =
             helloReply {
                 message = "Hello again 2 ${request.name}"
+            }
+    }
+
+    // 새로 추가된 Goodbye 서비스 구현
+    internal class GoodbyeService : GoodbyeGrpcKt.GoodbyeCoroutineImplBase() {
+        override suspend fun sayGoodbye(request: GoodbyeRequest) =
+            goodbyeReply {
+                message = "Goodbye ${request.name}"
+            }
+
+        override suspend fun sayGoodbyeAgain(request: GoodbyeRequest) =
+            goodbyeReply {
+                message = "Goodbye again ${request.name}"
             }
     }
 }

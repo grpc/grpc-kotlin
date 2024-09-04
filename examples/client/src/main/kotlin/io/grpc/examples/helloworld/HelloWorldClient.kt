@@ -19,11 +19,13 @@ package io.grpc.examples.helloworld
 import io.grpc.ManagedChannel   // gRPC 채널을 관리하는 클래스
 import io.grpc.ManagedChannelBuilder    // gRPC 채널을 생성하는 데 사용되는 빌더 클래스
 import io.grpc.examples.helloworld.GreeterGrpcKt.GreeterCoroutineStub   // gRPC 서비스에 대한 비동기 호출을 지원하는 Kotlin 코루틴 스텁(stub) 클래스 ?
+import io.grpc.examples.helloworld.GoodbyeGrpcKt.GoodbyeCoroutineStub // Goodbye 서비스용 스텁
 import java.io.Closeable    // 안전한 자원 반납을 위한 인터페이스
 import java.util.concurrent.TimeUnit
 
 class HelloWorldClient(private val channel: ManagedChannel) : Closeable {
     private val stub: GreeterCoroutineStub = GreeterCoroutineStub(channel)
+    private val goodbyeStub: GoodbyeCoroutineStub = GoodbyeCoroutineStub(channel) // Goodbye 서비스용 스텁
 
     // 비동기로 구현된 함수
     suspend fun greet(name: String) {
@@ -41,6 +43,15 @@ class HelloWorldClient(private val channel: ManagedChannel) : Closeable {
         println("Received: ${response.message}, ${response.age}, ${response.height}")
         val againResponse = stub.sayHelloAgain2(request)
         println("Received: ${againResponse.message}, ${response.age}, ${response.height}")
+    }
+
+    // Goodbye 서비스 호출
+    suspend fun sayGoodbye(name: String) {
+        val request = goodbyeRequest { this.name = name }
+        val response = goodbyeStub.sayGoodbye(request)
+        println("Received Goodbye: ${response.message}")
+        val againResponse = goodbyeStub.sayGoodbyeAgain(request)
+        println("Received Goodbye Again: ${againResponse.message}")
     }
 
     // gRPC 채널을 닫음
@@ -63,4 +74,5 @@ suspend fun main(args: Array<String>) {
     val user = args.singleOrNull() ?: "world"
     client.greet(user)
     client.greet2(user)
+    client.sayGoodbye(user)  // Goodbye 서비스 호출
 }

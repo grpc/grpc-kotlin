@@ -47,6 +47,11 @@ service Greeter {
   rpc SayHelloAgain2 (HelloRequest) returns (HelloReply) {}
 }
 
+service Goodbye {
+  rpc SayGoodbye (GoodbyeRequest) returns (GoodbyeReply) {}
+  rpc SayGoodbyeAgain (GoodbyeRequest) returns (GoodbyeReply) {}
+}
+
 // The request message containing the user's name.
 // add age, height
 // age return 0 when value not assigned
@@ -64,4 +69,12 @@ message HelloReply {
   string message = 1;
   int64 age = 2;
   double height = 3;
+}
+
+message GoodbyeRequest {
+  string name = 1;
+}
+
+message GoodbyeReply {
+  string message = 1;
 }
