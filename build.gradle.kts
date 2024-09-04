@@ -3,15 +3,17 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    alias(libs.plugins.kotlin.jvm) apply false
-    alias(libs.plugins.protobuf) apply false
-    alias(libs.plugins.test.retry)
-    alias(libs.plugins.publish.plugin)
-    alias(libs.plugins.qoomon.git.versioning)
+    alias(libs.plugins.kotlin.jvm) apply false  // 서브 프로젝트에서 별도 적용하기 위해 비활성화
+    alias(libs.plugins.protobuf) apply false    // Protocol Buffers 설정도 위와 동일
+    alias(libs.plugins.test.retry)              // 테스트 실패 시 재시도
+    alias(libs.plugins.publish.plugin)          // mvn 배포 설정
+    alias(libs.plugins.qoomon.git.versioning)   // git 버전 관리 - 태그와 커밋 기준으로 프로젝트 버전을 관리함
 }
 
 group = "io.grpc"
 
+// gitVersioning 설정
+// 태그가 v1.0와 같은 형식일 경우 해당 버전을 사용하고, 태그가 없으면 커밋 해시를 사용
 gitVersioning.apply {
     refs {
         tag("v(?<version>.*)") {
@@ -39,11 +41,13 @@ subprojects {
     group = rootProject.group
     version = rootProject.version
 
+    // 컴파일 버전 설정
     tasks.withType<JavaCompile> {
         sourceCompatibility = JavaVersion.VERSION_1_8.toString()
         targetCompatibility = JavaVersion.VERSION_1_8.toString()
     }
 
+    // Kotlin 컴파일 버전 설정. Xjsr305=strict 옵션을 추가하여 nullability 검사를 엄격하게 설정
     tasks.withType<KotlinCompile> {
         kotlinOptions {
             freeCompilerArgs = listOf("-Xjsr305=strict")
@@ -51,6 +55,7 @@ subprojects {
         }
     }
 
+    // 테스트 로깅 및 재시도 설정
     tasks.withType<Test> {
         testLogging {
             // set options for log level LIFECYCLE
@@ -85,10 +90,12 @@ subprojects {
             info.exceptionFormat = debug.exceptionFormat
         }
 
+        // 테스트를 최대 10번 재시도
         retry {
             maxRetries = 10
         }
 
+        // 테스트 결과 출력. 모든 테스트가 종료되면 테스트 성공유무, 테스트 수, 성공 수, 실패 수, 스킵 수 출력
         afterSuite(
             KotlinClosure2({ desc: TestDescriptor, result: TestResult ->
                 if (desc.parent == null) { // will match the outermost suite
