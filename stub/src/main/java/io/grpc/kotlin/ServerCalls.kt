@@ -265,7 +265,9 @@ object ServerCalls {
         else -> Status.fromThrowable(failure).withCause(failure)
       }
       val trailers = failure?.let { Status.trailersFromThrowable(it) } ?: GrpcMetadata()
-      mutex.withLock { call.close(closeStatus, trailers) }
+      mutex.withLock {
+        if (!call.isCancelled) call.close(closeStatus, trailers)
+      }
     }
 
     return object: ServerCall.Listener<RequestT>() {
