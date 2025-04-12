@@ -1,0 +1,31 @@
+load("@com_github_grpc_grpc_kotlin//:kt_jvm_grpc.bzl", "kt_jvm_grpc_library", "kt_jvm_proto_library")
+load("@protobuf//bazel:proto_library.bzl", "proto_library")
+load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library")
+
+package(default_visibility = ["//javatests/io/grpc/examples/bzlmod:__subpackages__"])
+
+proto_library(
+    name = "fibonacci_proto",
+    srcs = ["fibonacci.proto"],
+    deps = [],
+)
+
+kt_jvm_proto_library(
+    name = "fibonacci_kt_proto",
+    deps = [":fibonacci_proto"],
+)
+
+kt_jvm_grpc_library(
+    name = "fibonacci_kt_grpc",
+    srcs = [":fibonacci_proto"],
+    deps = [":fibonacci_kt_proto"],
+)
+
+kt_jvm_library(
+    name = "fibonacci",
+    srcs = ["Fibonacci.kt"],
+    deps = [
+        ":fibonacci_kt_grpc",
+        ":fibonacci_kt_proto",
+    ],
+)
