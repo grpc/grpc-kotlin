@@ -23,7 +23,7 @@ import io.grpc.kotlin.generator.protoc.util.sort.TopologicalSort.sortLexicograph
 
 @Beta
 object TopologicalSortGraph {
-    fun <N> topologicalOrdering(graph: Graph<N>): List<N> {
+    fun <N: Any> topologicalOrdering(graph: Graph<N>): List<N> {
         checkArgument(graph.isDirected, "Cannot get topological ordering of an undirected graph.")
         val partialOrdering: PartialOrdering<N> = object : PartialOrdering<N> {
             override fun getPredecessors(element: N): Set<N> = element?.let {
