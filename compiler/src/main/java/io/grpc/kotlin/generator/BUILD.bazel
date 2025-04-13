@@ -15,9 +15,9 @@ kt_jvm_library(
         "//stub/src/main/java/io/grpc/kotlin:stub",
         "@com_google_protobuf//:protobuf_java",
         "@io_grpc_grpc_java//core",
-        "@maven//:com_google_guava_guava",
-        "@maven//:com_squareup_kotlinpoet",
-        "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+        "@grpc_kotlin_maven//:com_google_guava_guava",
+        "@grpc_kotlin_maven//:com_squareup_kotlinpoet",
+        "@grpc_kotlin_maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
     ],
 )
 

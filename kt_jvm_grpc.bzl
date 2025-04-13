@@ -406,7 +406,7 @@ def kt_jvm_proto_library(
         name = name,
         srcs = [helper_target + ".srcjar"],
         deps = [
-            "@maven//:com_google_protobuf_protobuf_kotlin",
+            "@grpc_kotlin_maven//:com_google_protobuf_protobuf_kotlin",
         ] + java_protos,
         exports = java_exports,
         testonly = testonly,

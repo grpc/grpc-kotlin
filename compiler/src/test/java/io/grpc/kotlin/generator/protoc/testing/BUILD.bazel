@@ -10,9 +10,9 @@ kt_jvm_test(
     test_class = "io.grpc.kotlin.generator.protoc.testing.DeclarationsSubjectTest",
     deps = [
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc/testing",
-        "@maven//:com_google_truth_truth",
-        "@maven//:com_squareup_kotlinpoet",
-        "@maven//:junit_junit",
+        "@grpc_kotlin_maven//:com_google_truth_truth",
+        "@grpc_kotlin_maven//:com_squareup_kotlinpoet",
+        "@grpc_kotlin_maven//:junit_junit",
     ],
 )
 
