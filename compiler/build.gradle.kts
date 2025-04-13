@@ -11,7 +11,7 @@ application {
 java {
     withSourcesJar()
     toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -34,7 +34,6 @@ dependencies {
     testImplementation(libs.jimfs)
     testImplementation(libs.protobuf.gradle.plugin)
     testImplementation(libs.protobuf.java)
-    testImplementation(libs.mockito.kotlin)
     testImplementation(libs.junit.jupiter.engine)
     testImplementation(libs.mockito.core)
 }
