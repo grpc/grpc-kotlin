@@ -46,11 +46,11 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.debug.junit4.CoroutinesTimeout
 import kotlinx.coroutines.launch
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
+import org.junit.rules.Timeout
 
 abstract class AbstractCallsTest {
   companion object {
@@ -106,7 +106,7 @@ abstract class AbstractCallsTest {
   }
 
   @get:Rule
-  val timeout = CoroutinesTimeout.seconds(10)
+  val timeout: Timeout = Timeout.seconds(10)
 
   // We want the coroutines timeout to come first, because it comes with useful debug logs.
   @get:Rule
