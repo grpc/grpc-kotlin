@@ -5,3 +5,6 @@ build
 local.properties
 *.iml
 /bazel-*
+
+# Following https://github.com/bazelbuild/rules_java/blob/master/.gitignore#L20 example, ignore the lock file.
+MODULE.bazel.lock
