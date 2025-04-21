@@ -52,3 +52,8 @@ tasks.named<Test>("test") {
 
     // todo: cleanup copyExamples.destinationDir or move copy to tests
 }
+
+tasks.withType<AbstractPublishToMaven> {
+    enabled = false
+}
+
