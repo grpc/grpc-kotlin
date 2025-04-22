@@ -20,7 +20,6 @@ import io.grpc.CallOptions
 import io.grpc.ClientCall
 import io.grpc.MethodDescriptor
 import io.grpc.Status
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancel
@@ -28,7 +27,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -296,7 +294,7 @@ object ClientCalls {
             val cause =
               when {
                 status.isOk -> null
-                status.cause is CancellationException -> status.cause
+                status.cause != null -> status.cause
                 else -> status.asException(trailersMetadata)
               }
             responses.close(cause = cause)
