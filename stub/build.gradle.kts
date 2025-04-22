@@ -28,7 +28,6 @@ dependencies {
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter.engine)
-    testImplementation(libs.kotlinx.coroutines.debug)
     testImplementation(libs.truth.proto.extension)
     testImplementation(libs.grpc.protobuf)
     testImplementation(libs.grpc.testing)
@@ -38,7 +37,7 @@ dependencies {
 java {
     withSourcesJar()
     toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
