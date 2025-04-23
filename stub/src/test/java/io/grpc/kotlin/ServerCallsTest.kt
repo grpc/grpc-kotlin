@@ -1184,7 +1184,7 @@ class ServerCallsTest : AbstractCallsTest() {
       }
     }
 
-    val receivedStatusCause = CompletableDeferred<Throwable?>()
+    val receivedStatus = CompletableDeferred<Status?>()
 
     val interceptor = object : ServerInterceptor {
       override fun <ReqT, RespT> interceptCall(
@@ -1195,7 +1195,7 @@ class ServerCallsTest : AbstractCallsTest() {
         next.startCall(
           object : ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
             override fun close(status: Status, trailers: Metadata) {
-              receivedStatusCause.complete(status.cause)
+              receivedStatus.complete(status)
               super.close(status, trailers)
             }
           },
@@ -1213,11 +1213,13 @@ class ServerCallsTest : AbstractCallsTest() {
     // the exception should not propagate to the client
     assertThat(clientException.cause).isNull()
 
-    assertThat(clientException.status.code).isEqualTo(Status.Code.INTERNAL)
-    val statusCause = receivedStatusCause.await()
+    assertThat(clientException.status.code).isEqualTo(Status.Code.UNKNOWN)
+    val status = receivedStatus.await()!!
     // but the exception should propagate to server interceptors, with stack trace intact
-    assertThat(statusCause).isEqualTo(thrownStatusCause.await())
-    assertThat(statusCause!!.stackTraceToString()).contains("internalServerCall")
+    assertThat(status.code).isEqualTo(Status.UNKNOWN.code)
+    assertThat(status.description).isEqualTo("Unknown Exception")
+    assertThat(status.cause).isEqualTo(thrownStatusCause.await())
+    assertThat(status.cause?.stackTraceToString()).contains("internalServerCall")
   }
 
 }
