@@ -41,4 +41,4 @@ testcontainers = { group = "org.testcontainers", name = "testcontainers", versio
 slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version = "2.0.12" }
 gradle-test-kit = { group = "org.gradle", name = "gradle-test-kit", version = "6.1" }
 gradle-tooling-api = { group = "org.gradle", name = "gradle-tooling-api", version = "8.6" }
-commons-io = { group = "commons-io", name = "commons-io", version = "2.15.1" }
+commons-io = { group = "commons-io", name = "commons-io", version = "2.16.1" }
