@@ -23,6 +23,7 @@ import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeName
@@ -48,6 +49,7 @@ import io.grpc.kotlin.generator.protoc.methodName
 import io.grpc.kotlin.generator.protoc.of
 import io.grpc.kotlin.generator.protoc.serviceName
 import kotlinx.coroutines.flow.Flow
+import kotlin.coroutines.CoroutineContext
 import io.grpc.Channel as GrpcChannel
 import io.grpc.Metadata as GrpcMetadata
 
@@ -62,6 +64,10 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
     private val STREAMING_PARAMETER_NAME = MemberSimpleName("requests")
     private val GRPC_CHANNEL_PARAMETER_NAME = MemberSimpleName("channel")
     private val CALL_OPTIONS_PARAMETER_NAME = MemberSimpleName("callOptions")
+    private val WITH_COROUTINE_CONTEXT_FUN_NAME = MemberName(ClientCalls::class.java.`package`.name, "withCoroutineContext")
+    private val COROUTINE_CONTEXT_VAL_NAME = MemberName(CoroutineContext::class.java.`package`.name, "coroutineContext")
+    private val FLOW_FUN_NAME = MemberName(Flow::class.java.`package`.name, "flow")
+    private val EMIT_ALL_FUN_NAME = MemberName(Flow::class.java.`package`.name, "emitAll")
 
     private val HEADERS_PARAMETER: ParameterSpec = ParameterSpec
       .builder("headers", GrpcMetadata::class)
@@ -94,6 +100,9 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
       } else {
         if (isServerStreaming) MethodType.SERVER_STREAMING else MethodType.UNARY
       }
+
+      private val MethodDescriptor.isSuspendable: Boolean
+          get() = !isServerStreaming
   }
 
   override fun generate(service: ServiceDescriptor): Declarations = declarations {
@@ -189,28 +198,39 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
       )
     }
 
-    val codeBlockMap = mapOf(
-      "helperMethod" to helperMethod,
-      "methodDescriptor" to method.descriptorCode,
-      "parameter" to parameter,
-      "headers" to HEADERS_PARAMETER
-    )
+    val codeBlockMap = buildMap {
+        this["helperMethod"] = helperMethod
+        this["methodDescriptor"] = method.descriptorCode
+        this["parameter"] = parameter
+        this["headers"] = HEADERS_PARAMETER
+        this["withContext"] = WITH_COROUTINE_CONTEXT_FUN_NAME
+        this["coroutineContext"] = COROUTINE_CONTEXT_VAL_NAME
+        if (!method.isSuspendable) {
+            this["flow"] = FLOW_FUN_NAME
+            this["emitAll"] = EMIT_ALL_FUN_NAME
+        }
+    }
 
-    if (!method.isServerStreaming) {
+    if (method.isSuspendable) {
       funSpecBuilder.addModifiers(KModifier.SUSPEND)
     }
 
-    funSpecBuilder.addNamedCode(
-      """
-      return %helperMethod:M(
+    val helperCall = """
+      %helperMethod:M(
         channel,
         %methodDescriptor:L,
         %parameter:N,
-        callOptions,
+        callOptions.%withContext:M(%coroutineContext:M),
         %headers:N
       )
-      """.trimIndent(),
-      codeBlockMap
+    """.trimIndent()
+    funSpecBuilder.addNamedCode(
+      if (method.isSuspendable) {
+        "return $helperCall"
+      } else {
+        "return \n%flow:M {\n⇥%emitAll:M(\n⇥$helperCall\n⇤)\n⇤}"
+      },
+      codeBlockMap,
     )
     return funSpecBuilder.build()
   }
