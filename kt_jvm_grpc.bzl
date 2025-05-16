@@ -117,8 +117,8 @@ def kt_jvm_grpc_library(
         fail("Expected exactly one dep", "deps")
 
     kt_deps.extend([
-        "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:stub",
-        "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:context",
+        "@grpc_kotlin//stub/src/main/java/io/grpc/kotlin:stub",
+        "@grpc_kotlin//stub/src/main/java/io/grpc/kotlin:context",
     ])
 
     kt_grpc_label = ":%s_DO_NOT_DEPEND_kt_grpc" % name
@@ -217,8 +217,8 @@ def kt_jvm_grpc_no_java_library(
         srcs = [kt_grpc_label],
         deps = [
             java_grpc_dep,
-            "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:stub",
-            "@com_github_grpc_grpc_kotlin//stub/src/main/java/io/grpc/kotlin:context",
+            "@grpc_kotlin//stub/src/main/java/io/grpc/kotlin:stub",
+            "@grpc_kotlin//stub/src/main/java/io/grpc/kotlin:context",
         ],
         compatible_with = compatible_with,
         restricted_to = restricted_to,
@@ -406,7 +406,7 @@ def kt_jvm_proto_library(
         name = name,
         srcs = [helper_target + ".srcjar"],
         deps = [
-            "@maven//:com_google_protobuf_protobuf_kotlin",
+            "@grpc_kotlin_maven//:com_google_protobuf_protobuf_kotlin",
         ] + java_protos,
         exports = java_exports,
         testonly = testonly,
