@@ -1,5 +1,5 @@
 module(
-    name = "com_github_grpc_grpc_kotlin",
+    name = "grpc_kotlin",
     version = "2.1.0",
 )
 
