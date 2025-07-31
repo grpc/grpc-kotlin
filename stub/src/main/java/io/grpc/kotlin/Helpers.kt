@@ -16,8 +16,10 @@
 
 package io.grpc.kotlin
 
+import io.grpc.Metadata
 import io.grpc.Status
 import io.grpc.StatusException
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -75,3 +77,14 @@ internal fun <T> Flow<T>.singleOrStatusFlow(expected: String, descriptor: Any): 
  */
 internal suspend fun <T> Flow<T>.singleOrStatus(expected: String, descriptor: Any): T =
   singleOrStatusFlow(expected, descriptor).single()
+
+/**
+ * Returns gRPC Metadata.
+ */
+suspend fun grpcMetadata(): Metadata {
+  val metadataElement = coroutineContext[MetadataElement]
+    ?: throw Status.INTERNAL
+      .withDescription("gRPC Metadata not found in coroutineContext. Ensure that MetadataCoroutineContextInterceptor is used in gRPC server.")
+      .asException()
+  return metadataElement.value
+}
