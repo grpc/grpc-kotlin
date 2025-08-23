@@ -10,19 +10,19 @@ jib = { id = "com.google.cloud.tools.jib", version = "3.4.1" }
 
 [libraries]
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.8.0" }
-grpc-protobuf = { group = "io.grpc", name = "grpc-protobuf", version = "1.62.2" }
-grpc-protobuf-lite = { group = "io.grpc", name = "grpc-protobuf-lite", version = "1.62.2" }
-grpc-netty = { group = "io.grpc", name = "grpc-netty", version = "1.62.2" }
-grpc-okhttp = { group = "io.grpc", name = "grpc-okhttp", version = "1.62.2" }
-grpc-testing = { group = "io.grpc", name = "grpc-testing", version = "1.62.2" }
-grpc-stub = { group = "io.grpc", name = "grpc-stub", version = "1.62.2" }
+grpc-protobuf = { group = "io.grpc", name = "grpc-protobuf", version = "1.75.0" }
+grpc-protobuf-lite = { group = "io.grpc", name = "grpc-protobuf-lite", version = "1.75.0" }
+grpc-netty = { group = "io.grpc", name = "grpc-netty", version = "1.75.0" }
+grpc-okhttp = { group = "io.grpc", name = "grpc-okhttp", version = "1.75.0" }
+grpc-testing = { group = "io.grpc", name = "grpc-testing", version = "1.75.0" }
+grpc-stub = { group = "io.grpc", name = "grpc-stub", version = "1.75.0" }
 grpc-kotlin-stub = { group = "io.grpc", name = "grpc-kotlin-stub", version = "1.4.3" }
 
 protoc = { group = "com.google.protobuf", name = "protoc", version = "3.25.3" }
 protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version = "3.25.3" }
 protobuf-kotlin-lite = { group = "com.google.protobuf", name = "protobuf-kotlin-lite", version = "3.25.3" }
 protobuf-java-util = { group = "com.google.protobuf", name = "protobuf-java-util", version = "3.25.3" }
-protoc-gen-grpc-java = { group = "io.grpc", name = "protoc-gen-grpc-java", version = "1.62.2" }
+protoc-gen-grpc-java = { group = "io.grpc", name = "protoc-gen-grpc-java", version = "1.75.0" }
 protoc-gen-grpc-kotlin = { group = "io.grpc", name = "protoc-gen-grpc-kotlin", version = "1.4.3" }
 
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.8.2" }
