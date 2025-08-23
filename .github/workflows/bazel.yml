@@ -15,23 +15,38 @@ jobs:
       with:
         path: "/home/runner/.cache/bazel"
         key: bazel
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
     - name: Install bazelisk
       run: |
-        curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.1.0/bazelisk-linux-amd64"
+        curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.26.0/bazelisk-linux-amd64"
         mkdir -p "${GITHUB_WORKSPACE}/bin/"
         mv bazelisk-linux-amd64 "${GITHUB_WORKSPACE}/bin/bazel"
         chmod +x "${GITHUB_WORKSPACE}/bin/bazel"
-    - name: Test
-      uses: nick-invision/retry@v3
-      with:
-        timeout_minutes: 10
-        max_attempts: 3
-        command: |
-          "${GITHUB_WORKSPACE}/bin/bazel" test //...
     - name: Build
       uses: nick-invision/retry@v3
       with:
         timeout_minutes: 10
         max_attempts: 3
         command: |
+          cd "${GITHUB_WORKSPACE}"
           "${GITHUB_WORKSPACE}/bin/bazel" build //...
+    - name: Test
+      uses: nick-invision/retry@v3
+      with:
+        timeout_minutes: 10
+        max_attempts: 3
+        command: |
+          cd "${GITHUB_WORKSPACE}"
+          "${GITHUB_WORKSPACE}/bin/bazel" test //...
+    - name: Test bzl-examples/bzlmod
+      uses: nick-invision/retry@v3
+      with:
+        timeout_minutes: 10
+        max_attempts: 3
+        command: |
+          cd "${GITHUB_WORKSPACE}/bzl-examples/bzlmod"
+          "${GITHUB_WORKSPACE}/bin/bazel" test //...

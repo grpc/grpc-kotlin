@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package io.grpc.examples.bzlmod;
+
+option java_multiple_files = true;
+option java_outer_classname = "FibonacciProtos";
+option java_package = "io.grpc.examples.bzlmod";
+
+message QueryRequest {
+  int64 nth = 1;
+  int64 mod = 2;
+}
+
+message QueryResponse {
+  int64 nth_fibonacci = 1;
+}
+
+service FibonacciService {
+  rpc Query(QueryRequest) returns (QueryResponse);
+}
