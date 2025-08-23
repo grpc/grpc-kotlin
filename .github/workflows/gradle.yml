@@ -23,7 +23,7 @@ jobs:
         distribution: 'temurin'
 
     - name: Set up Gradle
-      uses: gradle/actions/setup-gradle@v3
+      uses: gradle/actions/setup-gradle@v4
 
     - name: Test on Mac
       if: matrix.os == 'macos-13'
