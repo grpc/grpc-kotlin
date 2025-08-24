@@ -1,6 +1,6 @@
 module(
     name = "grpc_kotlin",
-    # Note: the publish-to-BCR app will patch this line to stamp the version being published.
+    # Note: the Publish-to-BCR app will patch this line to stamp the version being published.
     version = "0.0.0",
     compatibility_level = 1,
 )
