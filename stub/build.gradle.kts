@@ -75,7 +75,6 @@ tasks.create<Jar>("javadocJar") {
 }
 
 tasks.withType<DokkaTask>().configureEach {
-
     val remoteSourceUrl = URI(
         "https://github.com/grpc/grpc-kotlin/blob/master/stub/src/main/java"
     ).toURL()
