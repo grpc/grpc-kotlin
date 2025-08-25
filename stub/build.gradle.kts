@@ -1,6 +1,6 @@
 import com.google.protobuf.gradle.*
 import org.jetbrains.dokka.gradle.DokkaTask
-import java.net.URL
+import java.net.URI
 
 plugins {
     alias(libs.plugins.dokka)
@@ -75,11 +75,15 @@ tasks.create<Jar>("javadocJar") {
 }
 
 tasks.withType<DokkaTask>().configureEach {
+    val remoteSourceUrl = URI(
+        "https://github.com/grpc/grpc-kotlin/blob/master/stub/src/main/java"
+    ).toURL()
+
     dokkaSourceSets {
         named("main") {
             sourceLink {
                 localDirectory.set(file("src/main/java"))
-                remoteUrl.set(URL("https://github.com/grpc/grpc-kotlin/blob/master/stub/src/main/java"))
+                remoteUrl.set(remoteSourceUrl)
                 remoteLineSuffix.set("#L")
             }
 
