@@ -1,5 +1,5 @@
-load("@rules_proto//proto:defs.bzl", "proto_library")
-load("@com_google_protobuf//bazel:java_proto_library.bzl", "java_proto_library")
+load("@protobuf//bazel:proto_library.bzl", "proto_library")
+load("@protobuf//bazel:java_proto_library.bzl", "java_proto_library")
 
 licenses(["notice"])
 
@@ -9,7 +9,7 @@ proto_library(
     name = "example3_proto",
     srcs = ["example3.proto"],
     strip_import_prefix = "/compiler/src/test/proto",
-    deps = ["@com_google_protobuf//:wrappers_proto"],
+    deps = ["@protobuf//:wrappers_proto"],
 )
 
 java_proto_library(
