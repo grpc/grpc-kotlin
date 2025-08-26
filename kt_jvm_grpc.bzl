@@ -1,5 +1,7 @@
 load("@io_bazel_rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library")
 load("@io_grpc_grpc_java//:java_grpc_library.bzl", "java_grpc_library")
+load("@rules_java//java:defs.bzl", "JavaInfo")
+load("@rules_proto//proto:defs.bzl", "ProtoInfo")
 
 def _invoke_generator(ctx, proto_dep, output_dir):
     direct_descriptor_set = depset([proto_dep[ProtoInfo].direct_descriptor_set])
