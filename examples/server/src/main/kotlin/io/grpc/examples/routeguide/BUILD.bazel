@@ -13,7 +13,7 @@ kt_jvm_binary(
         "//examples/protos/src/main/proto/io/grpc/examples/routeguide:route_guide_kt_grpc",
         "//examples/protos/src/main/proto/io/grpc/examples/routeguide:route_guide_kt_proto",
         "//examples/stub/src/main/kotlin/io/grpc/examples/routeguide:route_guide_stub",
-        "@com_google_protobuf//:protobuf_java_util",
+        "@protobuf//:protobuf_java_util",
         "@io_grpc_grpc_java//netty",
     ],
 )
