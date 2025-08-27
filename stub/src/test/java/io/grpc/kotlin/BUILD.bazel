@@ -10,7 +10,7 @@ kt_jvm_library(
     srcs = [":AbstractCallsTest.kt"],
     deps = [
         "//stub/src/test/proto/helloworld:hello_world_kt_grpc",
-        "@io_grpc_grpc_java//testing",
+        "@grpc-java//testing",
     ],
 )
 
@@ -53,7 +53,7 @@ kt_jvm_test(
     test_class = "io.grpc.kotlin.GrpcContextElementTest",
     deps = [
         "//stub/src/main/java/io/grpc/kotlin:context",
-        "@io_grpc_grpc_java//core",
+        "@grpc-java//core",
         "@grpc_kotlin_maven//:com_google_truth_truth",
         "@grpc_kotlin_maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
     ],

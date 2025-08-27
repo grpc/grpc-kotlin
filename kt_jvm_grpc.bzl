@@ -1,6 +1,8 @@
 load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_library")
-load("@io_grpc_grpc_java//:java_grpc_library.bzl", "java_grpc_library")
+load("@grpc-java//:java_grpc_library.bzl", "java_grpc_library")
 load("@protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
+load("@protobuf//bazel:java_lite_proto_library.bzl", "java_lite_proto_library")
+load("@protobuf//bazel:java_proto_library.bzl", "java_proto_library")
 load("@rules_java//java:defs.bzl", "JavaInfo")
 
 def _invoke_generator(ctx, proto_dep, output_dir):
@@ -364,7 +366,7 @@ def kt_jvm_proto_library(
     else:
         java_proto_target = ":%s_DO_NOT_DEPEND_java_proto" % name
         if flavor == "lite":
-            native.java_lite_proto_library(
+            java_lite_proto_library(
                 name = java_proto_target[1:],
                 deps = deps,
                 testonly = testonly,
@@ -376,7 +378,7 @@ def kt_jvm_proto_library(
                 features = features,
             )
         else:
-            native.java_proto_library(
+            java_proto_library(
                 name = java_proto_target[1:],
                 deps = deps,
                 testonly = testonly,

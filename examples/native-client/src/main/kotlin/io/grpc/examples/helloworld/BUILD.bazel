@@ -10,6 +10,6 @@ kt_jvm_binary(
     main_class = "io.grpc.examples.helloworld.HelloWorldClientKt",
     deps = [
         "//examples/protos/src/main/proto/io/grpc/examples/helloworld:hello_world_kt_grpc",
-        "@io_grpc_grpc_java//netty",
+        "@grpc-java//netty",
     ],
 )

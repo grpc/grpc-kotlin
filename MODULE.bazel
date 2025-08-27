@@ -9,7 +9,7 @@ bazel_dep(name = "protobuf", version = "31.1")
 bazel_dep(name = "rules_kotlin", version = "2.1.9")
 bazel_dep(name = "rules_java", version = "8.15.1")
 bazel_dep(name = "rules_jvm_external", version = "6.8")
-bazel_dep(name = "grpc-java", repo_name = "io_grpc_grpc_java", version = "1.71.0")
+bazel_dep(name = "grpc-java", version = "1.71.0")
 
 grpc_kotlin_maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 grpc_kotlin_maven.install(
