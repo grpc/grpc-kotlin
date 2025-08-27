@@ -1,6 +1,4 @@
 import com.google.protobuf.gradle.*
-import org.jetbrains.dokka.gradle.DokkaTask
-import java.net.URI
 
 plugins {
     alias(libs.plugins.dokka)
@@ -67,50 +65,42 @@ protobuf {
     }
 }
 
-tasks.create<Jar>("javadocJar") {
+dokka {
+    dokkaSourceSets.main {
+        reportUndocumented = true
+
+        sourceLink {
+            localDirectory.set(file("src/main/java"))
+            remoteUrl("https://github.com/grpc/grpc-kotlin/blob/master/stub/src/main/java")
+            remoteLineSuffix.set("#L")
+        }
+
+        externalDocumentationLinks.register("grpc-java-docs") {
+            url("https://grpc.github.io/grpc-java/javadoc/")
+            packageListUrl("https://grpc.github.io/grpc-java/javadoc/element-list")
+        }
+        externalDocumentationLinks.register("kotlinx.coroutines-docs") {
+            url("https://kotlinlang.org/api/kotlinx.coroutines/")
+        }
+
+        perPackageOption {
+            matchingRegex.set("io.grpc.testing.*")
+            suppress.set(true)
+        }
+
+        perPackageOption {
+            matchingRegex.set("io.grpc.kotlin.generator.*")
+            suppress.set(true)
+        }
+    }
+}
+
+val javadocJar by tasks.registering(Jar::class) {
+    dependsOn(tasks.dokkaGenerate)
     archiveClassifier.set("javadoc")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     includeEmptyDirs = false
-    from(tasks.named("dokkaHtml"))
-}
-
-tasks.withType<DokkaTask>().configureEach {
-    val remoteSourceUrl = URI(
-        "https://github.com/grpc/grpc-kotlin/blob/master/stub/src/main/java"
-    ).toURL()
-
-    dokkaSourceSets {
-        named("main") {
-            sourceLink {
-                localDirectory.set(file("src/main/java"))
-                remoteUrl.set(remoteSourceUrl)
-                remoteLineSuffix.set("#L")
-            }
-
-            noStdlibLink.set(false)
-            noJdkLink.set(false)
-            reportUndocumented.set(true)
-
-            externalDocumentationLink(
-                url = "https://grpc.github.io/grpc-java/javadoc/",
-                packageListUrl = "https://grpc.github.io/grpc-java/javadoc/element-list"
-            )
-
-            externalDocumentationLink(
-                url = "https://kotlinlang.org/api/kotlinx.coroutines/"
-            )
-
-            perPackageOption {
-                matchingRegex.set("io.grpc.testing")
-                suppress.set(true)
-            }
-
-            perPackageOption {
-                matchingRegex.set("io.grpc.kotlin.generator")
-                suppress.set(true)
-            }
-        }
-    }
+    from(layout.buildDirectory.dir("dokka/html"))
 }
 
 tasks.named<Jar>("sourcesJar") {
@@ -122,7 +112,7 @@ publishing {
         named<MavenPublication>("maven") {
             from(components["java"])
 
-            artifact(tasks.named("javadocJar"))
+            artifact(javadocJar)
 
             pom {
                 name.set("gRPC Kotlin Stub")
