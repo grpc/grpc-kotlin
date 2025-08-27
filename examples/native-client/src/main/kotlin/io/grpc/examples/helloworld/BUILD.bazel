@@ -1,4 +1,4 @@
-load("@io_bazel_rules_kotlin//kotlin:jvm.bzl", "kt_jvm_binary")
+load("@rules_kotlin//kotlin:jvm.bzl", "kt_jvm_binary")
 
 licenses(["notice"])
 
