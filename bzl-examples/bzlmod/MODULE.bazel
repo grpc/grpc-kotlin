@@ -6,12 +6,6 @@ module(
 bazel_dep(name = "protobuf", version = "32.0")
 bazel_dep(name = "rules_kotlin", version = "2.1.9")
 bazel_dep(name = "rules_jvm_external", version = "6.8")
-bazel_dep(name = "rules_java", version = "8.15.1")
-
-bazel_dep(name = "aspect_rules_lint", version = "1.5.3", dev_dependency = True)
-bazel_dep(name = "buildifier_prebuilt", version = "8.2.0.2", dev_dependency = True)
-bazel_dep(name = "rules_buf", version = "0.5.2", dev_dependency = True)
-
 bazel_dep(name = "grpc_kotlin", version = "0.0.0")
 local_path_override(
     module_name = "grpc_kotlin",
@@ -34,9 +28,3 @@ maven.install(
     strict_visibility = True,
 )
 use_repo(maven, "grpc_kotlin_maven", "maven")
-
-install_ktfmt = use_extension("//:extensions.bzl", "install_ktfmt")
-use_repo(install_ktfmt, "ktfmt")
-
-buf = use_extension("@rules_buf//buf:extensions.bzl", "buf")
-use_repo(buf, "rules_buf_toolchains")
