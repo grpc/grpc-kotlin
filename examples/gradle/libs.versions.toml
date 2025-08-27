@@ -28,7 +28,7 @@ protoc-gen-grpc-kotlin = { group = "io.grpc", name = "protoc-gen-grpc-kotlin", v
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.8.2" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version = "1.9.0" }
 androidx-compose-material = { group = "androidx.compose.material", name = "material", version = "1.6.3" }
-androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version = "1.6.3" }
+androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version = "1.9.0" }
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui", version = "1.9.0" }
 androidx-compose-compiler = { group = "androidx.compose.compiler", name = "compiler", version = "1.5.15" }
 
