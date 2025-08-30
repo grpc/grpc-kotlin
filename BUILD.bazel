@@ -1,11 +1,19 @@
 load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
 load("@rules_java//java:defs.bzl", "java_binary")
+load("@rules_multirun//:defs.bzl", "command")
 
 java_binary(
     name = "ktfmt",
     main_class = "com.facebook.ktfmt.cli.Main",
     tags = ["manual"],
     runtime_deps = ["@ktfmt//jar"],
+)
+
+command(
+    name = "ktfmt_wrapper",
+    arguments = ["--google-style"],
+    command = ":ktfmt",
+    tags = ["manual"],
 )
 
 java_binary(
@@ -25,7 +33,7 @@ java_binary(
 format_multirun(
     name = "format",
     java = ":java-format",
-    kotlin = ":ktfmt",
+    kotlin = ":ktfmt_wrapper",
     protocol_buffer = "@rules_buf_toolchains//:buf",
     starlark = "@buildifier_prebuilt//:buildifier",
     tags = ["manual"],
