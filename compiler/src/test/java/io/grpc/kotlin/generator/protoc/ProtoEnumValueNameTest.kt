@@ -27,8 +27,7 @@ import org.junit.runners.JUnit4
 class ProtoEnumValueNameTest {
   @Test
   fun asConstantName() {
-    assertThat(ProtoEnumValueName("FOO_BAR").asConstantName)
-      .isEqualTo(ConstantName("FOO_BAR"))
+    assertThat(ProtoEnumValueName("FOO_BAR").asConstantName).isEqualTo(ConstantName("FOO_BAR"))
   }
 
   @Test

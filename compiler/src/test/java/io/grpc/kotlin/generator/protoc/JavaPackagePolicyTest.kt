@@ -46,9 +46,7 @@ class JavaPackagePolicyTest {
   fun implicitJavaPackageGoogle() {
     with(JavaPackagePolicy.OPEN_SOURCE) {
       assertThat(javaPackage(ImplicitJavaPackage.getDescriptor().toProto()))
-        .isEqualTo(
-          PackageScope("testing")
-        )
+        .isEqualTo(PackageScope("testing"))
     }
   }
 

@@ -40,12 +40,10 @@ data class GeneratorConfig(
     FunSpec.builder(name).addModifiers(*inlineModifiers)
 
   /** Generates a [FunSpec.Builder] for a getter with appropriate modifiers. */
-  fun getterBuilder(): FunSpec.Builder =
-    FunSpec.getterBuilder().addModifiers(*inlineModifiers)
+  fun getterBuilder(): FunSpec.Builder = FunSpec.getterBuilder().addModifiers(*inlineModifiers)
 
   /** Generates a [FunSpec.Builder] for a setter with appropriate modifiers. */
-  fun setterBuilder(): FunSpec.Builder =
-    FunSpec.setterBuilder().addModifiers(*inlineModifiers)
+  fun setterBuilder(): FunSpec.Builder = FunSpec.setterBuilder().addModifiers(*inlineModifiers)
 
   /** Returns the package associated with Java APIs for protos in the specified file. */
   fun javaPackage(fileDescriptor: FileDescriptor): PackageScope =

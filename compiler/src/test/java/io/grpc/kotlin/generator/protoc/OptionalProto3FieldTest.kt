@@ -21,5 +21,4 @@ class OptionalProto3FieldTest {
     assertThat(TestProto3Optional.OptionalProto3::class.java.getMethod("hasOptionalField"))
       .isNotNull()
   }
-
 }

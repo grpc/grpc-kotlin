@@ -36,69 +36,51 @@ class DeclarationsSubjectTest {
 
   @Test
   fun generatesTopLevel() {
-    assertThat(decls).generatesTopLevel(
-      """
+    assertThat(decls)
+      .generatesTopLevel("""
       import kotlin.Int
 
       public val topLevel: Int
-    """
-    )
+    """)
   }
 
   @Test
   fun generatesEnclosed() {
-    assertThat(decls).generatesEnclosed(
-      """
+    assertThat(decls)
+      .generatesEnclosed("""
       import kotlin.Int
 
       public val enclosed: Int
-      """
-    )
+      """)
   }
 
   @Test
   fun generatesTopLevelFailure() {
-    expectFailureAbout(
-      declarationsSubjectFactory
-    ) { it.that(decls).generatesTopLevel("") }
+    expectFailureAbout(declarationsSubjectFactory) { it.that(decls).generatesTopLevel("") }
   }
 
   @Test
   fun generatesEnclosedFailure() {
-    expectFailureAbout(
-      declarationsSubjectFactory
-    ) { it.that(decls).generatesEnclosed("") }
+    expectFailureAbout(declarationsSubjectFactory) { it.that(decls).generatesEnclosed("") }
   }
 
   @Test
   fun generatesNoTopLevel() {
-    assertThat(
-      declarations {
-        addProperty(enclosedProperty)
-      }
-    ).generatesNoTopLevelMembers()
+    assertThat(declarations { addProperty(enclosedProperty) }).generatesNoTopLevelMembers()
   }
 
   @Test
   fun generatesNoEnclosed() {
-    assertThat(
-      declarations {
-        addTopLevelProperty(topLevelProperty)
-      }
-    ).generatesNoEnclosedMembers()
+    assertThat(declarations { addTopLevelProperty(topLevelProperty) }).generatesNoEnclosedMembers()
   }
 
   @Test
   fun generatesNoTopLevelFailure() {
-    expectFailureAbout(
-      declarationsSubjectFactory
-    ) { it.that(decls).generatesNoTopLevelMembers() }
+    expectFailureAbout(declarationsSubjectFactory) { it.that(decls).generatesNoTopLevelMembers() }
   }
 
   @Test
   fun generatesNoEnclosedFailure() {
-    expectFailureAbout(
-      declarationsSubjectFactory
-    ) { it.that(decls).generatesNoEnclosedMembers() }
+    expectFailureAbout(declarationsSubjectFactory) { it.that(decls).generatesNoEnclosedMembers() }
   }
 }

@@ -18,12 +18,12 @@ package io.grpc.kotlin
 
 import com.google.common.truth.Truth.assertThat
 import io.grpc.Context
+import java.util.concurrent.Executors
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import java.util.concurrent.Executors
 
 @RunWith(JUnit4::class)
 class GrpcContextElementTest {
@@ -33,7 +33,8 @@ class GrpcContextElementTest {
   fun testContextPropagation() {
     val testGrpcContext = Context.ROOT.withValue(testKey, "testValue")
     val coroutineContext =
-      Executors.newSingleThreadExecutor().asCoroutineDispatcher() + GrpcContextElement(testGrpcContext)
+      Executors.newSingleThreadExecutor().asCoroutineDispatcher() +
+        GrpcContextElement(testGrpcContext)
     runBlocking(coroutineContext) {
       val currentTestKey = testKey.get()
       // gets from the implicit current gRPC context

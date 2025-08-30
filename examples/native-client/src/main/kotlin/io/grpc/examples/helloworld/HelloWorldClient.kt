@@ -23,30 +23,27 @@ import java.io.Closeable
 import java.util.concurrent.TimeUnit
 
 class HelloWorldClient(private val channel: ManagedChannel) : Closeable {
-    private val stub: GreeterCoroutineStub = GreeterCoroutineStub(channel)
+  private val stub: GreeterCoroutineStub = GreeterCoroutineStub(channel)
 
-    suspend fun greet(name: String) {
-        val request = helloRequest { this.name = name }
-        val response = stub.sayHello(request)
-        println("Received: ${response.message}")
-    }
+  suspend fun greet(name: String) {
+    val request = helloRequest { this.name = name }
+    val response = stub.sayHello(request)
+    println("Received: ${response.message}")
+  }
 
-    override fun close() {
-        channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
-    }
+  override fun close() {
+    channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
+  }
 }
 
-/**
- * Greeter, uses first argument as name to greet if present;
- * greets "world" otherwise.
- */
+/** Greeter, uses first argument as name to greet if present; greets "world" otherwise. */
 suspend fun main(args: Array<String>) {
-    val port = System.getenv("PORT")?.toInt() ?: 50051
+  val port = System.getenv("PORT")?.toInt() ?: 50051
 
-    val channel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build()
+  val channel = ManagedChannelBuilder.forAddress("localhost", port).usePlaintext().build()
 
-    val client = HelloWorldClient(channel)
+  val client = HelloWorldClient(channel)
 
-    val user = args.singleOrNull() ?: "world"
-    client.greet(user)
+  val user = args.singleOrNull() ?: "world"
+  client.greet(user)
 }

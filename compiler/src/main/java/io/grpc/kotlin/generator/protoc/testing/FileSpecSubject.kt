@@ -27,10 +27,8 @@ val fileSpecs: Subject.Factory<FileSpecSubject, FileSpec> = Subject.Factory(::Fi
 fun assertThat(fileSpec: FileSpec): FileSpecSubject = assertAbout(fileSpecs).that(fileSpec)
 
 /** A Truth subject for [FileSpec]. */
-class FileSpecSubject(
-  failureMetadata: FailureMetadata,
-  private val actual: FileSpec?
-) : Subject(failureMetadata, actual) {
+class FileSpecSubject(failureMetadata: FailureMetadata, private val actual: FileSpec?) :
+  Subject(failureMetadata, actual) {
   fun generates(indentedCode: String) {
     val expectedCode = indentedCode.trimIndent()
     val actualCode = actual.toString().trim().lines().joinToString("\n") { it.trimEnd() }

@@ -14,11 +14,11 @@ kt_jvm_library(
         "//compiler/src/main/java/io/grpc/kotlin/generator/protoc",
         "//stub/src/main/java/io/grpc/kotlin:context",
         "//stub/src/main/java/io/grpc/kotlin:stub",
-        "@protobuf//:protobuf_java",
         "@grpc-java//core",
         "@grpc_kotlin_maven//:com_google_guava_guava",
         "@grpc_kotlin_maven//:com_squareup_kotlinpoet",
         "@grpc_kotlin_maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+        "@protobuf//:protobuf_java",
     ],
 )
 

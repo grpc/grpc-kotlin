@@ -17,35 +17,33 @@
 package io.grpc.examples.animals
 
 import io.grpc.testing.GrpcServerRule
-import kotlinx.coroutines.runBlocking
-import org.junit.Rule
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.coroutines.runBlocking
+import org.junit.Rule
 
 class AnimalsServerTest {
-    @get:Rule
-    val grpcServerRule: GrpcServerRule = GrpcServerRule().directExecutor()
+  @get:Rule val grpcServerRule: GrpcServerRule = GrpcServerRule().directExecutor()
 
-    @Test
-    fun animals() =
-        runBlocking {
-            val dogService = AnimalsServer.DogService()
-            val pigService = AnimalsServer.PigService()
-            val sheepService = AnimalsServer.SheepService()
-            grpcServerRule.serviceRegistry.addService(dogService)
-            grpcServerRule.serviceRegistry.addService(pigService)
-            grpcServerRule.serviceRegistry.addService(sheepService)
+  @Test
+  fun animals() = runBlocking {
+    val dogService = AnimalsServer.DogService()
+    val pigService = AnimalsServer.PigService()
+    val sheepService = AnimalsServer.SheepService()
+    grpcServerRule.serviceRegistry.addService(dogService)
+    grpcServerRule.serviceRegistry.addService(pigService)
+    grpcServerRule.serviceRegistry.addService(sheepService)
 
-            val dogStub = DogGrpcKt.DogCoroutineStub(grpcServerRule.channel)
-            val dogBark = dogStub.bark(barkRequest { })
-            assertEquals("Bark!", dogBark.message)
+    val dogStub = DogGrpcKt.DogCoroutineStub(grpcServerRule.channel)
+    val dogBark = dogStub.bark(barkRequest {})
+    assertEquals("Bark!", dogBark.message)
 
-            val pigStub = PigGrpcKt.PigCoroutineStub(grpcServerRule.channel)
-            val pigOink = pigStub.oink(oinkRequest { })
-            assertEquals("Oink!", pigOink.message)
+    val pigStub = PigGrpcKt.PigCoroutineStub(grpcServerRule.channel)
+    val pigOink = pigStub.oink(oinkRequest {})
+    assertEquals("Oink!", pigOink.message)
 
-            val sheepStub = SheepGrpcKt.SheepCoroutineStub(grpcServerRule.channel)
-            val sheepBaa = sheepStub.baa(baaRequest { })
-            assertEquals("Baa!", sheepBaa.message)
-        }
+    val sheepStub = SheepGrpcKt.SheepCoroutineStub(grpcServerRule.channel)
+    val sheepBaa = sheepStub.baa(baaRequest {})
+    assertEquals("Baa!", sheepBaa.message)
+  }
 }

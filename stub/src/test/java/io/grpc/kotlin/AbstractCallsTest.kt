@@ -55,12 +55,14 @@ import org.junit.rules.Timeout
 abstract class AbstractCallsTest {
   companion object {
     fun helloRequest(name: String): HelloRequest = HelloRequest.newBuilder().setName(name).build()
-    fun helloReply(message: String): HelloReply = HelloReply.newBuilder().setMessage(message).build()
+
+    fun helloReply(message: String): HelloReply =
+      HelloReply.newBuilder().setMessage(message).build()
+
     fun multiHelloRequest(vararg name: String): MultiHelloRequest =
       MultiHelloRequest.newBuilder().addAllName(name.asList()).build()
 
-    val sayHelloMethod: MethodDescriptor<HelloRequest, HelloReply> =
-      GreeterGrpc.getSayHelloMethod()
+    val sayHelloMethod: MethodDescriptor<HelloRequest, HelloReply> = GreeterGrpc.getSayHelloMethod()
     val clientStreamingSayHelloMethod: MethodDescriptor<HelloRequest, HelloReply> =
       GreeterGrpc.getClientStreamSayHelloMethod()
     val serverStreamingSayHelloMethod: MethodDescriptor<MultiHelloRequest, HelloReply> =
@@ -69,9 +71,7 @@ abstract class AbstractCallsTest {
       GreeterGrpc.getBidiStreamSayHelloMethod()
     val greeterService: ServiceDescriptor = GreeterGrpc.getServiceDescriptor()
 
-    fun <E> CoroutineScope.produce(
-      block: suspend SendChannel<E>.() -> Unit
-    ): ReceiveChannel<E> {
+    fun <E> CoroutineScope.produce(block: suspend SendChannel<E>.() -> Unit): ReceiveChannel<E> {
       val channel = Channel<E>()
       launch {
         channel.block()
@@ -98,19 +98,16 @@ abstract class AbstractCallsTest {
     }
 
     fun whenContextIsCancelled(onCancelled: () -> Unit) {
-      Context.current().withCancellation().addListener(
-        Context.CancellationListener { onCancelled() },
-        MoreExecutors.directExecutor()
-      )
+      Context.current()
+        .withCancellation()
+        .addListener(Context.CancellationListener { onCancelled() }, MoreExecutors.directExecutor())
     }
   }
 
-  @get:Rule
-  val timeout: Timeout = Timeout.seconds(10)
+  @get:Rule val timeout: Timeout = Timeout.seconds(10)
 
   // We want the coroutines timeout to come first, because it comes with useful debug logs.
-  @get:Rule
-  val grpcCleanup = GrpcCleanupRule().setTimeout(11, TimeUnit.SECONDS)
+  @get:Rule val grpcCleanup = GrpcCleanupRule().setTimeout(11, TimeUnit.SECONDS)
 
   lateinit var channel: ManagedChannel
 
@@ -133,9 +130,7 @@ abstract class AbstractCallsTest {
     }
   }
 
-  inline fun <reified E : Exception> assertThrows(
-    callback: () -> Unit
-  ): E {
+  inline fun <reified E : Exception> assertThrows(callback: () -> Unit): E {
     var ex: Exception? = null
     try {
       callback()
@@ -169,8 +164,7 @@ abstract class AbstractCallsTest {
     )
 
     return grpcCleanup.register(
-      InProcessChannelBuilder
-        .forName(serverName)
+      InProcessChannelBuilder.forName(serverName)
         .enableRetry()
         .defaultServiceConfig(serviceConfig)
         .run { this as io.grpc.ManagedChannelBuilder<*> } // workaround b/123879662
@@ -199,10 +193,7 @@ abstract class AbstractCallsTest {
     config: Map<String, Any> = emptyMap(),
     vararg interceptors: ServerInterceptor
   ): ManagedChannel {
-    return makeChannel(
-      ServerInterceptors.intercept(serverServiceDefinition, *interceptors),
-      config
-    )
+    return makeChannel(ServerInterceptors.intercept(serverServiceDefinition, *interceptors), config)
   }
 
   fun <R> runBlocking(block: suspend CoroutineScope.() -> R): Unit =

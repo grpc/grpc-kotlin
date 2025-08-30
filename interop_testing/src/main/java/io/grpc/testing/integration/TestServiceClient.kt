@@ -30,16 +30,16 @@ import io.grpc.okhttp.OkHttpChannelBuilder
 import io.grpc.okhttp.internal.Platform
 import io.grpc.testing.integration.TestServiceGrpcKt.TestServiceCoroutineStub
 import io.netty.handler.ssl.SslContext
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import java.io.File
 import java.io.FileInputStream
 import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 
 /**
- * Application that starts a client for the [TestServiceGrpc.TestServiceImplBase] and runs
- * through a series of tests.
+ * Application that starts a client for the [TestServiceGrpc.TestServiceImplBase] and runs through a
+ * series of tests.
  */
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -62,7 +62,7 @@ class TestServiceClient {
   @VisibleForTesting
   fun parseArgs(args: Array<String>) {
     var usage = false
-    argsLoop@for (arg in args) {
+    argsLoop@ for (arg in args) {
       if (!arg.startsWith("--")) {
         System.err.println("All arguments must start with '--': $arg")
         usage = true
@@ -136,7 +136,8 @@ class TestServiceClient {
           | --default_service_account   Email of GCE default service account. Default ${c.defaultServiceAccount}
           | --service_account_key_file  Path to service account json key file.${c.serviceAccountKeyFile}
           | --oauth_scope               Scope for OAuth tokens. Default ${c.oauthScope}
-        """.trimMargin()
+        """
+          .trimMargin()
       )
       exitProcess(1)
     }
@@ -231,8 +232,10 @@ class TestServiceClient {
   private inner class Tester : AbstractInteropTest() {
     override fun createChannel(): ManagedChannel {
       when (customCredentialsType) {
-        "google_default_credentials" -> return GoogleDefaultChannelBuilder.forAddress(serverHost, serverPort).build()
-        "compute_engine_channel_creds" -> return ComputeEngineChannelBuilder.forAddress(serverHost, serverPort).build()
+        "google_default_credentials" ->
+          return GoogleDefaultChannelBuilder.forAddress(serverHost, serverPort).build()
+        "compute_engine_channel_creds" ->
+          return ComputeEngineChannelBuilder.forAddress(serverHost, serverPort).build()
       }
       if (useAlts) {
         return AltsChannelBuilder.forAddress(serverHost, serverPort).build()
@@ -244,16 +247,17 @@ class TestServiceClient {
           sslContext =
             GrpcSslContexts.forClient().trustManager(TestUtils.loadCert("ca.pem")).build()
         }
-        val nettyBuilder = NettyChannelBuilder.forAddress(serverHost, serverPort)
-          .flowControlWindow(65 * 1024)
-          .negotiationType(
-            when {
-              useTls -> NegotiationType.TLS
-              useH2cUpgrade -> NegotiationType.PLAINTEXT_UPGRADE
-              else -> NegotiationType.PLAINTEXT
-            }
-          )
-          .sslContext(sslContext)
+        val nettyBuilder =
+          NettyChannelBuilder.forAddress(serverHost, serverPort)
+            .flowControlWindow(65 * 1024)
+            .negotiationType(
+              when {
+                useTls -> NegotiationType.TLS
+                useH2cUpgrade -> NegotiationType.PLAINTEXT_UPGRADE
+                else -> NegotiationType.PLAINTEXT
+              }
+            )
+            .sslContext(sslContext)
         if (serverHostOverride != null) {
           nettyBuilder.overrideAuthority(serverHostOverride)
         }
@@ -261,14 +265,15 @@ class TestServiceClient {
       } else {
         val okBuilder = OkHttpChannelBuilder.forAddress(serverHost, serverPort)
         if (serverHostOverride != null) { // Force the hostname to match the cert the server uses.
-          okBuilder.overrideAuthority(
-            Util.authorityFromHostAndPort(serverHostOverride, serverPort))
+          okBuilder.overrideAuthority(Util.authorityFromHostAndPort(serverHostOverride, serverPort))
         }
         if (useTls) {
           if (useTestCa) {
-            val factory = TestUtils.newSslSocketFactoryForCa(
-              Platform.get().provider, TestUtils.loadCert("ca.pem")
-            )
+            val factory =
+              TestUtils.newSslSocketFactoryForCa(
+                Platform.get().provider,
+                TestUtils.loadCert("ca.pem")
+              )
             okBuilder.sslSocketFactory(factory)
           }
         } else {
@@ -283,9 +288,7 @@ class TestServiceClient {
   companion object {
     private val UTF_8 = Charsets.UTF_8
 
-    /**
-     * The main application allowing this client to be launched from the command line.
-     */
+    /** The main application allowing this client to be launched from the command line. */
     @Throws(Exception::class)
     @JvmStatic
     fun main(args: Array<String>) { // Let Netty or OkHttp use Conscrypt if it is available.
@@ -293,16 +296,19 @@ class TestServiceClient {
       val client = TestServiceClient()
       client.parseArgs(args)
       client.setUp()
-      Runtime.getRuntime().addShutdownHook(object : Thread() {
-        override fun run() {
-          println("Shutting down")
-          try {
-            client.tearDown()
-          } catch (e: Exception) {
-            e.printStackTrace()
+      Runtime.getRuntime()
+        .addShutdownHook(
+          object : Thread() {
+            override fun run() {
+              println("Shutting down")
+              try {
+                client.tearDown()
+              } catch (e: Exception) {
+                e.printStackTrace()
+              }
+            }
           }
-        }
-      })
+        )
       try {
         client.run()
       } finally {
@@ -315,10 +321,7 @@ class TestServiceClient {
       val builder = StringBuilder()
       for (testCase in TestCases.values()) {
         val strTestcase = testCase.name.lowercase()
-        builder.append("\n      ")
-          .append(strTestcase)
-          .append(": ")
-          .append(testCase.description())
+        builder.append("\n      ").append(strTestcase).append(": ").append(testCase.description())
       }
       return builder.toString()
     }

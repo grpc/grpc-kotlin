@@ -13,18 +13,17 @@
 // limitations under the License.
 syntax = "proto3";
 
-option java_multiple_files = true;
-option java_package = "io.grpc.examples.animals";
-option java_outer_classname = "SheepProto";
-
 package animals;
 
+option java_multiple_files = true;
+option java_outer_classname = "SheepProto";
+option java_package = "io.grpc.examples.animals";
+
 service Sheep {
-  rpc Baa (BaaRequest) returns (BaaReply) {}
+  rpc Baa(BaaRequest) returns (BaaReply) {}
 }
 
-message BaaRequest {
-}
+message BaaRequest {}
 
 message BaaReply {
   string message = 1;

@@ -37,14 +37,14 @@ grpc_kotlin_maven.install(
         "com.google.protobuf:protobuf-java:4.30.2",
         "com.google.protobuf:protobuf-kotlin:4.30.2",
         "com.google.guava:guava:33.3.1-android",
-        "com.squareup:kotlinpoet:1.14.2", # Max version without causing compiler errors.
+        "com.squareup:kotlinpoet:1.14.2",  # Max version without causing compiler errors.
         "junit:junit:4.13.2",
         "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1",
         "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.1",
     ],
     fetch_sources = False,
-    lock_file = "//:grpc_kotlin_maven_install.json",
     generate_compat_repositories = True,
+    lock_file = "//:grpc_kotlin_maven_install.json",
     strict_visibility = True,
 )
 use_repo(grpc_kotlin_maven, "grpc_kotlin_maven")

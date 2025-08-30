@@ -35,9 +35,7 @@ data class ProtoMethodName(val name: String) : CharSequence by name {
   }
 
   private fun handleSpecialCharacters(name: MemberSimpleName): MemberSimpleName {
-    return name.split("_")
-      .map(::MemberSimpleName)
-      .reduce { acc, simpleName -> acc + simpleName }
+    return name.split("_").map(::MemberSimpleName).reduce { acc, simpleName -> acc + simpleName }
   }
 
   override fun toString() = name

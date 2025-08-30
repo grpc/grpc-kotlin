@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package testing;
 
-option java_package = "io.grpc.kotlin.generator.protoc.testproto";
 option java_outer_classname = "MyExplicitOuterClassName";
+option java_package = "io.grpc.kotlin.generator.protoc.testproto";
 
 message HasExplicitOuterClassName {}

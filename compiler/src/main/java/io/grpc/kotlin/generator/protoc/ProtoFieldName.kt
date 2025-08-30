@@ -26,14 +26,16 @@ import com.google.protobuf.Descriptors.OneofDescriptor
 data class ProtoFieldName(private val name: String) : CharSequence by name {
   companion object {
     // based on compiler/java/internal/helpers.cc
-    private val SPECIAL_CASES = setOf(
-      ProtoFieldName("class"),
-      ProtoFieldName("cached_size"),
-      ProtoFieldName("serialized_size")
-    )
+    private val SPECIAL_CASES =
+      setOf(
+        ProtoFieldName("class"),
+        ProtoFieldName("cached_size"),
+        ProtoFieldName("serialized_size")
+      )
 
     private val LETTER = CharMatcher.inRange('A', 'Z').or(CharMatcher.inRange('a', 'z'))
     private val DIGIT = CharMatcher.inRange('0', '9')
+
     private operator fun CharMatcher.contains(c: Char) = matches(c)
   }
 
@@ -45,13 +47,13 @@ data class ProtoFieldName(private val name: String) : CharSequence by name {
       val finalCamelCaseName = StringBuilder(name.length)
       for (word in nameComponents) {
         if (finalCamelCaseName.isEmpty()) {
-          finalCamelCaseName.append(
-            Ascii.toLowerCase(word[0])
-          ).append(upperCaseAfterNumeric(word), 1, word.length)
+          finalCamelCaseName
+            .append(Ascii.toLowerCase(word[0]))
+            .append(upperCaseAfterNumeric(word), 1, word.length)
         } else {
-          finalCamelCaseName.append(
-            Ascii.toUpperCase(word[0])
-          ).append(upperCaseAfterNumeric(word), 1, word.length)
+          finalCamelCaseName
+            .append(Ascii.toUpperCase(word[0]))
+            .append(upperCaseAfterNumeric(word), 1, word.length)
         }
       }
       return MemberSimpleName(finalCamelCaseName.toString())

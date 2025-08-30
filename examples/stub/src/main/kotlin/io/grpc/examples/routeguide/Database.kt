@@ -19,11 +19,11 @@ package io.grpc.examples.routeguide
 import com.google.protobuf.util.JsonFormat
 
 object Database {
-    fun features(): List<Feature> {
-        return javaClass.getResourceAsStream("route_guide_db.json")?.use {
-            val featureDatabaseBuilder = FeatureDatabase.newBuilder()
-            JsonFormat.parser().merge(it.reader(), featureDatabaseBuilder)
-            featureDatabaseBuilder.build().featureList
-        } ?: emptyList()
-    }
+  fun features(): List<Feature> {
+    return javaClass.getResourceAsStream("route_guide_db.json")?.use {
+      val featureDatabaseBuilder = FeatureDatabase.newBuilder()
+      JsonFormat.parser().merge(it.reader(), featureDatabaseBuilder)
+      featureDatabaseBuilder.build().featureList
+    } ?: emptyList()
+  }
 }

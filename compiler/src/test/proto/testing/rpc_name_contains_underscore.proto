@@ -1,9 +1,10 @@
 syntax = "proto3";
 package io.grpc.testing.underscore;
+
 option java_multiple_files = true;
 service NameContainsUnderscore {
-    rpc say_hello (HelloRequest) returns (HelloReply);
-    rpc say_hello_again (HelloRequest) returns (HelloReply);
+  rpc say_hello(HelloRequest) returns (HelloReply);
+  rpc say_hello_again(HelloRequest) returns (HelloReply);
 }
 message HelloRequest {}
 message HelloReply {}

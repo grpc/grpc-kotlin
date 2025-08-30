@@ -1,6 +1,6 @@
+load("@protobuf//bazel:java_lite_proto_library.bzl", "java_lite_proto_library")
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("//:kt_jvm_grpc.bzl", "kt_jvm_grpc_library", "kt_jvm_proto_library")
-load("@protobuf//bazel:java_lite_proto_library.bzl", "java_lite_proto_library")
 
 licenses(["notice"])
 

@@ -13,18 +13,17 @@
 // limitations under the License.
 syntax = "proto3";
 
-option java_multiple_files = true;
-option java_package = "io.grpc.examples.animals";
-option java_outer_classname = "PigProto";
-
 package animals;
 
+option java_multiple_files = true;
+option java_outer_classname = "PigProto";
+option java_package = "io.grpc.examples.animals";
+
 service Pig {
-  rpc Oink (OinkRequest) returns (OinkReply) {}
+  rpc Oink(OinkRequest) returns (OinkReply) {}
 }
 
-message OinkRequest {
-}
+message OinkRequest {}
 
 message OinkReply {
   string message = 1;

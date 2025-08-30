@@ -44,15 +44,13 @@ import io.grpc.kotlin.generator.protoc.declarations
 import io.grpc.kotlin.generator.protoc.methodName
 import io.grpc.kotlin.generator.protoc.of
 import io.grpc.kotlin.generator.protoc.serviceName
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.flow.Flow
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.Flow
 
-/**
- * Generator for abstract classes of the form `MyServiceCoroutineImplBase`.
- */
-class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerator(config) {
+/** Generator for abstract classes of the form `MyServiceCoroutineImplBase`. */
+class GrpcCoroutineServerGenerator(config: GeneratorConfig) : ServiceCodeGenerator(config) {
   companion object {
     private const val IMPL_BASE_SUFFIX = "CoroutineImplBase"
 
@@ -61,8 +59,7 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
     private val STREAMING_REQUEST_NAME: MemberSimpleName = MemberSimpleName("requests")
 
     private val coroutineContextParameter: ParameterSpec =
-      ParameterSpec
-        .builder("coroutineContext", CoroutineContext::class)
+      ParameterSpec.builder("coroutineContext", CoroutineContext::class)
         .defaultValue("%T", EmptyCoroutineContext::class)
         .build()
 
@@ -77,8 +74,7 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
     private val BIDI_STREAMING_SMD: MemberName =
       ServerCalls::class.member("bidiStreamingServerMethodDefinition")
 
-    private val UNIMPLEMENTED_STATUS: MemberName =
-      Status::class.member("UNIMPLEMENTED")
+    private val UNIMPLEMENTED_STATUS: MemberName = Status::class.member("UNIMPLEMENTED")
   }
 
   override fun generate(service: ServiceDescriptor): Declarations = declarations {
@@ -89,36 +85,37 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
     val serviceImplClassName = service.serviceName.toClassSimpleName().withSuffix(IMPL_BASE_SUFFIX)
 
     val stubs: List<MethodImplStub> = service.methods.map { serviceMethodStub(it) }
-    val implBuilder = TypeSpec
-      .classBuilder(serviceImplClassName)
-      .addModifiers(KModifier.ABSTRACT)
-      .addKdoc(
-        """
+    val implBuilder =
+      TypeSpec.classBuilder(serviceImplClassName)
+        .addModifiers(KModifier.ABSTRACT)
+        .addKdoc(
+          """
         Skeletal implementation of the %L service based on Kotlin coroutines.
-        """.trimIndent(),
-        service.fullName
-      )
-      .primaryConstructor(
-        FunSpec.constructorBuilder()
-          .addParameter(coroutineContextParameter)
-          .build()
-      )
-      .superclass(AbstractCoroutineServerImpl::class)
-      .addSuperclassConstructorParameter("%N", coroutineContextParameter)
+        """
+            .trimIndent(),
+          service.fullName
+        )
+        .primaryConstructor(
+          FunSpec.constructorBuilder().addParameter(coroutineContextParameter).build()
+        )
+        .superclass(AbstractCoroutineServerImpl::class)
+        .addSuperclassConstructorParameter("%N", coroutineContextParameter)
 
     var serverServiceDefinitionBuilder =
       CodeBlock.of("%M(%M())", SERVER_SERVICE_DEFINITION_BUILDER_FACTORY, service.grpcDescriptor)
 
     for (stub in stubs) {
       implBuilder.addFunction(stub.methodSpec)
-      serverServiceDefinitionBuilder = CodeBlock.of(
-        """
+      serverServiceDefinitionBuilder =
+        CodeBlock.of(
+          """
           %L
             .addMethod(%L)
-        """.trimIndent(),
-        serverServiceDefinitionBuilder,
-        stub.serverMethodDef
-      )
+        """
+            .trimIndent(),
+          serverServiceDefinitionBuilder,
+          stub.serverMethodDef
+        )
     }
 
     implBuilder.addFunction(
@@ -136,88 +133,90 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
   data class MethodImplStub(
     val methodSpec: FunSpec,
     /**
-     * A [CodeBlock] that computes a [ServerMethodDefinition] based on an implementation of
-     * the function described in [methodSpec].
+     * A [CodeBlock] that computes a [ServerMethodDefinition] based on an implementation of the
+     * function described in [methodSpec].
      */
     val serverMethodDef: CodeBlock
   )
 
   @VisibleForTesting
-  fun serviceMethodStub(method: MethodDescriptor): MethodImplStub = with(config) {
-    val requestType = method.inputType.messageClass()
-    val requestParam = if (method.isClientStreaming) {
-      ParameterSpec.of(STREAMING_REQUEST_NAME, FLOW.parameterizedBy(requestType))
-    } else {
-      ParameterSpec.of(UNARY_REQUEST_NAME, requestType)
-    }
+  fun serviceMethodStub(method: MethodDescriptor): MethodImplStub =
+    with(config) {
+      val requestType = method.inputType.messageClass()
+      val requestParam =
+        if (method.isClientStreaming) {
+          ParameterSpec.of(STREAMING_REQUEST_NAME, FLOW.parameterizedBy(requestType))
+        } else {
+          ParameterSpec.of(UNARY_REQUEST_NAME, requestType)
+        }
 
-    val methodSpecBuilder = FunSpec.builder(method.methodName.toMemberSimpleName())
-      .addModifiers(KModifier.OPEN)
-      .addParameter(requestParam)
-      .addStatement(
-        "throw %T(%M.withDescription(%S))",
-        StatusException::class,
-        UNIMPLEMENTED_STATUS,
-        "Method ${method.fullName} is unimplemented"
-      )
+      val methodSpecBuilder =
+        FunSpec.builder(method.methodName.toMemberSimpleName())
+          .addModifiers(KModifier.OPEN)
+          .addParameter(requestParam)
+          .addStatement(
+            "throw %T(%M.withDescription(%S))",
+            StatusException::class,
+            UNIMPLEMENTED_STATUS,
+            "Method ${method.fullName} is unimplemented"
+          )
 
-    if (method.options.deprecated) {
-      methodSpecBuilder.addAnnotation(
-        AnnotationSpec.builder(Deprecated::class)
-          .addMember("%S", "The underlying service method is marked deprecated.")
-          .build()
-      )
-    }
+      if (method.options.deprecated) {
+        methodSpecBuilder.addAnnotation(
+          AnnotationSpec.builder(Deprecated::class)
+            .addMember("%S", "The underlying service method is marked deprecated.")
+            .build()
+        )
+      }
 
-    val responseType = method.outputType.messageClass()
-    if (method.isServerStreaming) {
-      methodSpecBuilder.returns(FLOW.parameterizedBy(responseType))
-    } else {
-      methodSpecBuilder.returns(responseType)
-      methodSpecBuilder.addModifiers(KModifier.SUSPEND)
-    }
+      val responseType = method.outputType.messageClass()
+      if (method.isServerStreaming) {
+        methodSpecBuilder.returns(FLOW.parameterizedBy(responseType))
+      } else {
+        methodSpecBuilder.returns(responseType)
+        methodSpecBuilder.addModifiers(KModifier.SUSPEND)
+      }
 
-    methodSpecBuilder.addKdoc(stubKDoc(method, requestParam))
+      methodSpecBuilder.addKdoc(stubKDoc(method, requestParam))
 
-    val methodSpec = methodSpecBuilder.build()
+      val methodSpec = methodSpecBuilder.build()
 
-    val smdFactory = if (method.isServerStreaming) {
-      if (method.isClientStreaming) BIDI_STREAMING_SMD else SERVER_STREAMING_SMD
-    } else {
-      if (method.isClientStreaming) CLIENT_STREAMING_SMD else UNARY_SMD
-    }
+      val smdFactory =
+        if (method.isServerStreaming) {
+          if (method.isClientStreaming) BIDI_STREAMING_SMD else SERVER_STREAMING_SMD
+        } else {
+          if (method.isClientStreaming) CLIENT_STREAMING_SMD else UNARY_SMD
+        }
 
-    val serverMethodDef =
-      CodeBlock.of(
-        """
+      val serverMethodDef =
+        CodeBlock.of(
+          """
           %M(
             context = this.context,
             descriptor = %L,
             implementation = ::%N
           )
-        """.trimIndent(),
-        smdFactory,
-        method.descriptorCode,
-        methodSpec
+        """
+            .trimIndent(),
+          smdFactory,
+          method.descriptorCode,
+          methodSpec
+        )
+
+      MethodImplStub(methodSpec, serverMethodDef)
+    }
+
+  private fun stubKDoc(method: MethodDescriptor, requestParam: ParameterSpec): CodeBlock {
+    val kDocBindings =
+      mapOf(
+        "requestParam" to requestParam,
+        "methodName" to method.fullName,
+        "flow" to FLOW,
+        "status" to Status::class,
+        "statusException" to StatusException::class,
+        "cancellationException" to CancellationException::class,
+        "illegalStateException" to IllegalStateException::class
       )
-
-    MethodImplStub(methodSpec, serverMethodDef)
-  }
-
-  private fun stubKDoc(
-    method: MethodDescriptor,
-    requestParam: ParameterSpec
-  ): CodeBlock {
-    val kDocBindings = mapOf(
-      "requestParam" to requestParam,
-      "methodName" to method.fullName,
-      "flow" to FLOW,
-      "status" to Status::class,
-      "statusException" to StatusException::class,
-      "cancellationException" to CancellationException::class,
-      "illegalStateException" to IllegalStateException::class
-    )
-
 
     val kDocSections = mutableListOf<String>()
 
@@ -230,7 +229,8 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
           [%cancellationException:T], the RPC will fail with status `Status.CANCELLED`.  If creating
           or collecting the returned flow fails for any other reason, the RPC will fail with
           `Status.UNKNOWN` with the exception as a cause.
-        """.trimIndent()
+        """
+          .trimIndent()
       )
     } else {
       kDocSections.add("Returns the response to an RPC for %methodName:L.")
@@ -240,7 +240,8 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
           [%status:T].  If this method fails with a [%cancellationException:T], the RPC will fail
           with status `Status.CANCELLED`.  If this method fails for any other reason, the RPC will
           fail with `Status.UNKNOWN` with the exception as a cause.
-        """.trimIndent()
+        """
+          .trimIndent()
       )
     }
 
@@ -250,19 +251,18 @@ class GrpcCoroutineServerGenerator(config: GeneratorConfig): ServiceCodeGenerato
           @param %requestParam:N A [%flow:T] of requests from the client.  This flow can be
                  collected only once and throws [%illegalStateException:T] on attempts to collect
                  it more than once.
-        """.trimIndent()
+        """
+          .trimIndent()
       )
     } else {
       kDocSections.add(
         """
           @param %requestParam:N The request from the client.
-        """.trimIndent()
+        """
+          .trimIndent()
       )
     }
 
-    return CodeBlock
-      .builder()
-      .addNamed(kDocSections.joinToString("\n\n"), kDocBindings)
-      .build()
+    return CodeBlock.builder().addNamed(kDocSections.joinToString("\n\n"), kDocBindings).build()
   }
 }

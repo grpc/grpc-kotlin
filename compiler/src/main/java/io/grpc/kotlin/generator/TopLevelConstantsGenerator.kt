@@ -13,10 +13,8 @@ import io.grpc.kotlin.generator.protoc.builder
 import io.grpc.kotlin.generator.protoc.declarations
 import io.grpc.kotlin.generator.protoc.methodName
 
-/**
- * Generates top-level properties for the service descriptor and method descriptors.
- */
-class TopLevelConstantsGenerator(config: GeneratorConfig): ServiceCodeGenerator(config) {
+/** Generates top-level properties for the service descriptor and method descriptors. */
+class TopLevelConstantsGenerator(config: GeneratorConfig) : ServiceCodeGenerator(config) {
   override fun generate(service: Descriptors.ServiceDescriptor): Declarations = declarations {
     addProperty(
       PropertySpec.builder("serviceDescriptor", ServiceDescriptor::class)
@@ -32,23 +30,18 @@ class TopLevelConstantsGenerator(config: GeneratorConfig): ServiceCodeGenerator(
     with(config) {
       for (method in service.methods) {
         addProperty(
-          PropertySpec
-            .builder(
+          PropertySpec.builder(
               method.methodName.toMemberSimpleName().withSuffix("Method"),
-              MethodDescriptor::class.asTypeName().parameterizedBy(
-                method.inputType.messageClass(),
-                method.outputType.messageClass()
-              )
+              MethodDescriptor::class.asTypeName()
+                .parameterizedBy(method.inputType.messageClass(), method.outputType.messageClass())
             )
             .getter(
               FunSpec.getterBuilder()
                 .addAnnotation(JvmStatic::class)
-                .addStatement("return %T.%L()",
+                .addStatement(
+                  "return %T.%L()",
                   service.grpcClass,
-                  method.methodName
-                    .toMemberSimpleName()
-                    .withPrefix("get")
-                    .withSuffix("Method")
+                  method.methodName.toMemberSimpleName().withPrefix("get").withSuffix("Method")
                 )
                 .build()
             )

@@ -17,7 +17,9 @@
 package io.grpc.kotlin
 
 import io.grpc.CallOptions
+import io.grpc.Channel as GrpcChannel
 import io.grpc.ClientCall
+import io.grpc.Metadata as GrpcMetadata
 import io.grpc.MethodDescriptor
 import io.grpc.Status
 import kotlinx.coroutines.CancellationException
@@ -32,17 +34,13 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import io.grpc.Channel as GrpcChannel
-import io.grpc.Metadata as GrpcMetadata
 
 /**
- * Helpers for gRPC clients implemented in Kotlin.  Can be used directly, but intended to be used
+ * Helpers for gRPC clients implemented in Kotlin. Can be used directly, but intended to be used
  * from generated Kotlin APIs.
  */
 object ClientCalls {
-  /**
-   * Launches a unary RPC on the specified channel, suspending until the result is received.
-   */
+  /** Launches a unary RPC on the specified channel, suspending until the result is received. */
   suspend fun <RequestT, ResponseT> unaryRpc(
     channel: GrpcChannel,
     method: MethodDescriptor<RequestT, ResponseT>,
@@ -54,12 +52,13 @@ object ClientCalls {
       "Expected a unary RPC method, but got $method"
     }
     return rpcImpl(
-      channel = channel,
-      method = method,
-      callOptions = callOptions,
-      headers = headers,
-      request = Request.Unary(request)
-    ).singleOrStatus("request", method)
+        channel = channel,
+        method = method,
+        callOptions = callOptions,
+        headers = headers,
+        request = Request.Unary(request)
+      )
+      .singleOrStatus("request", method)
   }
 
   /**
@@ -73,12 +72,9 @@ object ClientCalls {
     method: MethodDescriptor<RequestT, ResponseT>,
     callOptions: CallOptions = CallOptions.DEFAULT,
     headers: suspend () -> GrpcMetadata = { GrpcMetadata() }
-  ): suspend (RequestT) -> ResponseT =
-    { unaryRpc(channel, method, it, callOptions, headers()) }
+  ): suspend (RequestT) -> ResponseT = { unaryRpc(channel, method, it, callOptions, headers()) }
 
-  /**
-   * Returns a [Flow] which launches the specified server-streaming RPC and emits the responses.
-   */
+  /** Returns a [Flow] which launches the specified server-streaming RPC and emits the responses. */
   fun <RequestT, ResponseT> serverStreamingRpc(
     channel: GrpcChannel,
     method: MethodDescriptor<RequestT, ResponseT>,
@@ -110,20 +106,12 @@ object ClientCalls {
     callOptions: CallOptions = CallOptions.DEFAULT,
     headers: suspend () -> GrpcMetadata = { GrpcMetadata() }
   ): (RequestT) -> Flow<ResponseT> = {
-    flow {
-      serverStreamingRpc(
-        channel,
-        method,
-        it,
-        callOptions,
-        headers()
-      ).collect { emit(it) }
-    }
+    flow { serverStreamingRpc(channel, method, it, callOptions, headers()).collect { emit(it) } }
   }
 
   /**
    * Launches a client-streaming RPC on the specified channel, suspending until the server returns
-   * the result.  The caller is expected to provide a [Flow] of requests.
+   * the result. The caller is expected to provide a [Flow] of requests.
    */
   suspend fun <RequestT, ResponseT> clientStreamingRpc(
     channel: GrpcChannel,
@@ -136,12 +124,13 @@ object ClientCalls {
       "Expected a server streaming RPC method, but got $method"
     }
     return rpcImpl(
-      channel = channel,
-      method = method,
-      callOptions = callOptions,
-      headers = headers,
-      request = Request.Flowing(requests)
-    ).singleOrStatus("response", method)
+        channel = channel,
+        method = method,
+        callOptions = callOptions,
+        headers = headers,
+        request = Request.Flowing(requests)
+      )
+      .singleOrStatus("response", method)
   }
 
   /**
@@ -155,24 +144,17 @@ object ClientCalls {
     method: MethodDescriptor<RequestT, ResponseT>,
     callOptions: CallOptions = CallOptions.DEFAULT,
     headers: suspend () -> GrpcMetadata = { GrpcMetadata() }
-  ): suspend (Flow<RequestT>) -> ResponseT =
-    {
-      clientStreamingRpc(
-        channel,
-        method,
-        it,
-        callOptions,
-        headers()
-      )
-    }
+  ): suspend (Flow<RequestT>) -> ResponseT = {
+    clientStreamingRpc(channel, method, it, callOptions, headers())
+  }
 
   /**
    * Returns a [Flow] which launches the specified bidirectional-streaming RPC, collecting the
    * requests flow, sending them to the server, and emitting the responses.
    *
-   * Cancelling collection of the flow cancels the RPC upstream and collection of the requests.
-   * For example, if `responses.take(2).toList()` is executed, the RPC will be cancelled after
-   * the first two responses are returned.
+   * Cancelling collection of the flow cancels the RPC upstream and collection of the requests. For
+   * example, if `responses.take(2).toList()` is executed, the RPC will be cancelled after the first
+   * two responses are returned.
    */
   fun <RequestT, ResponseT> bidiStreamingRpc(
     channel: GrpcChannel,
@@ -204,46 +186,28 @@ object ClientCalls {
     method: MethodDescriptor<RequestT, ResponseT>,
     callOptions: CallOptions = CallOptions.DEFAULT,
     headers: suspend () -> GrpcMetadata = { GrpcMetadata() }
-  ): (Flow<RequestT>) -> Flow<ResponseT> =
-    {
-      flow {
-        bidiStreamingRpc(
-          channel,
-          method,
-          it,
-          callOptions,
-          headers()
-        ).collect { emit(it) }
-      }
-    }
+  ): (Flow<RequestT>) -> Flow<ResponseT> = {
+    flow { bidiStreamingRpc(channel, method, it, callOptions, headers()).collect { emit(it) } }
+  }
 
   /** The client's request(s). */
   private sealed class Request<RequestT> {
     /**
      * Send the request(s) to the ClientCall, with `readiness` indicating calls to `onReady` from
-     * the listener.  Returns when sending the requests is done, either because all the requests
-     * were sent (in which case `null` is returned) or because the requests channel was closed
-     * with an exception (in which case the exception is returned).
+     * the listener. Returns when sending the requests is done, either because all the requests were
+     * sent (in which case `null` is returned) or because the requests channel was closed with an
+     * exception (in which case the exception is returned).
      */
-    abstract suspend fun sendTo(
-      clientCall: ClientCall<RequestT, *>,
-      readiness: Readiness
-    )
+    abstract suspend fun sendTo(clientCall: ClientCall<RequestT, *>, readiness: Readiness)
 
     class Unary<RequestT>(private val request: RequestT) : Request<RequestT>() {
-      override suspend fun sendTo(
-        clientCall: ClientCall<RequestT, *>,
-        readiness: Readiness
-      ) {
+      override suspend fun sendTo(clientCall: ClientCall<RequestT, *>, readiness: Readiness) {
         clientCall.sendMessage(request)
       }
     }
 
     class Flowing<RequestT>(private val requestFlow: Flow<RequestT>) : Request<RequestT>() {
-      override suspend fun sendTo(
-        clientCall: ClientCall<RequestT, *>,
-        readiness: Readiness
-      ) {
+      override suspend fun sendTo(clientCall: ClientCall<RequestT, *>, readiness: Readiness) {
         readiness.suspendUntilReady()
         requestFlow.collect { request ->
           clientCall.sendMessage(request)
@@ -260,10 +224,10 @@ object ClientCalls {
   }
 
   /**
-   * Returns a [Flow] that, when collected, issues the specified RPC with the specified request
-   * on the specified channel, and emits the responses.  This is intended to be the root
-   * implementation of the client side of all Kotlin coroutine-based RPCs, with non-streaming
-   * implementations simply emitting or receiving a single message in the appropriate direction.
+   * Returns a [Flow] that, when collected, issues the specified RPC with the specified request on
+   * the specified channel, and emits the responses. This is intended to be the root implementation
+   * of the client side of all Kotlin coroutine-based RPCs, with non-streaming implementations
+   * simply emitting or receiving a single message in the appropriate direction.
    */
   private fun <RequestT, ResponseT> rpcImpl(
     channel: GrpcChannel,
@@ -309,15 +273,16 @@ object ClientCalls {
         headers.copy()
       )
 
-      val sender = launch(CoroutineName("SendMessage worker for ${method.fullMethodName}")) {
-        try {
-          request.sendTo(clientCall, readiness)
-          clientCall.halfClose()
-        } catch (ex: Exception) {
-          clientCall.cancel("Collection of requests completed exceptionally", ex)
-          throw ex // propagate failure upward
+      val sender =
+        launch(CoroutineName("SendMessage worker for ${method.fullMethodName}")) {
+          try {
+            request.sendTo(clientCall, readiness)
+            clientCall.halfClose()
+          } catch (ex: Exception) {
+            clientCall.cancel("Collection of requests completed exceptionally", ex)
+            throw ex // propagate failure upward
+          }
         }
-      }
 
       try {
         clientCall.request(1)

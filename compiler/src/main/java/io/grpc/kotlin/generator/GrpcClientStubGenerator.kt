@@ -31,6 +31,8 @@ import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.asTypeName
 import io.grpc.CallOptions
+import io.grpc.Channel as GrpcChannel
+import io.grpc.Metadata as GrpcMetadata
 import io.grpc.MethodDescriptor.MethodType
 import io.grpc.Status
 import io.grpc.StatusException
@@ -48,12 +50,8 @@ import io.grpc.kotlin.generator.protoc.methodName
 import io.grpc.kotlin.generator.protoc.of
 import io.grpc.kotlin.generator.protoc.serviceName
 import kotlinx.coroutines.flow.Flow
-import io.grpc.Channel as GrpcChannel
-import io.grpc.Metadata as GrpcMetadata
 
-/**
- * Logic for generating gRPC stubs for Kotlin.
- */
+/** Logic for generating gRPC stubs for Kotlin. */
 @VisibleForTesting
 class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(config) {
   companion object {
@@ -63,16 +61,16 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
     private val GRPC_CHANNEL_PARAMETER_NAME = MemberSimpleName("channel")
     private val CALL_OPTIONS_PARAMETER_NAME = MemberSimpleName("callOptions")
 
-    private val HEADERS_PARAMETER: ParameterSpec = ParameterSpec
-      .builder("headers", GrpcMetadata::class)
-      .defaultValue("%T()", GrpcMetadata::class)
-      .build()
+    private val HEADERS_PARAMETER: ParameterSpec =
+      ParameterSpec.builder("headers", GrpcMetadata::class)
+        .defaultValue("%T()", GrpcMetadata::class)
+        .build()
 
     val GRPC_CHANNEL_PARAMETER = ParameterSpec.of(GRPC_CHANNEL_PARAMETER_NAME, GrpcChannel::class)
-    val CALL_OPTIONS_PARAMETER = ParameterSpec
-      .builder(MemberSimpleName("callOptions"), CallOptions::class)
-      .defaultValue("%M", CallOptions::class.member("DEFAULT"))
-      .build()
+    val CALL_OPTIONS_PARAMETER =
+      ParameterSpec.builder(MemberSimpleName("callOptions"), CallOptions::class)
+        .defaultValue("%M", CallOptions::class.member("DEFAULT"))
+        .build()
 
     private val FLOW = Flow::class.asClassName()
 
@@ -81,19 +79,21 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
     private val SERVER_STREAMING_RPC_HELPER = ClientCalls::class.member("serverStreamingRpc")
     private val BIDI_STREAMING_RPC_HELPER = ClientCalls::class.member("bidiStreamingRpc")
 
-    private val RPC_HELPER = mapOf(
-      MethodType.UNARY to UNARY_RPC_HELPER,
-      MethodType.CLIENT_STREAMING to CLIENT_STREAMING_RPC_HELPER,
-      MethodType.SERVER_STREAMING to SERVER_STREAMING_RPC_HELPER,
-      MethodType.BIDI_STREAMING to BIDI_STREAMING_RPC_HELPER
-    )
+    private val RPC_HELPER =
+      mapOf(
+        MethodType.UNARY to UNARY_RPC_HELPER,
+        MethodType.CLIENT_STREAMING to CLIENT_STREAMING_RPC_HELPER,
+        MethodType.SERVER_STREAMING to SERVER_STREAMING_RPC_HELPER,
+        MethodType.BIDI_STREAMING to BIDI_STREAMING_RPC_HELPER
+      )
 
     private val MethodDescriptor.type: MethodType
-      get() = if (isClientStreaming) {
-        if (isServerStreaming) MethodType.BIDI_STREAMING else MethodType.CLIENT_STREAMING
-      } else {
-        if (isServerStreaming) MethodType.SERVER_STREAMING else MethodType.UNARY
-      }
+      get() =
+        if (isClientStreaming) {
+          if (isServerStreaming) MethodType.BIDI_STREAMING else MethodType.CLIENT_STREAMING
+        } else {
+          if (isServerStreaming) MethodType.SERVER_STREAMING else MethodType.UNARY
+        }
   }
 
   override fun generate(service: ServiceDescriptor): Declarations = declarations {
@@ -108,29 +108,26 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
     // which we don't want.
     val stubSelfReference: TypeName = TypeVariableName(stubName.toString())
 
-    val builder = TypeSpec
-      .classBuilder(stubName)
-      .superclass(AbstractCoroutineStub::class.asTypeName().parameterizedBy(stubSelfReference))
-      .addKdoc(
-        "A stub for issuing RPCs to a(n) %L service as suspending coroutines.",
-        service.fullName
-      )
-      .addAnnotation(
-        AnnotationSpec.builder(StubFor::class)
-          .addMember("%T::class", service.grpcClass)
-          .build()
-      )
-      .primaryConstructor(
-        FunSpec
-          .constructorBuilder()
-          .addParameter(GRPC_CHANNEL_PARAMETER)
-          .addParameter(CALL_OPTIONS_PARAMETER)
-          .addAnnotation(JvmOverloads::class)
-          .build()
-      )
-      .addSuperclassConstructorParameter("%N", GRPC_CHANNEL_PARAMETER)
-      .addSuperclassConstructorParameter("%N", CALL_OPTIONS_PARAMETER)
-      .addFunction(buildFun(stubSelfReference))
+    val builder =
+      TypeSpec.classBuilder(stubName)
+        .superclass(AbstractCoroutineStub::class.asTypeName().parameterizedBy(stubSelfReference))
+        .addKdoc(
+          "A stub for issuing RPCs to a(n) %L service as suspending coroutines.",
+          service.fullName
+        )
+        .addAnnotation(
+          AnnotationSpec.builder(StubFor::class).addMember("%T::class", service.grpcClass).build()
+        )
+        .primaryConstructor(
+          FunSpec.constructorBuilder()
+            .addParameter(GRPC_CHANNEL_PARAMETER)
+            .addParameter(CALL_OPTIONS_PARAMETER)
+            .addAnnotation(JvmOverloads::class)
+            .build()
+        )
+        .addSuperclassConstructorParameter("%N", GRPC_CHANNEL_PARAMETER)
+        .addSuperclassConstructorParameter("%N", CALL_OPTIONS_PARAMETER)
+        .addFunction(buildFun(stubSelfReference))
 
     for (method in service.methods) {
       builder.addFunction(generateRpcStub(method))
@@ -142,66 +139,63 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
    * Outputs a `FunSpec` of an override of `AbstractCoroutineStub.build` for this particular stub.
    */
   private fun buildFun(stubName: TypeName): FunSpec {
-    return FunSpec
-      .builder("build")
+    return FunSpec.builder("build")
       .returns(stubName)
       .addModifiers(KModifier.OVERRIDE)
       .addParameter(GRPC_CHANNEL_PARAMETER)
       .addParameter(ParameterSpec.of(CALL_OPTIONS_PARAMETER_NAME, CallOptions::class))
-      .addStatement(
-        "return %T(%N, %N)",
-        stubName,
-        GRPC_CHANNEL_PARAMETER,
-        CALL_OPTIONS_PARAMETER
-      )
+      .addStatement("return %T(%N, %N)", stubName, GRPC_CHANNEL_PARAMETER, CALL_OPTIONS_PARAMETER)
       .build()
   }
 
   @VisibleForTesting
-  fun generateRpcStub(method: MethodDescriptor): FunSpec = with(config) {
-    val name = method.methodName.toMemberSimpleName()
-    val requestType = method.inputType.messageClass()
-    val parameter = if (method.isClientStreaming) {
-      ParameterSpec.of(STREAMING_PARAMETER_NAME, FLOW.parameterizedBy(requestType))
-    } else {
-      ParameterSpec.of(UNARY_PARAMETER_NAME, requestType)
-    }
+  fun generateRpcStub(method: MethodDescriptor): FunSpec =
+    with(config) {
+      val name = method.methodName.toMemberSimpleName()
+      val requestType = method.inputType.messageClass()
+      val parameter =
+        if (method.isClientStreaming) {
+          ParameterSpec.of(STREAMING_PARAMETER_NAME, FLOW.parameterizedBy(requestType))
+        } else {
+          ParameterSpec.of(UNARY_PARAMETER_NAME, requestType)
+        }
 
-    val responseType = method.outputType.messageClass()
+      val responseType = method.outputType.messageClass()
 
-    val returnType =
-      if (method.isServerStreaming) FLOW.parameterizedBy(responseType) else responseType
+      val returnType =
+        if (method.isServerStreaming) FLOW.parameterizedBy(responseType) else responseType
 
-    val helperMethod = RPC_HELPER[method.type] ?: throw IllegalArgumentException()
+      val helperMethod = RPC_HELPER[method.type] ?: throw IllegalArgumentException()
 
-    val funSpecBuilder =
-      funSpecBuilder(name)
-        .addParameter(parameter)
-        .addParameter(HEADERS_PARAMETER)
-        .returns(returnType)
-        .addKdoc(rpcStubKDoc(method, parameter))
+      val funSpecBuilder =
+        funSpecBuilder(name)
+          .addParameter(parameter)
+          .addParameter(HEADERS_PARAMETER)
+          .returns(returnType)
+          .addKdoc(rpcStubKDoc(method, parameter))
 
-    if (method.options.deprecated) {
-      funSpecBuilder.addAnnotation(
-        AnnotationSpec.builder(Deprecated::class)
-          .addMember("%S", "The underlying service method is marked deprecated.")
-          .build()
-      )
-    }
+      if (method.options.deprecated) {
+        funSpecBuilder.addAnnotation(
+          AnnotationSpec.builder(Deprecated::class)
+            .addMember("%S", "The underlying service method is marked deprecated.")
+            .build()
+        )
+      }
 
-    val codeBlockMap = mapOf(
-      "helperMethod" to helperMethod,
-      "methodDescriptor" to method.descriptorCode,
-      "parameter" to parameter,
-      "headers" to HEADERS_PARAMETER
-    )
+      val codeBlockMap =
+        mapOf(
+          "helperMethod" to helperMethod,
+          "methodDescriptor" to method.descriptorCode,
+          "parameter" to parameter,
+          "headers" to HEADERS_PARAMETER
+        )
 
-    if (!method.isServerStreaming) {
-      funSpecBuilder.addModifiers(KModifier.SUSPEND)
-    }
+      if (!method.isServerStreaming) {
+        funSpecBuilder.addModifiers(KModifier.SUSPEND)
+      }
 
-    funSpecBuilder.addNamedCode(
-      """
+      funSpecBuilder.addNamedCode(
+        """
       return %helperMethod:M(
         channel,
         %methodDescriptor:L,
@@ -209,23 +203,22 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
         callOptions,
         %headers:N
       )
-      """.trimIndent(),
-      codeBlockMap
-    )
-    return funSpecBuilder.build()
-  }
+      """
+          .trimIndent(),
+        codeBlockMap
+      )
+      return funSpecBuilder.build()
+    }
 
-  private fun rpcStubKDoc(
-    method: MethodDescriptor,
-    parameter: ParameterSpec
-  ): CodeBlock {
-    val kDocBindings = mapOf(
-      "parameter" to parameter,
-      "flow" to Flow::class,
-      "status" to Status::class,
-      "statusException" to StatusException::class,
-      "headers" to HEADERS_PARAMETER
-    )
+  private fun rpcStubKDoc(method: MethodDescriptor, parameter: ParameterSpec): CodeBlock {
+    val kDocBindings =
+      mapOf(
+        "parameter" to parameter,
+        "flow" to Flow::class,
+        "status" to Status::class,
+        "statusException" to StatusException::class,
+        "headers" to HEADERS_PARAMETER
+      )
 
     val kDocComponents = mutableListOf<String>()
 
@@ -237,14 +230,16 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
         [`Status.OK`][%status:T], and fails by throwing a [%statusException:T] otherwise.  If
         collecting the flow downstream fails exceptionally (including via cancellation), the RPC
         is cancelled with that exception as a cause.
-        """.trimIndent()
+        """
+          .trimIndent()
       } else {
         """
         Executes this RPC and returns the response message, suspending until the RPC completes
         with [`Status.OK`][%status:T].  If the RPC completes with another status, a corresponding
         [%statusException:T] is thrown.  If this coroutine is cancelled, the RPC is also cancelled
         with the corresponding exception as a cause.
-        """.trimIndent()
+        """
+          .trimIndent()
       }
     )
 
@@ -258,7 +253,8 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
           `%parameter:N` is cancelled.  If the collection of `%parameter:N` completes
           exceptionally for any other reason, then the collection of the [%flow:T] of responses
           completes exceptionally for the same reason and the RPC is cancelled with that reason.
-          """.trimIndent()
+          """
+            .trimIndent()
         )
       }
       MethodType.CLIENT_STREAMING -> {
@@ -269,7 +265,8 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
           will be cancelled.  If the collection of requests completes exceptionally for any other
           reason, the RPC will be cancelled for that reason and this method will throw that
           exception.
-          """.trimIndent()
+          """
+            .trimIndent()
         )
       }
       else -> {}
@@ -294,9 +291,6 @@ class GrpcClientStubGenerator(config: GeneratorConfig) : ServiceCodeGenerator(co
         "@return The single response from the server."
       }
     )
-    return CodeBlock
-      .builder()
-      .addNamed(kDocComponents.joinToString("\n\n"), kDocBindings)
-      .build()
+    return CodeBlock.builder().addNamed(kDocComponents.joinToString("\n\n"), kDocBindings).build()
   }
 }

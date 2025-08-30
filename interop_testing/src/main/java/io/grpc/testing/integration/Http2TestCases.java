@@ -18,9 +18,7 @@ package io.grpc.testing.integration;
 
 import com.google.common.base.Preconditions;
 
-/**
- * Enum of HTTP/2 interop test cases.
- */
+/** Enum of HTTP/2 interop test cases. */
 public enum Http2TestCases {
   RST_AFTER_HEADER("server resets stream after sending header"),
   RST_AFTER_DATA("server resets stream after sending data"),
@@ -35,16 +33,14 @@ public enum Http2TestCases {
     this.description = description;
   }
 
-  /**
-   * Returns a description of the test case.
-   */
+  /** Returns a description of the test case. */
   public String description() {
     return description;
   }
 
   /**
-   * Returns the {@link Http2TestCases} matching the string {@code s}. The
-   * matching is case insensitive.
+   * Returns the {@link Http2TestCases} matching the string {@code s}. The matching is case
+   * insensitive.
    */
   public static Http2TestCases fromString(String s) {
     Preconditions.checkNotNull(s, "s");

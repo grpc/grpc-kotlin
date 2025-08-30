@@ -28,29 +28,21 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class TypeSpecSubjectTest {
   private val typeSpec =
-    TypeSpec
-      .objectBuilder("Foo")
-      .addProperty(PropertySpec.builder("bar", INT).build())
-      .build()
+    TypeSpec.objectBuilder("Foo").addProperty(PropertySpec.builder("bar", INT).build()).build()
 
   @Test
   fun generates() {
-    assertThat(typeSpec).generates(
-      """
+    assertThat(typeSpec)
+      .generates("""
       public object Foo {
         public val bar: kotlin.Int
       }
-    """
-    )
+    """)
   }
 
   @Test
   fun generatesFailure() {
-    expectFailureAbout(
-      typeSpecs
-    ) { it.that(typeSpec).generates("") }
-    expectFailureAbout(
-      typeSpecs
-    ) { it.that(typeSpec).generates("public object Foo") }
+    expectFailureAbout(typeSpecs) { it.that(typeSpec).generates("") }
+    expectFailureAbout(typeSpecs) { it.that(typeSpec).generates("public object Foo") }
   }
 }

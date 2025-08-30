@@ -18,9 +18,7 @@ package io.grpc.kotlin.generator.protoc
 
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto
 
-/**
- * Describes a policy for converting proto message types to Java classes in the correct package.
- */
+/** Describes a policy for converting proto message types to Java classes in the correct package. */
 enum class JavaPackagePolicy {
   OPEN_SOURCE {
     override fun javaPackage(fileProto: FileDescriptorProto): PackageScope {

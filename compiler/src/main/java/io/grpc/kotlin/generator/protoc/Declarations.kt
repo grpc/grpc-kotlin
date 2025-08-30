@@ -29,7 +29,8 @@ inline fun declarations(callback: Declarations.Builder.() -> Unit): Declarations
  * An immutable set of declarations, some of which may be always at the top level, and some of which
  * may be in some containing class or namespace (which may be a type or a file).
  */
-class Declarations private constructor(
+class Declarations
+private constructor(
   private val atTopLevel: List<FileSpec.Builder.() -> Unit>,
   private val atEnclosing: List<ForEnclosing>
 ) {

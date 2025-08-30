@@ -30,31 +30,23 @@ fun assertThat(declarations: Declarations): DeclarationsSubject =
   assertAbout(declarationsSubjectFactory).that(declarations)
 
 /** A Truth subject for [Declarations]. */
-class DeclarationsSubject(
-  failureMetadata: FailureMetadata,
-  private val actual: Declarations?
-) : Subject(failureMetadata, actual) {
+class DeclarationsSubject(failureMetadata: FailureMetadata, private val actual: Declarations?) :
+  Subject(failureMetadata, actual) {
   fun generatesTopLevel(indentedCode: String) {
     val actualCode =
-      FileSpec.builder("", "MyDeclarations.kt")
-        .apply { actual?.writeOnlyTopLevel(this) }
-        .build()
+      FileSpec.builder("", "MyDeclarations.kt").apply { actual?.writeOnlyTopLevel(this) }.build()
     check("topLevel").about(fileSpecs).that(actualCode).generates(indentedCode)
   }
 
   fun generatesEnclosed(indentedCode: String) {
     val actualCode =
-      FileSpec.builder("", "MyDeclarations.kt")
-        .apply { actual?.writeToEnclosingFile(this) }
-        .build()
+      FileSpec.builder("", "MyDeclarations.kt").apply { actual?.writeToEnclosingFile(this) }.build()
     check("enclosed").about(fileSpecs).that(actualCode).generates(indentedCode)
   }
 
   fun generatesNoTopLevelMembers() {
     val actualCode =
-      FileSpec.builder("", "MyDeclarations.kt")
-        .apply { actual?.writeOnlyTopLevel(this) }
-        .build()
+      FileSpec.builder("", "MyDeclarations.kt").apply { actual?.writeOnlyTopLevel(this) }.build()
     check("topLevel")
       .withMessage("top level declarations: %s", actualCode)
       .that(actual?.hasTopLevelDeclarations)
@@ -63,9 +55,7 @@ class DeclarationsSubject(
 
   fun generatesNoEnclosedMembers() {
     val actualCode =
-      FileSpec.builder("", "MyDeclarations.kt")
-        .apply { actual?.writeToEnclosingFile(this) }
-        .build()
+      FileSpec.builder("", "MyDeclarations.kt").apply { actual?.writeToEnclosingFile(this) }.build()
     check("enclosed")
       .withMessage("enclosed declarations: %s", actualCode)
       .that(actual?.hasEnclosingScopeDeclarations)

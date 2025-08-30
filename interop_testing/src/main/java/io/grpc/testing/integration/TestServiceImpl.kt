@@ -45,9 +45,8 @@ import kotlinx.coroutines.flow.toList
  */
 @ExperimentalCoroutinesApi
 @FlowPreview // most of these methods are graduating imminently but that has not yet landed
-class TestServiceImpl(
-  executor: Executor
-) : TestServiceGrpcKt.TestServiceCoroutineImplBase(executor.asCoroutineDispatcher()) {
+class TestServiceImpl(executor: Executor) :
+  TestServiceGrpcKt.TestServiceCoroutineImplBase(executor.asCoroutineDispatcher()) {
   private val random = Random()
   private val compressableBuffer: ByteString = ByteString.copyFrom(ByteArray(1024))
 
@@ -56,13 +55,11 @@ class TestServiceImpl(
 
   override suspend fun unaryCall(request: Messages.SimpleRequest): Messages.SimpleResponse {
     if (request.hasResponseStatus()) {
-      throw Status
-        .fromCodeValue(request.responseStatus.code)
+      throw Status.fromCodeValue(request.responseStatus.code)
         .withDescription(request.responseStatus.message)
         .asException()
     }
-    return Messages.SimpleResponse
-      .newBuilder()
+    return Messages.SimpleResponse.newBuilder()
       .apply {
         if (request.responseSize != 0) {
           val offset = random.nextInt(compressableBuffer.size())
@@ -80,11 +77,8 @@ class TestServiceImpl(
       for (params in request.responseParametersList) {
         delay(timeMillis = TimeUnit.MICROSECONDS.toMillis(params.intervalUs.toLong()))
         emit(
-          Messages.StreamingOutputCallResponse
-            .newBuilder()
-            .apply {
-              payload = generatePayload(compressableBuffer, offset, params.size)
-            }
+          Messages.StreamingOutputCallResponse.newBuilder()
+            .apply { payload = generatePayload(compressableBuffer, offset, params.size) }
             .build()
         )
         offset += params.size
@@ -96,11 +90,8 @@ class TestServiceImpl(
   override suspend fun streamingInputCall(
     requests: Flow<Messages.StreamingInputCallRequest>
   ): Messages.StreamingInputCallResponse =
-    Messages.StreamingInputCallResponse
-      .newBuilder()
-      .apply {
-        aggregatedPayloadSize = requests.map { it.payload.body.size() }.sum()
-      }
+    Messages.StreamingInputCallResponse.newBuilder()
+      .apply { aggregatedPayloadSize = requests.map { it.payload.body.size() }.sum() }
       .build()
 
   override fun fullDuplexCall(
@@ -108,8 +99,7 @@ class TestServiceImpl(
   ): Flow<Messages.StreamingOutputCallResponse> =
     requests.flatMapConcat {
       if (it.hasResponseStatus()) {
-        throw Status
-          .fromCodeValue(it.responseStatus.code)
+        throw Status.fromCodeValue(it.responseStatus.code)
           .withDescription(it.responseStatus.message)
           .asException()
       }
@@ -118,21 +108,21 @@ class TestServiceImpl(
 
   override fun halfDuplexCall(
     requests: Flow<Messages.StreamingOutputCallRequest>
-  ): Flow<Messages.StreamingOutputCallResponse> =
-    flow {
-      val requestList = requests.toList()
-      emitAll(requestList.asFlow().flatMapConcat { streamingOutputCall(it) })
-    }
+  ): Flow<Messages.StreamingOutputCallResponse> = flow {
+    val requestList = requests.toList()
+    emitAll(requestList.asFlow().flatMapConcat { streamingOutputCall(it) })
+  }
 
   companion object {
-    /** Returns interceptors necessary for full service implementation.  */
+    /** Returns interceptors necessary for full service implementation. */
     @get:JvmStatic
     @get:JvmName("interceptors")
-    val interceptors = listOf(
-      echoRequestHeadersInterceptor(Util.METADATA_KEY),
-      echoRequestMetadataInHeaders(Util.ECHO_INITIAL_METADATA_KEY),
-      echoRequestMetadataInTrailers(Util.ECHO_TRAILING_METADATA_KEY)
-    )
+    val interceptors =
+      listOf(
+        echoRequestHeadersInterceptor(Util.METADATA_KEY),
+        echoRequestMetadataInHeaders(Util.ECHO_INITIAL_METADATA_KEY),
+        echoRequestMetadataInTrailers(Util.ECHO_TRAILING_METADATA_KEY)
+      )
 
     suspend fun Flow<Int>.sum() = fold(0) { a, b -> a + b }
 
@@ -157,8 +147,8 @@ class TestServiceImpl(
     }
 
     /**
-     * Echo the request headers from a client into response headers and trailers. Useful for
-     * testing end-to-end metadata propagation.
+     * Echo the request headers from a client into response headers and trailers. Useful for testing
+     * end-to-end metadata propagation.
      */
     private fun echoRequestHeadersInterceptor(vararg keys: Metadata.Key<*>): ServerInterceptor {
       val keySet: Set<Metadata.Key<*>> = keys.toSet()

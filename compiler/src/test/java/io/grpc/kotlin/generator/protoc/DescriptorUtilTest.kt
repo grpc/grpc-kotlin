@@ -17,13 +17,13 @@
 package io.grpc.kotlin.generator.protoc
 
 import com.google.common.truth.Truth.assertThat
-import io.grpc.testing.ProtoFileWithHyphen
 import io.grpc.kotlin.generator.protoc.testproto.Example3
 import io.grpc.kotlin.generator.protoc.testproto.Example3.ExampleEnum
 import io.grpc.kotlin.generator.protoc.testproto.Example3.ExampleMessage
 import io.grpc.kotlin.generator.protoc.testproto.HasNestedClassNameConflictOuterClass
 import io.grpc.kotlin.generator.protoc.testproto.HasOuterClassNameConflictOuterClass
 import io.grpc.kotlin.generator.protoc.testproto.MyExplicitOuterClassName
+import io.grpc.testing.ProtoFileWithHyphen
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4

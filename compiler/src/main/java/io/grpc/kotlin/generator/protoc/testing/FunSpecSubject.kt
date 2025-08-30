@@ -27,10 +27,8 @@ val funSpecs: Subject.Factory<FunSpecSubject, FunSpec> = Subject.Factory(::FunSp
 fun assertThat(funSpec: FunSpec): FunSpecSubject = Truth.assertAbout(funSpecs).that(funSpec)
 
 /** A Truth subject for [FunSpec]. */
-class FunSpecSubject(
-  failureMetadata: FailureMetadata,
-  private val actual: FunSpec?
-) : Subject(failureMetadata, actual) {
+class FunSpecSubject(failureMetadata: FailureMetadata, private val actual: FunSpec?) :
+  Subject(failureMetadata, actual) {
   fun generates(indentedCode: String) {
     val expectedCode = indentedCode.trimIndent()
     val actualCode = actual.toString().trim()

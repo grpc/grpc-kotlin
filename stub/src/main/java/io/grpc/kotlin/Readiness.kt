@@ -19,21 +19,18 @@ package io.grpc.kotlin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.onFailure
 
-/**
- * A simple helper allowing a notification of "ready" to be broadcast, and waited for.
- */
-internal class Readiness(
-  private val isReallyReady: () -> Boolean
-) {
+/** A simple helper allowing a notification of "ready" to be broadcast, and waited for. */
+internal class Readiness(private val isReallyReady: () -> Boolean) {
   // A CONFLATED channel never suspends to send, and two notifications of readiness are equivalent
   // to one
   private val channel = Channel<Unit>(Channel.CONFLATED)
 
   fun onReady() {
     channel.trySend(Unit).onFailure { e ->
-      throw e ?: AssertionError(
-        "Should be impossible; a CONFLATED channel should never return false on offer"
-      )
+      throw e
+        ?: AssertionError(
+          "Should be impossible; a CONFLATED channel should never return false on offer"
+        )
     }
   }
 

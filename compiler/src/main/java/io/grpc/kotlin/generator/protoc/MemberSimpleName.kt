@@ -40,6 +40,7 @@ data class MemberSimpleName(val name: String) : CharSequence by name {
   }
 
   fun withSuffix(suffix: String): MemberSimpleName = MemberSimpleName(name + suffix)
+
   fun withPrefix(prefix: String): MemberSimpleName =
     MemberSimpleName(prefix + CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name))
 
@@ -99,9 +100,8 @@ fun PropertySpec.Companion.builder(
 ): PropertySpec.Builder = builder(simpleName.name, type, *modifiers)
 
 /** Create a builder for a function with the specified simple name. */
-fun FunSpec.Companion.builder(
-  simpleName: MemberSimpleName
-): FunSpec.Builder = builder(simpleName.name)
+fun FunSpec.Companion.builder(simpleName: MemberSimpleName): FunSpec.Builder =
+  builder(simpleName.name)
 
 /** Create a fully qualified [MemberName] in this class with the specified name. */
 fun ClassName.member(memberSimpleName: MemberSimpleName): MemberName = member(memberSimpleName.name)

@@ -47,10 +47,7 @@ internal object CodeGenerators {
     val byFileName = protoFileList.associateBy { it.fileName }
 
     val depGraph =
-      GraphBuilder
-        .directed()
-        .expectedNodeCount(protoFileList.size)
-        .build<ProtoFileName>()
+      GraphBuilder.directed().expectedNodeCount(protoFileList.size).build<ProtoFileName>()
 
     byFileName.keys.forEach { depGraph.addNode(it) }
 
@@ -61,21 +58,27 @@ internal object CodeGenerators {
     }
 
     return descriptorMap(
-      TopologicalSortGraph.topologicalOrdering(depGraph)
-        .map { byFileName.getValue(it) }
+      TopologicalSortGraph.topologicalOrdering(depGraph).map { byFileName.getValue(it) }
     )
   }
 
   fun toCodeGeneratorResponseFile(fileSpec: FileSpec): PluginProtos.CodeGeneratorResponse.File =
-    PluginProtos.CodeGeneratorResponse.File.newBuilder().also {
-      it.name = fileSpec.path.toString()
-      it.content = fileSpec.toString()
-    }.build()
+    PluginProtos.CodeGeneratorResponse.File.newBuilder()
+      .also {
+        it.name = fileSpec.path.toString()
+        it.content = fileSpec.toString()
+      }
+      .build()
 
-  inline fun codeGeneratorResponse(build: () -> List<FileSpec>): PluginProtos.CodeGeneratorResponse {
+  inline fun codeGeneratorResponse(
+    build: () -> List<FileSpec>
+  ): PluginProtos.CodeGeneratorResponse {
     val builder = PluginProtos.CodeGeneratorResponse.newBuilder()
     try {
-      builder.setSupportedFeatures(PluginProtos.CodeGeneratorResponse.Feature.FEATURE_PROTO3_OPTIONAL_VALUE.toLong())
+      builder
+        .setSupportedFeatures(
+          PluginProtos.CodeGeneratorResponse.Feature.FEATURE_PROTO3_OPTIONAL_VALUE.toLong()
+        )
         .addAllFile(build().map { toCodeGeneratorResponseFile(it) })
     } catch (failure: Exception) {
       builder.error = Throwables.getStackTraceAsString(failure)

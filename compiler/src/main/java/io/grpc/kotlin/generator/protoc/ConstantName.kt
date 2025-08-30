@@ -25,5 +25,4 @@ data class ConstantName(val name: String) : CharSequence by name {
 }
 
 /** Returns the fully qualified name of this constant, as a member of the specified class. */
-fun ClassName.member(constantName: ConstantName): MemberName =
-  MemberName(this, constantName.name)
+fun ClassName.member(constantName: ConstantName): MemberName = MemberName(this, constantName.name)

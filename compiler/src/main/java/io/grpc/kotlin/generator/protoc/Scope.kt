@@ -20,7 +20,7 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 
 /**
- * Describes a location classes can be nested in, such as a package or another class.  This can
+ * Describes a location classes can be nested in, such as a package or another class. This can
  * convert a [ClassSimpleName] to a fully qualified [ClassName].
  */
 sealed class Scope {
@@ -29,25 +29,17 @@ sealed class Scope {
   fun nestedScope(simpleName: ClassSimpleName): Scope = ClassScope(nestedClass(simpleName))
 }
 
-/**
- * The unqualified, top-level scope.
- */
+/** The unqualified, top-level scope. */
 object UnqualifiedScope : Scope() {
-  override fun nestedClass(simpleName: ClassSimpleName): ClassName =
-    ClassName("", simpleName.name)
+  override fun nestedClass(simpleName: ClassSimpleName): ClassName = ClassName("", simpleName.name)
 }
 
-/**
- * The scope of a package.
- */
+/** The scope of a package. */
 data class PackageScope(val pkg: String) : Scope() {
-  override fun nestedClass(simpleName: ClassSimpleName): ClassName =
-    ClassName(pkg, simpleName.name)
+  override fun nestedClass(simpleName: ClassSimpleName): ClassName = ClassName(pkg, simpleName.name)
 }
 
-/**
- * The scope of a fully qualified class.
- */
+/** The scope of a fully qualified class. */
 class ClassScope(private val className: ClassName) : Scope() {
   override fun nestedClass(simpleName: ClassSimpleName): ClassName =
     className.nestedClass(simpleName)

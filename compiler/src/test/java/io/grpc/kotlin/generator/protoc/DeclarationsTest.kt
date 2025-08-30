@@ -35,12 +35,7 @@ class DeclarationsTest {
   private val type = TypeSpec.objectBuilder("MyObject").build()
 
   private inline fun someFile(block: FileSpec.Builder.() -> Unit): String {
-    return FileSpec
-      .builder("com.foo.bar", "SomeFile.kt")
-      .apply(block)
-      .build()
-      .toString()
-      .trim()
+    return FileSpec.builder("com.foo.bar", "SomeFile.kt").apply(block).build().toString().trim()
   }
 
   @Test
@@ -49,12 +44,9 @@ class DeclarationsTest {
       addTopLevelProperty(property)
       addFunction(function)
     }
-    assertThat(
-      someFile {
-        decls.writeAllAtTopLevel(this)
-      }
-    ).isEqualTo(
-      """
+    assertThat(someFile { decls.writeAllAtTopLevel(this) })
+      .isEqualTo(
+        """
       package com.foo.bar
 
       import kotlin.Int
@@ -63,8 +55,9 @@ class DeclarationsTest {
 
       public fun someFunction() {
       }
-      """.trimIndent()
-    )
+      """
+          .trimIndent()
+      )
   }
 
   @Test
@@ -73,27 +66,21 @@ class DeclarationsTest {
       addTopLevelProperty(property)
       addFunction(function)
     }
-    assertThat(
-      someFile {
-        decls.writeOnlyTopLevel(this)
-      }
-    ).isEqualTo(
-      """
+    assertThat(someFile { decls.writeOnlyTopLevel(this) })
+      .isEqualTo(
+        """
       package com.foo.bar
 
       import kotlin.Int
 
       public val someProperty: Int
-      """.trimIndent()
-    )
+      """
+          .trimIndent()
+      )
   }
 
   private fun FileSpec.Builder.writeToSomeEnclosingObject(decls: Declarations) {
-    addType(
-      TypeSpec.objectBuilder("SomeObject")
-        .apply { decls.writeToEnclosingType(this) }
-        .build()
-    )
+    addType(TypeSpec.objectBuilder("SomeObject").apply { decls.writeToEnclosingType(this) }.build())
   }
 
   @Test
@@ -102,85 +89,59 @@ class DeclarationsTest {
       addTopLevelProperty(property)
       addFunction(function)
     }
-    assertThat(
-      someFile {
-        writeToSomeEnclosingObject(decls)
-      }
-    ).isEqualTo(
-      """
+    assertThat(someFile { writeToSomeEnclosingObject(decls) })
+      .isEqualTo(
+        """
       package com.foo.bar
 
       public object SomeObject {
         public fun someFunction() {
         }
       }
-      """.trimIndent()
-    )
+      """
+          .trimIndent()
+      )
   }
 
   @Test
   fun hasTopLevel() {
-    assertThat(
-      declarations {
-        addTopLevelProperty(property)
-      }.hasTopLevelDeclarations
-    ).isTrue()
-    assertThat(
-      declarations {
-        addProperty(property)
-      }.hasTopLevelDeclarations
-    ).isFalse()
+    assertThat(declarations { addTopLevelProperty(property) }.hasTopLevelDeclarations).isTrue()
+    assertThat(declarations { addProperty(property) }.hasTopLevelDeclarations).isFalse()
   }
 
   @Test
   fun hasEnclosingScopeDeclarations() {
-    assertThat(
-      declarations {
-        addTopLevelProperty(property)
-      }.hasEnclosingScopeDeclarations
-    ).isFalse()
-    assertThat(
-      declarations {
-        addProperty(property)
-      }.hasEnclosingScopeDeclarations
-    ).isTrue()
+    assertThat(declarations { addTopLevelProperty(property) }.hasEnclosingScopeDeclarations)
+      .isFalse()
+    assertThat(declarations { addProperty(property) }.hasEnclosingScopeDeclarations).isTrue()
   }
 
   @Test
   fun addTopLevelProperty() {
-    val decls = declarations {
-      addTopLevelProperty(property)
-    }
-    assertThat(decls).generatesTopLevel(
-      """
+    val decls = declarations { addTopLevelProperty(property) }
+    assertThat(decls)
+      .generatesTopLevel("""
       import kotlin.Int
 
       public val someProperty: Int
-    """
-    )
+    """)
     assertThat(decls).generatesNoEnclosedMembers()
   }
 
   @Test
   fun addTopLevelFunction() {
-    val decls = declarations {
-      addTopLevelFunction(function)
-    }
+    val decls = declarations { addTopLevelFunction(function) }
     assertThat(decls)
-      .generatesTopLevel(
-        """
+      .generatesTopLevel("""
         public fun someFunction() {
         }
-        """
-      )
+        """)
     assertThat(decls).generatesNoEnclosedMembers()
   }
 
   @Test
   fun addTopLevelType() {
-    val decls = declarations {
-      addTopLevelType(type)
-    }
+    val decls = declarations { addTopLevelType(type) }
     assertThat(decls).generatesTopLevel("public object MyObject")
     assertThat(decls).generatesNoEnclosedMembers()
   }
