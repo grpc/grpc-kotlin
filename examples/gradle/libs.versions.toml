@@ -4,7 +4,6 @@ android-library = { id = "com.android.library", version = "8.3.0" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.1.20" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.1.20" }
 protobuf = { id = "com.google.protobuf", version = "0.9.5" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.1.0" }
 palantir-graal = { id = "com.palantir.graal", version = "0.12.0" }
 jib = { id = "com.google.cloud.tools.jib", version = "3.4.1" }
 
