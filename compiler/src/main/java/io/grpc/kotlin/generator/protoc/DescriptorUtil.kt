@@ -17,8 +17,6 @@
 package io.grpc.kotlin.generator.protoc
 
 import com.google.common.base.Ascii
-import com.google.common.base.CaseFormat.LOWER_UNDERSCORE
-import com.google.common.base.CaseFormat.UPPER_CAMEL
 import com.google.protobuf.DescriptorProtos.DescriptorProto
 import com.google.protobuf.DescriptorProtos.EnumDescriptorProto
 import com.google.protobuf.DescriptorProtos.FileDescriptorProto
@@ -38,29 +36,35 @@ import io.grpc.kotlin.generator.protoc.TypeNames.BYTE_STRING
 import io.grpc.kotlin.generator.protoc.TypeNames.STRING
 
 private val JavaType.scalarType: TypeName
-  get() = when (this) {
-    JavaType.BOOLEAN -> BOOLEAN
-    JavaType.INT -> INT
-    JavaType.LONG -> LONG
-    JavaType.FLOAT -> FLOAT
-    JavaType.DOUBLE -> DOUBLE
-    JavaType.STRING -> STRING
-    JavaType.BYTE_STRING -> BYTE_STRING
-    else -> throw IllegalArgumentException("Not a scalar type")
-  }
+  get() =
+    when (this) {
+      JavaType.BOOLEAN -> BOOLEAN
+      JavaType.INT -> INT
+      JavaType.LONG -> LONG
+      JavaType.FLOAT -> FLOAT
+      JavaType.DOUBLE -> DOUBLE
+      JavaType.STRING -> STRING
+      JavaType.BYTE_STRING -> BYTE_STRING
+      else -> throw IllegalArgumentException("Not a scalar type")
+    }
 
 /**
- * Returns the fully qualified Kotlin type representing values of this field, assuming that it
- * is a scalar field (defined at https://developers.google.com/protocol-buffers/docs/proto3#scalar).
+ * Returns the fully qualified Kotlin type representing values of this field, assuming that it is a
+ * scalar field (defined at https://developers.google.com/protocol-buffers/docs/proto3#scalar).
  */
 val FieldDescriptor.scalarType: TypeName
   get() = javaType.scalarType
 
 private val JavaType.isJavaPrimitive: Boolean
-  get() = when (this) {
-    JavaType.BOOLEAN, JavaType.INT, JavaType.LONG, JavaType.FLOAT, JavaType.DOUBLE -> true
-    else -> false
-  }
+  get() =
+    when (this) {
+      JavaType.BOOLEAN,
+      JavaType.INT,
+      JavaType.LONG,
+      JavaType.FLOAT,
+      JavaType.DOUBLE -> true
+      else -> false
+    }
 
 /** True if the Java type representing the contents of this field is a primitive. */
 val FieldDescriptor.isJavaPrimitive: Boolean
@@ -89,8 +93,8 @@ val Descriptor.messageClassSimpleName: ClassSimpleName
   get() = toProto().messageClassSimpleName
 
 /**
- * Returns the simple name of the Java class that represents a message type, given its descriptor
- * in proto form.
+ * Returns the simple name of the Java class that represents a message type, given its descriptor in
+ * proto form.
  */
 val DescriptorProto.messageClassSimpleName: ClassSimpleName
   get() = simpleName.toClassSimpleName()
@@ -100,8 +104,8 @@ val EnumDescriptor.enumClassSimpleName: ClassSimpleName
   get() = toProto().enumClassSimpleName
 
 /**
- * Returns the name of the Java class representing the proto enum type, given its descriptor
- * in proto form.
+ * Returns the name of the Java class representing the proto enum type, given its descriptor in
+ * proto form.
  */
 val EnumDescriptorProto.enumClassSimpleName: ClassSimpleName
   get() = simpleName.toClassSimpleName()
@@ -110,19 +114,21 @@ val FileDescriptor.outerClassSimpleName: ClassSimpleName
   get() = toProto().outerClassSimpleName
 
 private val FileDescriptorProto.explicitOuterClassSimpleName: ClassSimpleName?
-  get() = when (val name = options.javaOuterClassname) {
-    "" -> null
-    else -> ClassSimpleName(name)
-  }
+  get() =
+    when (val name = options.javaOuterClassname) {
+      "" -> null
+      else -> ClassSimpleName(name)
+    }
 
 /** The simple name of the outer class of a proto file. */
 val FileDescriptorProto.outerClassSimpleName: ClassSimpleName
   get() {
-    explicitOuterClassSimpleName?.let { return it }
+    explicitOuterClassSimpleName?.let {
+      return it
+    }
 
-    val defaultOuterClassName = ClassSimpleName(
-      fileName.name.replace("-", "_").underscoresToCamel()
-    )
+    val defaultOuterClassName =
+      ClassSimpleName(fileName.name.replace("-", "_").underscoresToCamel())
 
     val foundDuplicate =
       enumTypeList.any { it.enumClassSimpleName == defaultOuterClassName } ||
@@ -141,14 +147,10 @@ private fun String.underscoresToCamel(): String {
   var capNextLetter = true
   for ((i, ch) in this.withIndex()) {
     if (ch in 'a'..'z') {
-      builder.append(
-        if (capNextLetter) Ascii.toUpperCase(ch) else ch
-      )
+      builder.append(if (capNextLetter) Ascii.toUpperCase(ch) else ch)
       capNextLetter = false
     } else if (ch in 'A'..'Z') {
-      builder.append(
-        if (i == 0 && !capNextLetter) Ascii.toLowerCase(ch) else ch
-      )
+      builder.append(if (i == 0 && !capNextLetter) Ascii.toLowerCase(ch) else ch)
       capNextLetter = false
     } else if (ch in '0'..'9') {
       builder.append(ch)

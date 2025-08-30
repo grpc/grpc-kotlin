@@ -27,17 +27,11 @@ import org.junit.runners.JUnit4
 class ProtoFileNameTest {
   @Test
   fun fileName() {
-    assertThat(Example3.getDescriptor().fileName)
-      .isEqualTo(
-        ProtoFileName(
-          "testing/example3.proto"
-        )
-      )
+    assertThat(Example3.getDescriptor().fileName).isEqualTo(ProtoFileName("testing/example3.proto"))
   }
 
   @Test
   fun name() {
-    assertThat(ProtoFileName("foo/bar/baz/quux.proto").name)
-      .isEqualTo("quux")
+    assertThat(ProtoFileName("foo/bar/baz/quux.proto").name).isEqualTo("quux")
   }
 }

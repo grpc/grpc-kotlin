@@ -117,11 +117,13 @@ public class TestServiceServer {
       System.out.println(
           "Usage: [ARGS...]"
               + "\n"
-              + "\n  --port=PORT           Port to connect to. Default " + s.port
-              + "\n  --use_tls=true|false  Whether to use TLS. Default " + s.useTls
+              + "\n  --port=PORT           Port to connect to. Default "
+              + s.port
+              + "\n  --use_tls=true|false  Whether to use TLS. Default "
+              + s.useTls
               + "\n  --use_alts=true|false Whether to use ALTS. Enable ALTS will disable TLS."
-              + "\n                        Default " + s.useAlts
-      );
+              + "\n                        Default "
+              + s.useAlts);
       System.exit(1);
     }
   }

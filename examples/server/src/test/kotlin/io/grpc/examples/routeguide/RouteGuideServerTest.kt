@@ -17,39 +17,34 @@
 package io.grpc.examples.routeguide
 
 import io.grpc.testing.GrpcServerRule
+import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class RouteGuideServerTest {
-    @get:Rule
-    val grpcServerRule: GrpcServerRule = GrpcServerRule().directExecutor()
+  @get:Rule val grpcServerRule: GrpcServerRule = GrpcServerRule().directExecutor()
 
-    @Test
-    fun listFeatures() =
-        runBlocking {
-            val service = RouteGuideServer.RouteGuideService(Database.features())
-            grpcServerRule.serviceRegistry.addService(service)
+  @Test
+  fun listFeatures() = runBlocking {
+    val service = RouteGuideServer.RouteGuideService(Database.features())
+    grpcServerRule.serviceRegistry.addService(service)
 
-            val stub = RouteGuideGrpcKt.RouteGuideCoroutineStub(grpcServerRule.channel)
+    val stub = RouteGuideGrpcKt.RouteGuideCoroutineStub(grpcServerRule.channel)
 
-            val rectangle =
-                rectangle {
-                    lo =
-                        point {
-                            latitude = 407838351
-                            longitude = -746143763
-                        }
-                    hi =
-                        point {
-                            latitude = 407838351
-                            longitude = -746143763
-                        }
-                }
+    val rectangle = rectangle {
+      lo = point {
+        latitude = 407838351
+        longitude = -746143763
+      }
+      hi = point {
+        latitude = 407838351
+        longitude = -746143763
+      }
+    }
 
-            val features = stub.listFeatures(rectangle).toList()
-            assertEquals("Patriots Path, Mendham, NJ 07945, USA", features.first().name)
-        }
+    val features = stub.listFeatures(rectangle).toList()
+    assertEquals("Patriots Path, Mendham, NJ 07945, USA", features.first().name)
+  }
 }

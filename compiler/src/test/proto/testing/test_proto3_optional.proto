@@ -5,7 +5,5 @@ package io.grpc.testing;
 // --experimental_allow_proto3_optional or the filename (or a directory name) of the proto
 // file contains the string 'test_proto3_optional'
 message OptionalProto3 {
-
   optional string optional_field = 1;
-
 }

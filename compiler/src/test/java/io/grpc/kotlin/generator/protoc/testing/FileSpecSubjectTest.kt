@@ -34,22 +34,16 @@ class FileSpecSubjectTest {
 
   @Test
   fun generates() {
-    assertThat(fileSpec).generates(
-      """
+    assertThat(fileSpec).generates("""
       import kotlin.Int
 
       public val bar: Int
-    """
-    )
+    """)
   }
 
   @Test
   fun generatesFailure() {
-    expectFailureAbout(
-      fileSpecs
-    ) { it.that(fileSpec).generates("") }
-    expectFailureAbout(
-      fileSpecs
-    ) { it.that(fileSpec).generates("object Foo") }
+    expectFailureAbout(fileSpecs) { it.that(fileSpec).generates("") }
+    expectFailureAbout(fileSpecs) { it.that(fileSpec).generates("object Foo") }
   }
 }

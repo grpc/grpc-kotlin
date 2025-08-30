@@ -28,11 +28,11 @@ import io.grpc.kotlin.generator.protoc.testproto.HasOuterClassNameConflictOuterC
 import io.grpc.kotlin.generator.protoc.testproto.MyExplicitOuterClassName
 import io.grpc.testing.ServiceNameConflictsWithFileOuterClass
 import io.grpc.testing.ServiceTOuterClass
+import kotlin.reflect.KClass
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import testing.ImplicitJavaPackage
-import kotlin.reflect.KClass
 
 /** Tests for [GeneratorConfig]. */
 @RunWith(JUnit4::class)
@@ -42,9 +42,7 @@ class GeneratorConfigTest {
 
   private fun generateFile(block: Declarations.Builder.() -> Unit): String {
     return FileSpec.builder("com.google", "FooBar.kt")
-      .apply {
-        declarations(block).writeAllAtTopLevel(this)
-      }
+      .apply { declarations(block).writeAllAtTopLevel(this) }
       .build()
       .toString()
       .trim()
@@ -53,32 +51,28 @@ class GeneratorConfigTest {
   @Test
   fun funSpecBuilder() {
     with(GeneratorConfig(javaPackagePolicy, aggressiveInlining = false)) {
-      assertThat(
-        generateFile {
-          addFunction(funSpecBuilder(MemberSimpleName("fooBar")).build())
-        }
-      ).isEqualTo(
-        """
+      assertThat(generateFile { addFunction(funSpecBuilder(MemberSimpleName("fooBar")).build()) })
+        .isEqualTo(
+          """
         package com.google
 
         public fun fooBar() {
         }
-        """.trimIndent()
-      )
+        """
+            .trimIndent()
+        )
     }
     with(GeneratorConfig(javaPackagePolicy, aggressiveInlining = true)) {
-      assertThat(
-        generateFile {
-          addFunction(funSpecBuilder(MemberSimpleName("fooBar")).build())
-        }
-      ).isEqualTo(
-        """
+      assertThat(generateFile { addFunction(funSpecBuilder(MemberSimpleName("fooBar")).build()) })
+        .isEqualTo(
+          """
         package com.google
 
         public inline fun fooBar() {
         }
-        """.trimIndent()
-      )
+        """
+            .trimIndent()
+        )
     }
   }
 
@@ -86,44 +80,48 @@ class GeneratorConfigTest {
   fun getterBuilder() {
     with(GeneratorConfig(javaPackagePolicy, aggressiveInlining = false)) {
       assertThat(
-        generateFile {
-          addProperty(
-            PropertySpec.builder("someProp", INT)
-              .getter(getterBuilder().addStatement("return 1").build())
-              .build()
-          )
-        }
-      ).isEqualTo(
-        """
+          generateFile {
+            addProperty(
+              PropertySpec.builder("someProp", INT)
+                .getter(getterBuilder().addStatement("return 1").build())
+                .build()
+            )
+          }
+        )
+        .isEqualTo(
+          """
         package com.google
 
         import kotlin.Int
 
         public val someProp: Int
           get() = 1
-        """.trimIndent()
-      )
+        """
+            .trimIndent()
+        )
     }
 
     with(GeneratorConfig(javaPackagePolicy, aggressiveInlining = true)) {
       assertThat(
-        generateFile {
-          addProperty(
-            PropertySpec.builder("someProp", INT)
-              .getter(getterBuilder().addStatement("return 1").build())
-              .build()
-          )
-        }
-      ).isEqualTo(
-        """
+          generateFile {
+            addProperty(
+              PropertySpec.builder("someProp", INT)
+                .getter(getterBuilder().addStatement("return 1").build())
+                .build()
+            )
+          }
+        )
+        .isEqualTo(
+          """
         package com.google
 
         import kotlin.Int
 
         public inline val someProp: Int
           get() = 1
-        """.trimIndent()
-      )
+        """
+            .trimIndent()
+        )
     }
   }
 
@@ -132,16 +130,17 @@ class GeneratorConfigTest {
     val param = ParameterSpec.builder("newValue", INT).build()
     with(GeneratorConfig(javaPackagePolicy, aggressiveInlining = false)) {
       assertThat(
-        generateFile {
-          addProperty(
-            PropertySpec.builder("someProp", INT)
-              .mutable(true)
-              .setter(setterBuilder().addParameter(param).build())
-              .build()
-          )
-        }
-      ).isEqualTo(
-        """
+          generateFile {
+            addProperty(
+              PropertySpec.builder("someProp", INT)
+                .mutable(true)
+                .setter(setterBuilder().addParameter(param).build())
+                .build()
+            )
+          }
+        )
+        .isEqualTo(
+          """
         package com.google
 
         import kotlin.Int
@@ -149,22 +148,24 @@ class GeneratorConfigTest {
         public var someProp: Int
           set(newValue) {
           }
-        """.trimIndent()
-      )
+        """
+            .trimIndent()
+        )
     }
 
     with(GeneratorConfig(javaPackagePolicy, aggressiveInlining = true)) {
       assertThat(
-        generateFile {
-          addProperty(
-            PropertySpec.builder("someProp", INT)
-              .mutable(true)
-              .setter(setterBuilder().addParameter(param).build())
-              .build()
-          )
-        }
-      ).isEqualTo(
-        """
+          generateFile {
+            addProperty(
+              PropertySpec.builder("someProp", INT)
+                .mutable(true)
+                .setter(setterBuilder().addParameter(param).build())
+                .build()
+            )
+          }
+        )
+        .isEqualTo(
+          """
         package com.google
 
         import kotlin.Int
@@ -172,8 +173,9 @@ class GeneratorConfigTest {
         public var someProp: Int
           inline set(newValue) {
           }
-        """.trimIndent()
-      )
+        """
+            .trimIndent()
+        )
     }
   }
 

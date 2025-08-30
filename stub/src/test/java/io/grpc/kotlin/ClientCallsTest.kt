@@ -18,12 +18,10 @@ package io.grpc.kotlin
 
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.extensions.proto.ProtoTruth.assertThat
-import com.google.common.util.concurrent.MoreExecutors.directExecutor
 import io.grpc.CallOptions
 import io.grpc.ClientCall
 import io.grpc.ClientInterceptor
 import io.grpc.ClientInterceptors
-import io.grpc.Context
 import io.grpc.ForwardingClientCall
 import io.grpc.Metadata
 import io.grpc.MethodDescriptor
@@ -35,8 +33,8 @@ import io.grpc.examples.helloworld.HelloRequest
 import io.grpc.examples.helloworld.MultiHelloRequest
 import io.grpc.stub.StreamObserver
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -48,75 +46,75 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.produceIn
 import kotlinx.coroutines.flow.single
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.yield
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import java.util.concurrent.atomic.AtomicInteger
 
 /** Tests for [ClientCalls]. */
 @RunWith(JUnit4::class)
-class ClientCallsTest: AbstractCallsTest() {
+class ClientCallsTest : AbstractCallsTest() {
 
-  /**
-   * Verifies that a simple unary RPC successfully returns results to a suspend function.
-   */
+  /** Verifies that a simple unary RPC successfully returns results to a suspend function. */
   @Test
   fun simpleUnary() = runBlocking {
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun sayHello(request: HelloRequest, responseObserver: StreamObserver<HelloReply>) {
-        responseObserver.onNext(helloReply("Hello, ${request.name}"))
-        responseObserver.onCompleted()
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun sayHello(request: HelloRequest, responseObserver: StreamObserver<HelloReply>) {
+          responseObserver.onNext(helloReply("Hello, ${request.name}"))
+          responseObserver.onCompleted()
+        }
       }
-    }
 
     channel = makeChannel(serverImpl)
 
     assertThat(
-      ClientCalls.unaryRpc(
-        channel = channel,
-        callOptions = CallOptions.DEFAULT,
-        method = sayHelloMethod,
-        request = helloRequest("Cindy")
+        ClientCalls.unaryRpc(
+          channel = channel,
+          callOptions = CallOptions.DEFAULT,
+          method = sayHelloMethod,
+          request = helloRequest("Cindy")
+        )
       )
-    ).isEqualTo(helloReply("Hello, Cindy"))
+      .isEqualTo(helloReply("Hello, Cindy"))
 
     assertThat(
-      ClientCalls.unaryRpc(
-        channel = channel,
-        callOptions = CallOptions.DEFAULT,
-        method = sayHelloMethod,
-        request = helloRequest("Jeff")
+        ClientCalls.unaryRpc(
+          channel = channel,
+          callOptions = CallOptions.DEFAULT,
+          method = sayHelloMethod,
+          request = helloRequest("Jeff")
+        )
       )
-    ).isEqualTo(helloReply("Hello, Jeff"))
+      .isEqualTo(helloReply("Hello, Jeff"))
   }
 
   /**
-   * Verify that a unary RPC that does not respond within a timeout specified by [CallOptions]
-   * fails on the client with a DEADLINE_EXCEEDED and is cancelled on the server.
+   * Verify that a unary RPC that does not respond within a timeout specified by [CallOptions] fails
+   * on the client with a DEADLINE_EXCEEDED and is cancelled on the server.
    */
   @Test
   fun unaryServerDoesNotRespondGrpcTimeout() = runBlocking {
     val serverCancelled = Job()
 
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun sayHello(request: HelloRequest, responseObserver: StreamObserver<HelloReply>) {
-        whenContextIsCancelled { serverCancelled.complete() }
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun sayHello(request: HelloRequest, responseObserver: StreamObserver<HelloReply>) {
+          whenContextIsCancelled { serverCancelled.complete() }
+        }
       }
-    }
 
     channel = makeChannel(serverImpl)
 
-    val ex = assertThrows<StatusException> {
-      ClientCalls.unaryRpc(
-        channel = channel,
-        callOptions = CallOptions.DEFAULT.withDeadlineAfter(200, TimeUnit.MILLISECONDS),
-        method = sayHelloMethod,
-        request = helloRequest("Jeff")
-      )
-    }
+    val ex =
+      assertThrows<StatusException> {
+        ClientCalls.unaryRpc(
+          channel = channel,
+          callOptions = CallOptions.DEFAULT.withDeadlineAfter(200, TimeUnit.MILLISECONDS),
+          method = sayHelloMethod,
+          request = helloRequest("Jeff")
+        )
+      }
     assertThat(ex.status.code).isEqualTo(Status.Code.DEADLINE_EXCEEDED)
     serverCancelled.join()
   }
@@ -124,13 +122,14 @@ class ClientCallsTest: AbstractCallsTest() {
   /** Verify that a server that sends two responses to a unary RPC causes an exception. */
   @Test
   fun unaryTooManyResponses() = runBlocking {
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun sayHello(request: HelloRequest, responseObserver: StreamObserver<HelloReply>) {
-        responseObserver.onNext(helloReply("Hello, ${request.name}"))
-        responseObserver.onNext(helloReply("It's nice to meet you, ${request.name}"))
-        responseObserver.onCompleted()
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun sayHello(request: HelloRequest, responseObserver: StreamObserver<HelloReply>) {
+          responseObserver.onNext(helloReply("Hello, ${request.name}"))
+          responseObserver.onNext(helloReply("It's nice to meet you, ${request.name}"))
+          responseObserver.onCompleted()
+        }
       }
-    }
 
     channel = makeChannel(serverImpl)
 
@@ -149,11 +148,12 @@ class ClientCallsTest: AbstractCallsTest() {
   /** Verify that a server that sends zero responses to a unary RPC causes an exception. */
   @Test
   fun unaryNoResponses() = runBlocking {
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun sayHello(request: HelloRequest, responseObserver: StreamObserver<HelloReply>) {
-        responseObserver.onCompleted()
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun sayHello(request: HelloRequest, responseObserver: StreamObserver<HelloReply>) {
+          responseObserver.onCompleted()
+        }
       }
-    }
 
     channel = makeChannel(serverImpl)
 
@@ -179,12 +179,13 @@ class ClientCallsTest: AbstractCallsTest() {
     val serverReceived = Job()
     val serverCancelled = Job()
 
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun sayHello(request: HelloRequest, responseObserver: StreamObserver<HelloReply>) {
-        serverReceived.complete()
-        whenContextIsCancelled { serverCancelled.complete() }
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun sayHello(request: HelloRequest, responseObserver: StreamObserver<HelloReply>) {
+          serverReceived.complete()
+          whenContextIsCancelled { serverCancelled.complete() }
+        }
       }
-    }
 
     channel = makeChannel(serverImpl)
 
@@ -203,22 +204,24 @@ class ClientCallsTest: AbstractCallsTest() {
 
   @Test
   fun unaryServerExceptionPropagated() = runBlocking {
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun sayHello(request: HelloRequest, responseObserver: StreamObserver<HelloReply>) {
-        throw IllegalArgumentException("No hello for you!")
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun sayHello(request: HelloRequest, responseObserver: StreamObserver<HelloReply>) {
+          throw IllegalArgumentException("No hello for you!")
+        }
       }
-    }
 
     channel = makeChannel(serverImpl)
 
-    val ex = assertThrows<StatusException> {
-      ClientCalls.unaryRpc(
-        channel = channel,
-        callOptions = CallOptions.DEFAULT,
-        method = sayHelloMethod,
-        request = helloRequest("Cindy")
-      )
-    }
+    val ex =
+      assertThrows<StatusException> {
+        ClientCalls.unaryRpc(
+          channel = channel,
+          callOptions = CallOptions.DEFAULT,
+          method = sayHelloMethod,
+          request = helloRequest("Cindy")
+        )
+      }
     assertThat(ex.status.code).isEqualTo(Status.Code.UNKNOWN)
   }
 
@@ -258,56 +261,64 @@ class ClientCallsTest: AbstractCallsTest() {
 
   @Test
   fun simpleServerStreamingRpc() = runBlocking {
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun serverStreamSayHello(
-        request: MultiHelloRequest,
-        responseObserver: StreamObserver<HelloReply>
-      ) {
-        for (name in request.nameList) {
-          responseObserver.onNext(helloReply("Hello, $name"))
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun serverStreamSayHello(
+          request: MultiHelloRequest,
+          responseObserver: StreamObserver<HelloReply>
+        ) {
+          for (name in request.nameList) {
+            responseObserver.onNext(helloReply("Hello, $name"))
+          }
+          responseObserver.onCompleted()
         }
-        responseObserver.onCompleted()
       }
-    }
 
     channel = makeChannel(serverImpl)
 
-    val rpc = ClientCalls.serverStreamingRpc(
-      channel = channel,
-      method = serverStreamingSayHelloMethod,
-      request = multiHelloRequest("Cindy", "Jeff", "Aki")
-    )
+    val rpc =
+      ClientCalls.serverStreamingRpc(
+        channel = channel,
+        method = serverStreamingSayHelloMethod,
+        request = multiHelloRequest("Cindy", "Jeff", "Aki")
+      )
 
-    assertThat(rpc.toList()).containsExactly(
-      helloReply("Hello, Cindy"), helloReply("Hello, Jeff"), helloReply("Hello, Aki")
-    ).inOrder()
+    assertThat(rpc.toList())
+      .containsExactly(
+        helloReply("Hello, Cindy"),
+        helloReply("Hello, Jeff"),
+        helloReply("Hello, Aki")
+      )
+      .inOrder()
   }
 
   @Test
   fun serverStreamingRpcCancellation() = runBlocking {
     val serverCancelled = Job()
     val serverReceived = Job()
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun serverStreamSayHello(
-        request: MultiHelloRequest,
-        responseObserver: StreamObserver<HelloReply>
-      ) {
-        whenContextIsCancelled { serverCancelled.complete() }
-        serverReceived.complete()
-        for (name in request.nameList) {
-          responseObserver.onNext(helloReply("Hello, $name"))
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun serverStreamSayHello(
+          request: MultiHelloRequest,
+          responseObserver: StreamObserver<HelloReply>
+        ) {
+          whenContextIsCancelled { serverCancelled.complete() }
+          serverReceived.complete()
+          for (name in request.nameList) {
+            responseObserver.onNext(helloReply("Hello, $name"))
+          }
+          responseObserver.onCompleted()
         }
-        responseObserver.onCompleted()
       }
-    }
 
     channel = makeChannel(serverImpl)
 
-    val rpc = ClientCalls.serverStreamingRpc(
-      channel = channel,
-      method = serverStreamingSayHelloMethod,
-      request = multiHelloRequest("Tim", "Jim", "Pym")
-    )
+    val rpc =
+      ClientCalls.serverStreamingRpc(
+        channel = channel,
+        method = serverStreamingSayHelloMethod,
+        request = multiHelloRequest("Tim", "Jim", "Pym")
+      )
     assertThrows<CancellationException> {
       rpc.collect {
         serverReceived.join()
@@ -319,76 +330,76 @@ class ClientCallsTest: AbstractCallsTest() {
 
   @Test
   fun simpleClientStreamingRpc() = runBlocking {
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun clientStreamSayHello(
-        responseObserver: StreamObserver<HelloReply>
-      ): StreamObserver<HelloRequest> {
-        return object : StreamObserver<HelloRequest> {
-          private val names = mutableListOf<String>()
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun clientStreamSayHello(
+          responseObserver: StreamObserver<HelloReply>
+        ): StreamObserver<HelloRequest> {
+          return object : StreamObserver<HelloRequest> {
+            private val names = mutableListOf<String>()
 
-          override fun onNext(value: HelloRequest) {
-            names += value.name
-          }
+            override fun onNext(value: HelloRequest) {
+              names += value.name
+            }
 
-          override fun onError(t: Throwable) = throw t
+            override fun onError(t: Throwable) = throw t
 
-          override fun onCompleted() {
-            responseObserver.onNext(
-              helloReply(names.joinToString(prefix = "Hello, ", separator = ", "))
-            )
-            responseObserver.onCompleted()
+            override fun onCompleted() {
+              responseObserver.onNext(
+                helloReply(names.joinToString(prefix = "Hello, ", separator = ", "))
+              )
+              responseObserver.onCompleted()
+            }
           }
         }
       }
-    }
 
     channel = makeChannel(serverImpl)
 
-    val requests = flowOf(
-      helloRequest("Tim"),
-      helloRequest("Jim")
-    )
+    val requests = flowOf(helloRequest("Tim"), helloRequest("Jim"))
     assertThat(
-      ClientCalls.clientStreamingRpc(
-        channel = channel,
-        method = clientStreamingSayHelloMethod,
-        requests = requests
+        ClientCalls.clientStreamingRpc(
+          channel = channel,
+          method = clientStreamingSayHelloMethod,
+          requests = requests
+        )
       )
-    ).isEqualTo(helloReply("Hello, Tim, Jim"))
+      .isEqualTo(helloReply("Hello, Tim, Jim"))
   }
 
   @FlowPreview
   @Test
   fun clientStreamingRpcReturnsEarly() = runBlocking {
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun clientStreamSayHello(
-        responseObserver: StreamObserver<HelloReply>
-      ): StreamObserver<HelloRequest> {
-        return object : StreamObserver<HelloRequest> {
-          private val names = mutableListOf<String>()
-          private var isComplete = false
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun clientStreamSayHello(
+          responseObserver: StreamObserver<HelloReply>
+        ): StreamObserver<HelloRequest> {
+          return object : StreamObserver<HelloRequest> {
+            private val names = mutableListOf<String>()
+            private var isComplete = false
 
-          override fun onNext(value: HelloRequest) {
-            names += value.name
-            if (names.size >= 2 && !isComplete) {
-              onCompleted()
+            override fun onNext(value: HelloRequest) {
+              names += value.name
+              if (names.size >= 2 && !isComplete) {
+                onCompleted()
+              }
             }
-          }
 
-          override fun onError(t: Throwable) = throw t
+            override fun onError(t: Throwable) = throw t
 
-          override fun onCompleted() {
-            if (!isComplete) {
-              responseObserver.onNext(
-                helloReply(names.joinToString(prefix = "Hello, ", separator = ", "))
-              )
-              responseObserver.onCompleted()
-              isComplete = true
+            override fun onCompleted() {
+              if (!isComplete) {
+                responseObserver.onNext(
+                  helloReply(names.joinToString(prefix = "Hello, ", separator = ", "))
+                )
+                responseObserver.onCompleted()
+                isComplete = true
+              }
             }
           }
         }
       }
-    }
 
     channel = makeChannel(serverImpl)
 
@@ -415,28 +426,29 @@ class ClientCallsTest: AbstractCallsTest() {
   @FlowPreview
   @Test
   fun clientStreamingRpcCancelled() = runBlocking {
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun clientStreamSayHello(
-        responseObserver: StreamObserver<HelloReply>
-      ): StreamObserver<HelloRequest> {
-        return object : StreamObserver<HelloRequest> {
-          private val names = mutableListOf<String>()
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun clientStreamSayHello(
+          responseObserver: StreamObserver<HelloReply>
+        ): StreamObserver<HelloRequest> {
+          return object : StreamObserver<HelloRequest> {
+            private val names = mutableListOf<String>()
 
-          override fun onNext(value: HelloRequest) {
-            names += value.name
-          }
+            override fun onNext(value: HelloRequest) {
+              names += value.name
+            }
 
-          override fun onError(t: Throwable) = throw t
+            override fun onError(t: Throwable) = throw t
 
-          override fun onCompleted() {
-            responseObserver.onNext(
-              helloReply(names.joinToString(prefix = "Hello, ", separator = ", "))
-            )
-            responseObserver.onCompleted()
+            override fun onCompleted() {
+              responseObserver.onNext(
+                helloReply(names.joinToString(prefix = "Hello, ", separator = ", "))
+              )
+              responseObserver.onCompleted()
+            }
           }
         }
       }
-    }
 
     channel = makeChannel(serverImpl)
 
@@ -451,40 +463,41 @@ class ClientCallsTest: AbstractCallsTest() {
     requests.send(helloRequest("Tim"))
     response.cancel()
     response.join()
-    assertThrows<CancellationException> {
-      requests.send(helloRequest("John"))
-    }
+    assertThrows<CancellationException> { requests.send(helloRequest("John")) }
   }
 
   @FlowPreview
   @Test
   fun simpleBidiStreamingRpc() = runBlocking {
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun bidiStreamSayHello(
-        responseObserver: StreamObserver<HelloReply>
-      ): StreamObserver<HelloRequest> {
-        return object : StreamObserver<HelloRequest> {
-          override fun onNext(value: HelloRequest) {
-            responseObserver.onNext(helloReply("Hello, ${value.name}"))
-          }
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun bidiStreamSayHello(
+          responseObserver: StreamObserver<HelloReply>
+        ): StreamObserver<HelloRequest> {
+          return object : StreamObserver<HelloRequest> {
+            override fun onNext(value: HelloRequest) {
+              responseObserver.onNext(helloReply("Hello, ${value.name}"))
+            }
 
-          override fun onError(t: Throwable) = throw t
+            override fun onError(t: Throwable) = throw t
 
-          override fun onCompleted() {
-            responseObserver.onCompleted()
+            override fun onCompleted() {
+              responseObserver.onCompleted()
+            }
           }
         }
       }
-    }
 
     channel = makeChannel(serverImpl)
 
     val requests = Channel<HelloRequest>()
-    val rpc = ClientCalls.bidiStreamingRpc(
-      channel = channel,
-      method = bidiStreamingSayHelloMethod,
-      requests = requests.consumeAsFlow()
-    ).produceIn(this)
+    val rpc =
+      ClientCalls.bidiStreamingRpc(
+          channel = channel,
+          method = bidiStreamingSayHelloMethod,
+          requests = requests.consumeAsFlow()
+        )
+        .produceIn(this)
     requests.send(helloRequest("Tim"))
     assertThat(rpc.receive()).isEqualTo(helloReply("Hello, Tim"))
     requests.send(helloRequest("Jim"))
@@ -496,38 +509,41 @@ class ClientCallsTest: AbstractCallsTest() {
   @FlowPreview
   @Test
   fun bidiStreamingRpcReturnsEarly() = runBlocking {
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun bidiStreamSayHello(
-        responseObserver: StreamObserver<HelloReply>
-      ): StreamObserver<HelloRequest> {
-        return object : StreamObserver<HelloRequest> {
-          private var responseCount = 0
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun bidiStreamSayHello(
+          responseObserver: StreamObserver<HelloReply>
+        ): StreamObserver<HelloRequest> {
+          return object : StreamObserver<HelloRequest> {
+            private var responseCount = 0
 
-          override fun onNext(value: HelloRequest) {
-            responseCount++
-            responseObserver.onNext(helloReply("Hello, ${value.name}"))
-            if (responseCount >= 2) {
-              onCompleted()
+            override fun onNext(value: HelloRequest) {
+              responseCount++
+              responseObserver.onNext(helloReply("Hello, ${value.name}"))
+              if (responseCount >= 2) {
+                onCompleted()
+              }
             }
-          }
 
-          override fun onError(t: Throwable) = throw t
+            override fun onError(t: Throwable) = throw t
 
-          override fun onCompleted() {
-            responseObserver.onCompleted()
+            override fun onCompleted() {
+              responseObserver.onCompleted()
+            }
           }
         }
       }
-    }
 
     channel = makeChannel(serverImpl)
 
     val requests = Channel<HelloRequest>()
-    val rpc = ClientCalls.bidiStreamingRpc(
-      channel = channel,
-      method = bidiStreamingSayHelloMethod,
-      requests = requests.consumeAsFlow()
-    ).produceIn(this)
+    val rpc =
+      ClientCalls.bidiStreamingRpc(
+          channel = channel,
+          method = bidiStreamingSayHelloMethod,
+          requests = requests.consumeAsFlow()
+        )
+        .produceIn(this)
     requests.send(helloRequest("Tim"))
     assertThat(rpc.receive()).isEqualTo(helloReply("Hello, Tim"))
     requests.send(helloRequest("Jim"))
@@ -544,72 +560,73 @@ class ClientCallsTest: AbstractCallsTest() {
 
   @Test
   fun bidiStreamingRpcRequestsFail() = runBlocking {
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun bidiStreamSayHello(
-        responseObserver: StreamObserver<HelloReply>
-      ): StreamObserver<HelloRequest> {
-        return object : StreamObserver<HelloRequest> {
-          override fun onNext(value: HelloRequest) {
-            responseObserver.onNext(helloReply("Hello, ${value.name}"))
-          }
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun bidiStreamSayHello(
+          responseObserver: StreamObserver<HelloReply>
+        ): StreamObserver<HelloRequest> {
+          return object : StreamObserver<HelloRequest> {
+            override fun onNext(value: HelloRequest) {
+              responseObserver.onNext(helloReply("Hello, ${value.name}"))
+            }
 
-          override fun onError(t: Throwable) = throw t
+            override fun onError(t: Throwable) = throw t
 
-          override fun onCompleted() {
-            responseObserver.onCompleted()
+            override fun onCompleted() {
+              responseObserver.onCompleted()
+            }
           }
         }
       }
-    }
     channel = makeChannel(serverImpl)
 
-    val responses = ClientCalls.bidiStreamingRpc(
-      channel = channel,
-      method = bidiStreamingSayHelloMethod,
-      requests = flow {
-        throw MyException()
-      }
-    )
+    val responses =
+      ClientCalls.bidiStreamingRpc(
+        channel = channel,
+        method = bidiStreamingSayHelloMethod,
+        requests = flow { throw MyException() }
+      )
 
-    assertThrows<MyException> {
-      responses.collect()
-    }
+    assertThrows<MyException> { responses.collect() }
   }
 
-  private class MyException: Exception()
+  private class MyException : Exception()
 
   @Test
   fun bidiStreamingRpcCollectsRequestsEachTime() = runBlocking {
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun bidiStreamSayHello(
-        responseObserver: StreamObserver<HelloReply>
-      ): StreamObserver<HelloRequest> {
-        return object : StreamObserver<HelloRequest> {
-          override fun onNext(value: HelloRequest) {
-            responseObserver.onNext(helloReply("Hello, ${value.name}"))
-          }
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun bidiStreamSayHello(
+          responseObserver: StreamObserver<HelloReply>
+        ): StreamObserver<HelloRequest> {
+          return object : StreamObserver<HelloRequest> {
+            override fun onNext(value: HelloRequest) {
+              responseObserver.onNext(helloReply("Hello, ${value.name}"))
+            }
 
-          override fun onError(t: Throwable) = throw t
+            override fun onError(t: Throwable) = throw t
 
-          override fun onCompleted() {
-            responseObserver.onCompleted()
+            override fun onCompleted() {
+              responseObserver.onCompleted()
+            }
           }
         }
       }
-    }
     channel = makeChannel(serverImpl)
 
     val requestsEvaluations = AtomicInteger()
-    val requests = flow<HelloRequest> {
-      requestsEvaluations.incrementAndGet()
-      emit(helloRequest("Sunstone"))
-    }
+    val requests =
+      flow<HelloRequest> {
+        requestsEvaluations.incrementAndGet()
+        emit(helloRequest("Sunstone"))
+      }
 
-    val responses = ClientCalls.bidiStreamingRpc(
-      channel = channel,
-      method = bidiStreamingSayHelloMethod,
-      requests = requests
-    )
+    val responses =
+      ClientCalls.bidiStreamingRpc(
+        channel = channel,
+        method = bidiStreamingSayHelloMethod,
+        requests = requests
+      )
 
     assertThat(responses.single()).isEqualTo(helloReply("Hello, Sunstone"))
     assertThat(responses.single()).isEqualTo(helloReply("Hello, Sunstone"))
@@ -618,37 +635,40 @@ class ClientCallsTest: AbstractCallsTest() {
 
   @Test
   fun metadataCopied() = runBlocking {
-    val metadataKey: Metadata.Key<String> = Metadata.Key.of("test", Metadata.ASCII_STRING_MARSHALLER)
-    val serverImpl = object : GreeterGrpc.GreeterImplBase() {
-      override fun serverStreamSayHello(
-        request: MultiHelloRequest,
-        responseObserver: StreamObserver<HelloReply>
-      ) {
-        responseObserver.onNext(helloReply("hello!"))
-        responseObserver.onCompleted()
+    val metadataKey: Metadata.Key<String> =
+      Metadata.Key.of("test", Metadata.ASCII_STRING_MARSHALLER)
+    val serverImpl =
+      object : GreeterGrpc.GreeterImplBase() {
+        override fun serverStreamSayHello(
+          request: MultiHelloRequest,
+          responseObserver: StreamObserver<HelloReply>
+        ) {
+          responseObserver.onNext(helloReply("hello!"))
+          responseObserver.onCompleted()
+        }
       }
-    }
 
     // Verify that the metadata is copied anew for each collection of the flow, with an interceptor
     // that checks that it hasn't run before.
-    val interceptor = object : ClientInterceptor {
-      override fun <ReqT, RespT> interceptCall(
-        method: MethodDescriptor<ReqT, RespT>?,
-        callOptions: CallOptions,
-        next: io.grpc.Channel
-      ): ClientCall<ReqT, RespT> {
-        val call: ClientCall<ReqT, RespT> = next.newCall(method, callOptions)
-        return object : ForwardingClientCall<ReqT, RespT>() {
-          override fun start(responseListener: Listener<RespT>, headers: Metadata) {
-            check(!headers.containsKey(metadataKey))
-            headers.put(metadataKey, "value")
-            super.start(responseListener, headers)
-          }
+    val interceptor =
+      object : ClientInterceptor {
+        override fun <ReqT, RespT> interceptCall(
+          method: MethodDescriptor<ReqT, RespT>?,
+          callOptions: CallOptions,
+          next: io.grpc.Channel
+        ): ClientCall<ReqT, RespT> {
+          val call: ClientCall<ReqT, RespT> = next.newCall(method, callOptions)
+          return object : ForwardingClientCall<ReqT, RespT>() {
+            override fun start(responseListener: Listener<RespT>, headers: Metadata) {
+              check(!headers.containsKey(metadataKey))
+              headers.put(metadataKey, "value")
+              super.start(responseListener, headers)
+            }
 
-          override fun delegate(): ClientCall<ReqT, RespT> = call
+            override fun delegate(): ClientCall<ReqT, RespT> = call
+          }
         }
       }
-    }
     val channel = ClientInterceptors.intercept(makeChannel(serverImpl), interceptor)
     val flow =
       ClientCalls.serverStreamingRpc(channel, serverStreamingSayHelloMethod, multiHelloRequest())

@@ -27,10 +27,8 @@ val typeSpecs: Subject.Factory<TypeSpecSubject, TypeSpec> = Subject.Factory(::Ty
 fun assertThat(typeSpec: TypeSpec): TypeSpecSubject = assertAbout(typeSpecs).that(typeSpec)
 
 /** A Truth subject for [TypeSpec]. */
-class TypeSpecSubject(
-  failureMetadata: FailureMetadata,
-  private val actual: TypeSpec?
-) : Subject(failureMetadata, actual) {
+class TypeSpecSubject(failureMetadata: FailureMetadata, private val actual: TypeSpec?) :
+  Subject(failureMetadata, actual) {
   fun generates(indentedCode: String) {
     val expectedCode = indentedCode.trimIndent()
     val actualCode = actual.toString().trim()

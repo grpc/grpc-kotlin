@@ -9,19 +9,19 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class ProtoMethodNameTest {
   @Test
-  fun toMemberSimpleNameWithSingleUnderscore(){
+  fun toMemberSimpleNameWithSingleUnderscore() {
     assertThat(ProtoMethodName("say_hello").toMemberSimpleName())
       .isEqualTo(MemberSimpleName("sayHello"))
   }
 
   @Test
-  fun toMemberSimpleNameWithMultipleUnderscores(){
+  fun toMemberSimpleNameWithMultipleUnderscores() {
     assertThat(ProtoMethodName("say_hello_again").toMemberSimpleName())
       .isEqualTo(MemberSimpleName("sayHelloAgain"))
   }
 
   @Test
-  fun toMemberSimpleNameWithRecommendedNamingStyle(){
+  fun toMemberSimpleNameWithRecommendedNamingStyle() {
     assertThat(ProtoMethodName("SayHello").toMemberSimpleName())
       .isEqualTo(MemberSimpleName("sayHello"))
   }

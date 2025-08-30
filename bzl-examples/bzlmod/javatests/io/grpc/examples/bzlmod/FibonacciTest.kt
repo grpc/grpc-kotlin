@@ -23,27 +23,29 @@ class FibonacciTest {
     val serverName = InProcessServerBuilder.generateName()
 
     grpcCleanup.register(
-        InProcessServerBuilder.forName(serverName)
-            .directExecutor()
-            .addService(Fibonacci())
-            .build()
-            .start())
+      InProcessServerBuilder.forName(serverName)
+        .directExecutor()
+        .addService(Fibonacci())
+        .build()
+        .start()
+    )
 
     stub =
-        FibonacciServiceGrpcKt.FibonacciServiceCoroutineStub(
-            grpcCleanup.register(
-                InProcessChannelBuilder.forName(serverName).directExecutor().build()))
+      FibonacciServiceGrpcKt.FibonacciServiceCoroutineStub(
+        grpcCleanup.register(InProcessChannelBuilder.forName(serverName).directExecutor().build())
+      )
   }
 
   @Test
   fun query_succeeds() {
     runBlocking {
       val response =
-          stub.query(
-              queryRequest {
-                nth = 20
-                mod = 1000000007
-              })
+        stub.query(
+          queryRequest {
+            nth = 20
+            mod = 1000000007
+          }
+        )
       assertThat(response).isEqualTo(queryResponse { nthFibonacci = 6765 })
     }
   }

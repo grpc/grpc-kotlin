@@ -25,9 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Unit tests for {@link TestCases}.
- */
+/** Unit tests for {@link TestCases}. */
 @RunWith(JUnit4.class)
 public class TestCasesTest {
 

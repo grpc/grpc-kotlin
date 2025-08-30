@@ -29,8 +29,7 @@ import org.junit.runners.JUnit4
 class ClassSimpleNameTest {
   @Test
   fun withSuffix() {
-    assertThat(ClassSimpleName("FooBar").withSuffix("Baz"))
-      .isEqualTo(ClassSimpleName("FooBarBaz"))
+    assertThat(ClassSimpleName("FooBar").withSuffix("Baz")).isEqualTo(ClassSimpleName("FooBarBaz"))
   }
 
   @Test
@@ -45,11 +44,9 @@ class ClassSimpleNameTest {
   fun asMemberWithPrefix() {
     val simpleName = ClassSimpleName("SimpleName")
 
-    assertThat(simpleName.asMemberWithPrefix("get"))
-      .isEqualTo(MemberSimpleName("getSimpleName"))
+    assertThat(simpleName.asMemberWithPrefix("get")).isEqualTo(MemberSimpleName("getSimpleName"))
 
-    assertThat(simpleName.asMemberWithPrefix(""))
-      .isEqualTo(MemberSimpleName("simpleName"))
+    assertThat(simpleName.asMemberWithPrefix("")).isEqualTo(MemberSimpleName("simpleName"))
   }
 
   @Test

@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Throwables;
+import com.squareup.okhttp.ConnectionSpec;
 import io.grpc.ManagedChannel;
 import io.grpc.ServerBuilder;
 import io.grpc.internal.testing.StreamRecorder;
@@ -41,17 +42,13 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLPeerUnverifiedException;
-import com.squareup.okhttp.ConnectionSpec;
-
 import org.jetbrains.annotations.NotNull;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Integration tests for GRPC over Http2 using the OkHttp framework.
- */
+/** Integration tests for GRPC over Http2 using the OkHttp framework. */
 @RunWith(JUnit4.class)
 public class Http2OkHttpTest extends AbstractInteropTest {
 
@@ -74,10 +71,12 @@ public class Http2OkHttpTest extends AbstractInteropTest {
         // are forced to use Jetty ALPN for Netty instead of OpenSSL.
         sslProvider = SslProvider.JDK;
       }
-      SslContextBuilder contextBuilder = SslContextBuilder
-          .forServer(TestUtils.loadCert("server1.pem"), TestUtils.loadCert("server1.key"));
+      SslContextBuilder contextBuilder =
+          SslContextBuilder.forServer(
+              TestUtils.loadCert("server1.pem"), TestUtils.loadCert("server1.key"));
       GrpcSslContexts.configure(contextBuilder, sslProvider);
-      Iterable<String> ciphers = Arrays.asList(SSLContext.getDefault().getDefaultSSLParameters().getCipherSuites());
+      Iterable<String> ciphers =
+          Arrays.asList(SSLContext.getDefault().getDefaultSSLParameters().getCipherSuites());
       contextBuilder.ciphers(ciphers, SupportedCipherSuiteFilter.INSTANCE);
       return NettyServerBuilder.forPort(0)
           .flowControlWindow(65 * 1024)
@@ -96,14 +95,15 @@ public class Http2OkHttpTest extends AbstractInteropTest {
 
   private OkHttpChannelBuilder createChannelBuilder() {
     int port = ((InetSocketAddress) getListenAddress()).getPort();
-    OkHttpChannelBuilder builder = OkHttpChannelBuilder.forAddress("localhost", port)
-        .maxInboundMessageSize(AbstractInteropTest.MAX_MESSAGE_SIZE)
-        .connectionSpec(ConnectionSpec.MODERN_TLS)
-        .overrideAuthority(Util.authorityFromHostAndPort(
-            TestUtils.TEST_SERVER_HOST, port));
+    OkHttpChannelBuilder builder =
+        OkHttpChannelBuilder.forAddress("localhost", port)
+            .maxInboundMessageSize(AbstractInteropTest.MAX_MESSAGE_SIZE)
+            .connectionSpec(ConnectionSpec.MODERN_TLS)
+            .overrideAuthority(Util.authorityFromHostAndPort(TestUtils.TEST_SERVER_HOST, port));
     try {
-      builder.sslSocketFactory(TestUtils.newSslSocketFactoryForCa(Platform.get().getProvider(),
-          TestUtils.loadCert("ca.pem")));
+      builder.sslSocketFactory(
+          TestUtils.newSslSocketFactoryForCa(
+              Platform.get().getProvider(), TestUtils.loadCert("ca.pem")));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -113,8 +113,7 @@ public class Http2OkHttpTest extends AbstractInteropTest {
   @Test
   public void receivedDataForFinishedStream() throws Exception {
     Messages.ResponseParameters.Builder responseParameters =
-        Messages.ResponseParameters.newBuilder()
-        .setSize(1);
+        Messages.ResponseParameters.newBuilder().setSize(1);
     Messages.StreamingOutputCallRequest.Builder requestBuilder =
         Messages.StreamingOutputCallRequest.newBuilder();
     for (int i = 0; i < 1000; i++) {
@@ -137,12 +136,11 @@ public class Http2OkHttpTest extends AbstractInteropTest {
   @Test
   public void wrongHostNameFailHostnameVerification() throws Exception {
     int port = ((InetSocketAddress) getListenAddress()).getPort();
-    ManagedChannel channel = createChannelBuilder()
-        .overrideAuthority(Util.authorityFromHostAndPort(
-            BAD_HOSTNAME, port))
-        .build();
-    TestServiceGrpc.TestServiceBlockingStub blockingStub =
-        TestServiceGrpc.newBlockingStub(channel);
+    ManagedChannel channel =
+        createChannelBuilder()
+            .overrideAuthority(Util.authorityFromHostAndPort(BAD_HOSTNAME, port))
+            .build();
+    TestServiceGrpc.TestServiceBlockingStub blockingStub = TestServiceGrpc.newBlockingStub(channel);
 
     Throwable actualThrown = null;
     try {
@@ -160,13 +158,12 @@ public class Http2OkHttpTest extends AbstractInteropTest {
   @Test
   public void hostnameVerifierWithBadHostname() throws Exception {
     int port = ((InetSocketAddress) getListenAddress()).getPort();
-    ManagedChannel channel = createChannelBuilder()
-        .overrideAuthority(Util.authorityFromHostAndPort(
-            BAD_HOSTNAME, port))
-        .hostnameVerifier((hostname, session) -> true)
-        .build();
-    TestServiceGrpc.TestServiceBlockingStub blockingStub =
-        TestServiceGrpc.newBlockingStub(channel);
+    ManagedChannel channel =
+        createChannelBuilder()
+            .overrideAuthority(Util.authorityFromHostAndPort(BAD_HOSTNAME, port))
+            .hostnameVerifier((hostname, session) -> true)
+            .build();
+    TestServiceGrpc.TestServiceBlockingStub blockingStub = TestServiceGrpc.newBlockingStub(channel);
 
     blockingStub.emptyCall(Empty.getDefaultInstance());
 
@@ -176,13 +173,12 @@ public class Http2OkHttpTest extends AbstractInteropTest {
   @Test
   public void hostnameVerifierWithCorrectHostname() throws Exception {
     int port = ((InetSocketAddress) getListenAddress()).getPort();
-    ManagedChannel channel = createChannelBuilder()
-        .overrideAuthority(Util.authorityFromHostAndPort(
-            TestUtils.TEST_SERVER_HOST, port))
-        .hostnameVerifier((hostname, session) -> false)
-        .build();
-    TestServiceGrpc.TestServiceBlockingStub blockingStub =
-        TestServiceGrpc.newBlockingStub(channel);
+    ManagedChannel channel =
+        createChannelBuilder()
+            .overrideAuthority(Util.authorityFromHostAndPort(TestUtils.TEST_SERVER_HOST, port))
+            .hostnameVerifier((hostname, session) -> false)
+            .build();
+    TestServiceGrpc.TestServiceBlockingStub blockingStub = TestServiceGrpc.newBlockingStub(channel);
 
     Throwable actualThrown = null;
     try {

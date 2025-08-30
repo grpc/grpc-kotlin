@@ -23,8 +23,8 @@ import java.util.PriorityQueue
  * described in TAOCP Section 2.2.3, with a little bit of extra state to provide a stable sort. The
  * constructed ordering is guaranteed to be deterministic.
  *
- *
- * The elements to be sorted should implement the standard [Object.hashCode] and [ ][Object.equals] methods.
+ * The elements to be sorted should implement the standard [Object.hashCode] and [ ][Object.equals]
+ * methods.
  */
 object TopologicalSort {
   /**
@@ -33,9 +33,9 @@ object TopologicalSort {
    * ordering" can be achieved by first lexicographically sorting the input list according to your
    * own criteria and then calling this method.
    *
-   *
    * A high-level sketch of toplogical sort from Wikipedia:
    * (http://en.wikipedia.org/wiki/Topological_sorting)
+   *
    * ```
    * L ← Empty list that will contain the sorted elements
    * S ← Set of all nodes with no incoming edges
@@ -52,15 +52,14 @@ object TopologicalSort {
    *     return L (a topologically sorted order)
    * ```
    *
-   *
-   * We extend the basic algorithm to traverse `S` in a particular order based on the
-   * original order of the elements to enforce a deterministic result (lexicographically based on
-   * the order of elements in the original input list).
+   * We extend the basic algorithm to traverse `S` in a particular order based on the original order
+   * of the elements to enforce a deterministic result (lexicographically based on the order of
+   * elements in the original input list).
    *
    * @param elements a mutable list of elements to be sorted.
    * @param order the partial order between elements.
    * @throws CyclicalGraphException if the graph is cyclical or any predecessor is not present in
-   * the input list.
+   *   the input list.
    */
   fun <T> sortLexicographicallyLeast(elements: Collection<T>, order: PartialOrdering<T>): List<T> {
     val internalElements = internalizeElements(elements, order)
@@ -82,7 +81,9 @@ object TopologicalSort {
     if (sortedElements.size != elements.size) {
       val elementsInCycle = internalElements.filter { it.predecessorCount > 0 }.map { it.element }
       throw CyclicalGraphException(
-        "Cyclical graphs can not be topologically sorted.", elementsInCycle)
+        "Cyclical graphs can not be topologically sorted.",
+        elementsInCycle
+      )
     }
     return sortedElements.map { it.element }
   }
@@ -96,13 +97,13 @@ object TopologicalSort {
    * @return a list of [InternalElement]s initialized with dependency structure.
    */
   private fun <T> internalizeElements(
-    elements: Iterable<T>, order: PartialOrdering<T>
+    elements: Iterable<T>,
+    order: PartialOrdering<T>
   ): List<InternalElement<T>> {
     val internalElements: MutableList<InternalElement<T>> = mutableListOf()
     // Subtle: due to the potential for duplicates in elements, we need to map every element to a
     // list of the corresponding InternalElements.
-    val internalElementsByValue: MutableMap<T, MutableList<InternalElement<T>>> =
-      mutableMapOf()
+    val internalElementsByValue: MutableMap<T, MutableList<InternalElement<T>>> = mutableMapOf()
     for ((index, element) in elements.withIndex()) {
       val internalElement = InternalElement(element, index)
       internalElements.add(internalElement)
@@ -136,9 +137,9 @@ object TopologicalSort {
   class CyclicalGraphException(
     message: String, // not parameterized because exceptions can't be parameterized
     /**
-     * A list of the elements that are part of the cycle, as well as elements that are
-     * greater than the elements in the cycle, according to the partial ordering. The elements in
-     * this list are not in a meaningful order.
+     * A list of the elements that are part of the cycle, as well as elements that are greater than
+     * the elements in the cycle, according to the partial ordering. The elements in this list are
+     * not in a meaningful order.
      */
     val elementsInCycle: List<*>
   ) : RuntimeException(message)
@@ -146,23 +147,19 @@ object TopologicalSort {
   /**
    * To bundle an element with a mutable structure of the dependency graph.
    *
+   * Each [InternalElement] counts how many predecessors it has left. Rather than keep a list of
+   * predecessors, we reverse the relation so that it's easy to navigate to the successors when an
+   * [InternalElement] is selected for sorting.
    *
-   * Each [InternalElement] counts how many predecessors it has left. Rather than keep a
-   * list of predecessors, we reverse the relation so that it's easy to navigate to the successors
-   * when an [InternalElement] is selected for sorting.
-   *
-   *
-   * This maintains a `originalIndex` to allow a "stable" sort based on the original
-   * position in the input list.
+   * This maintains a `originalIndex` to allow a "stable" sort based on the original position in the
+   * input list.
    */
-  private data class InternalElement<T>(
-    val element: T,
-    val originalIndex: Int
-  ) : Comparable<InternalElement<T>> {
+  private data class InternalElement<T>(val element: T, val originalIndex: Int) :
+    Comparable<InternalElement<T>> {
     val successors: MutableList<InternalElement<T>> = mutableListOf()
     var predecessorCount = 0
+
     override operator fun compareTo(other: InternalElement<T>): Int =
       originalIndex.compareTo(other.originalIndex)
-
   }
 }

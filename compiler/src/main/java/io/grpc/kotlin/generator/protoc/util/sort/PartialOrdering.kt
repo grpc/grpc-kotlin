@@ -22,13 +22,12 @@ package io.grpc.kotlin.generator.protoc.util.sort
  * @author Okhtay Ilghami (okhtay@google.com)
  */
 interface PartialOrdering<T> {
-    /**
-     * Returns nodes that are considered "less than" `element` for purposes of a [ ]. Transitive predecessors do not need to be included.
-     *
-     *
-     * For example, if `getPredecessors(a)` includes `b` and `getPredecessors(b)`
-     * includes `c`, it is not necessary to include `c` in `getPredecessors(a)`.
-     * `c` is not a "direct" predecessor of `a`.
-     */
-    fun getPredecessors(element: T): Set<T>
+  /**
+   * Returns nodes that are considered "less than" `element` for purposes of a [ ]. Transitive
+   * predecessors do not need to be included.
+   *
+   * For example, if `getPredecessors(a)` includes `b` and `getPredecessors(b)` includes `c`, it is
+   * not necessary to include `c` in `getPredecessors(a)`. `c` is not a "direct" predecessor of `a`.
+   */
+  fun getPredecessors(element: T): Set<T>
 }

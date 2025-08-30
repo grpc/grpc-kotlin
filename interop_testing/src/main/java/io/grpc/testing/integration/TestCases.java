@@ -18,9 +18,7 @@ package io.grpc.testing.integration;
 
 import com.google.common.base.Preconditions;
 
-/**
- * Enum of interop test cases.
- */
+/** Enum of interop test cases. */
 public enum TestCases {
   EMPTY_UNARY("empty (zero bytes) request and response"),
   CACHEABLE_UNARY("cacheable unary rpc sent using GET"),
@@ -43,8 +41,7 @@ public enum TestCases {
   JWT_TOKEN_CREDS("JWT-based auth"),
   OAUTH2_AUTH_TOKEN("raw oauth2 access token auth"),
   PER_RPC_CREDS("per rpc raw oauth2 access token auth"),
-  GOOGLE_DEFAULT_CREDENTIALS(
-      "google default credentials, i.e. GoogleManagedChannel based auth"),
+  GOOGLE_DEFAULT_CREDENTIALS("google default credentials, i.e. GoogleManagedChannel based auth"),
   CUSTOM_METADATA("unary and full duplex calls with metadata"),
   STATUS_CODE_AND_MESSAGE("request error code and message"),
   SPECIAL_STATUS_MESSAGE("special characters in status message"),
@@ -62,16 +59,14 @@ public enum TestCases {
     this.description = description;
   }
 
-  /**
-   * Returns a description of the test case.
-   */
+  /** Returns a description of the test case. */
   public String description() {
     return description;
   }
 
   /**
-   * Returns the {@link TestCases} matching the string {@code s}. The
-   * matching is done case insensitive.
+   * Returns the {@link TestCases} matching the string {@code s}. The matching is done case
+   * insensitive.
    */
   public static TestCases fromString(String s) {
     Preconditions.checkNotNull(s, "s");

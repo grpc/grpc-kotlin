@@ -61,6 +61,21 @@ import io.grpc.testing.integration.Messages.StreamingInputCallRequest
 import io.grpc.testing.integration.Messages.StreamingInputCallResponse
 import io.grpc.testing.integration.Messages.StreamingOutputCallRequest
 import io.grpc.testing.integration.Messages.StreamingOutputCallResponse
+import java.io.IOException
+import java.io.InputStream
+import java.net.SocketAddress
+import java.util.Arrays
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.Executors
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
+import java.util.logging.Level
+import java.util.logging.Logger
+import java.util.regex.Pattern
+import kotlin.math.max
+import kotlin.test.assertFailsWith
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -94,33 +109,16 @@ import org.junit.Test
 import org.junit.rules.DisableOnDebug
 import org.junit.rules.TestRule
 import org.junit.rules.Timeout
-import java.io.IOException
-import java.io.InputStream
-import java.net.SocketAddress
-import java.util.Arrays
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.Executors
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicReference
-import java.util.logging.Level
-import java.util.logging.Logger
-import java.util.regex.Pattern
-import kotlin.math.max
-import kotlin.test.assertFailsWith
 
 /**
  * Abstract base class for all GRPC transport tests.
  *
- *
- *  New tests should avoid using Mockito to support running on AppEngine.
+ * New tests should avoid using Mockito to support running on AppEngine.
  */
 @ExperimentalCoroutinesApi
 @FlowPreview
 abstract class AbstractInteropTest {
-  @get:Rule
-  val globalTimeout: TestRule
+  @get:Rule val globalTimeout: TestRule
   private val serverCallCapture = AtomicReference<ServerCall<*, *>>()
   private val clientCallCapture = AtomicReference<ClientCall<*, *>>()
   private val requestHeadersCapture = AtomicReference<Metadata?>()
@@ -129,14 +127,11 @@ abstract class AbstractInteropTest {
   private var server: Server? = null
   private val serverStreamTracers = LinkedBlockingQueue<ServerStreamTracerInfo>()
 
-  private class ServerStreamTracerInfo internal constructor(
-    val fullMethodName: String,
-    val tracer: InteropServerStreamTracer
-  ) {
+  private class ServerStreamTracerInfo
+  internal constructor(val fullMethodName: String, val tracer: InteropServerStreamTracer) {
 
     class InteropServerStreamTracer : TestServerStreamTracer() {
-      @Volatile
-      var contextCapture: Context? = null
+      @Volatile var contextCapture: Context? = null
 
       override fun filterContext(context: Context): Context {
         contextCapture = context
@@ -165,25 +160,22 @@ abstract class AbstractInteropTest {
     }
     val executor = Executors.newScheduledThreadPool(2)
     testServiceExecutor = executor
-    val allInterceptors: List<ServerInterceptor> = ImmutableList.builder<ServerInterceptor>()
-      .add(recordServerCallInterceptor(serverCallCapture))
-      .add(TestUtils.recordRequestHeadersInterceptor(requestHeadersCapture))
-      .add(recordContextInterceptor(contextCapture))
-      .addAll(TestServiceImpl.interceptors)
-      .build()
+    val allInterceptors: List<ServerInterceptor> =
+      ImmutableList.builder<ServerInterceptor>()
+        .add(recordServerCallInterceptor(serverCallCapture))
+        .add(TestUtils.recordRequestHeadersInterceptor(requestHeadersCapture))
+        .add(recordContextInterceptor(contextCapture))
+        .addAll(TestServiceImpl.interceptors)
+        .build()
     builder
-      .addService(
-        ServerInterceptors.intercept(
-          TestServiceImpl(executor),
-          allInterceptors
-        )
-      )
+      .addService(ServerInterceptors.intercept(TestServiceImpl(executor), allInterceptors))
       .addStreamTracerFactory(serverStreamTracerFactory)
-    server = try {
-      builder.build().start()
-    } catch (ex: IOException) {
-      throw RuntimeException(ex)
-    }
+    server =
+      try {
+        builder.build().start()
+      } catch (ex: IOException) {
+        throw RuntimeException(ex)
+      }
   }
 
   private fun stopServer() {
@@ -207,12 +199,10 @@ abstract class AbstractInteropTest {
   protected lateinit var stub: TestServiceGrpcKt.TestServiceCoroutineStub
 
   // to be deleted when subclasses are ready to migrate
-  @JvmField
-  var blockingStub: TestServiceGrpc.TestServiceBlockingStub? = null
+  @JvmField var blockingStub: TestServiceGrpc.TestServiceBlockingStub? = null
 
   // to be deleted when subclasses are ready to migrate
-  @JvmField
-  var asyncStub: TestServiceGrpc.TestServiceStub? = null
+  @JvmField var asyncStub: TestServiceGrpc.TestServiceStub? = null
 
   private val clientStreamTracers = LinkedBlockingQueue<TestClientStreamTracer>()
   private val clientStreamTracerFactory: ClientStreamTracer.Factory =
@@ -226,21 +216,18 @@ abstract class AbstractInteropTest {
         return tracer
       }
     }
-  private val tracerSetupInterceptor: ClientInterceptor = object : ClientInterceptor {
-    override fun <ReqT, RespT> interceptCall(
-      method: MethodDescriptor<ReqT, RespT>,
-      callOptions: CallOptions,
-      next: Channel
-    ): ClientCall<ReqT, RespT> {
-      return next.newCall(
-        method, callOptions.withStreamTracerFactory(clientStreamTracerFactory)
-      )
+  private val tracerSetupInterceptor: ClientInterceptor =
+    object : ClientInterceptor {
+      override fun <ReqT, RespT> interceptCall(
+        method: MethodDescriptor<ReqT, RespT>,
+        callOptions: CallOptions,
+        next: Channel
+      ): ClientCall<ReqT, RespT> {
+        return next.newCall(method, callOptions.withStreamTracerFactory(clientStreamTracerFactory))
+      }
     }
-  }
 
-  /**
-   * Must be called by the subclass setup method if overridden.
-   */
+  /** Must be called by the subclass setup method if overridden. */
   @Before
   fun setUp() {
     startServer()
@@ -256,7 +243,7 @@ abstract class AbstractInteropTest {
     requestHeadersCapture.set(null)
   }
 
-  /** Clean up.  */
+  /** Clean up. */
   @After
   open fun tearDown() {
     channel.shutdownNow()
@@ -276,38 +263,30 @@ abstract class AbstractInteropTest {
     get() = null
 
   /**
-   * Returns the server builder used to create server for each test run.  Return `null` if
-   * it shouldn't start a server in the same process.
+   * Returns the server builder used to create server for each test run. Return `null` if it
+   * shouldn't start a server in the same process.
    */
   protected open val serverBuilder: ServerBuilder<*>?
     get() = null
 
   @Test
   fun emptyUnary() {
-    runBlocking {
-      assertEquals(EMPTY, stub.emptyCall(EMPTY))
-    }
+    runBlocking { assertEquals(EMPTY, stub.emptyCall(EMPTY)) }
   }
 
   @Test
   fun largeUnary() {
     assumeEnoughMemory()
-    val request = SimpleRequest.newBuilder()
-      .setResponseSize(314159)
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(271828)))
-      )
-      .build()
-    val goldenResponse = SimpleResponse.newBuilder()
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(314159)))
-      )
-      .build()
-    runBlocking {
-      assertResponse(goldenResponse, stub.unaryCall(request))
-    }
+    val request =
+      SimpleRequest.newBuilder()
+        .setResponseSize(314159)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(271828))))
+        .build()
+    val goldenResponse =
+      SimpleResponse.newBuilder()
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(314159))))
+        .build()
+    runBlocking { assertResponse(goldenResponse, stub.unaryCall(request)) }
     assertStatsTrace(
       "grpc.testing.TestService/UnaryCall",
       Status.Code.OK,
@@ -322,19 +301,22 @@ abstract class AbstractInteropTest {
    */
   fun clientCompressedUnary(probe: Boolean) {
     assumeEnoughMemory()
-    val expectCompressedRequest = SimpleRequest.newBuilder()
-      .setExpectCompressed(BoolValue.newBuilder().setValue(true))
-      .setResponseSize(314159)
-      .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(271828))))
-      .build()
-    val expectUncompressedRequest = SimpleRequest.newBuilder()
-      .setExpectCompressed(BoolValue.newBuilder().setValue(false))
-      .setResponseSize(314159)
-      .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(271828))))
-      .build()
-    val goldenResponse = SimpleResponse.newBuilder()
-      .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(314159))))
-      .build()
+    val expectCompressedRequest =
+      SimpleRequest.newBuilder()
+        .setExpectCompressed(BoolValue.newBuilder().setValue(true))
+        .setResponseSize(314159)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(271828))))
+        .build()
+    val expectUncompressedRequest =
+      SimpleRequest.newBuilder()
+        .setExpectCompressed(BoolValue.newBuilder().setValue(false))
+        .setResponseSize(314159)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(271828))))
+        .build()
+    val goldenResponse =
+      SimpleResponse.newBuilder()
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(314159))))
+        .build()
     if (probe) {
       // Send a non-compressed message with expectCompress=true. Servers supporting this test case
       // should return INVALID_ARGUMENT.
@@ -350,16 +332,21 @@ abstract class AbstractInteropTest {
     }
     runBlocking {
       assertResponse(
-        goldenResponse, stub.withCompression("gzip").unaryCall(expectCompressedRequest)
+        goldenResponse,
+        stub.withCompression("gzip").unaryCall(expectCompressedRequest)
       )
       assertStatsTrace(
         "grpc.testing.TestService/UnaryCall",
-        Status.Code.OK, setOf(expectCompressedRequest), setOf(goldenResponse)
+        Status.Code.OK,
+        setOf(expectCompressedRequest),
+        setOf(goldenResponse)
       )
       assertResponse(goldenResponse, stub.unaryCall(expectUncompressedRequest))
       assertStatsTrace(
         "grpc.testing.TestService/UnaryCall",
-        Status.Code.OK, setOf(expectUncompressedRequest), setOf(goldenResponse)
+        Status.Code.OK,
+        setOf(expectUncompressedRequest),
+        setOf(goldenResponse)
       )
     }
   }
@@ -373,42 +360,48 @@ abstract class AbstractInteropTest {
   @Test
   fun serverCompressedUnary() {
     assumeEnoughMemory()
-    val responseShouldBeCompressed = SimpleRequest.newBuilder()
-      .setResponseCompressed(BoolValue.newBuilder().setValue(true))
-      .setResponseSize(314159)
-      .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(271828))))
-      .build()
-    val responseShouldBeUncompressed = SimpleRequest.newBuilder()
-      .setResponseCompressed(BoolValue.newBuilder().setValue(false))
-      .setResponseSize(314159)
-      .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(271828))))
-      .build()
-    val goldenResponse = SimpleResponse.newBuilder()
-      .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(314159))))
-      .build()
+    val responseShouldBeCompressed =
+      SimpleRequest.newBuilder()
+        .setResponseCompressed(BoolValue.newBuilder().setValue(true))
+        .setResponseSize(314159)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(271828))))
+        .build()
+    val responseShouldBeUncompressed =
+      SimpleRequest.newBuilder()
+        .setResponseCompressed(BoolValue.newBuilder().setValue(false))
+        .setResponseSize(314159)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(271828))))
+        .build()
+    val goldenResponse =
+      SimpleResponse.newBuilder()
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(314159))))
+        .build()
     runBlocking {
       assertResponse(goldenResponse, stub.unaryCall(responseShouldBeCompressed))
       assertStatsTrace(
         "grpc.testing.TestService/UnaryCall",
-        Status.Code.OK, setOf(responseShouldBeCompressed), setOf(goldenResponse)
+        Status.Code.OK,
+        setOf(responseShouldBeCompressed),
+        setOf(goldenResponse)
       )
       assertResponse(goldenResponse, stub.unaryCall(responseShouldBeUncompressed))
       assertStatsTrace(
         "grpc.testing.TestService/UnaryCall",
-        Status.Code.OK, setOf(responseShouldBeUncompressed), setOf(goldenResponse)
+        Status.Code.OK,
+        setOf(responseShouldBeUncompressed),
+        setOf(goldenResponse)
       )
     }
   }
 
-  /**
-   * Assuming "pick_first" policy is used, tests that all requests are sent to the same server.
-   */
+  /** Assuming "pick_first" policy is used, tests that all requests are sent to the same server. */
   fun pickFirstUnary() {
-    val request = SimpleRequest.newBuilder()
-      .setResponseSize(1)
-      .setFillServerId(true)
-      .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(1))))
-      .build()
+    val request =
+      SimpleRequest.newBuilder()
+        .setResponseSize(1)
+        .setFillServerId(true)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(1))))
+        .build()
     runBlocking {
       val firstResponse = stub.unaryCall(request)
       // Increase the chance of all servers are connected, in case the channel should be doing
@@ -423,108 +416,70 @@ abstract class AbstractInteropTest {
 
   @Test
   fun serverStreaming() {
-    val request = StreamingOutputCallRequest.newBuilder()
-      .addResponseParameters(
-        ResponseParameters.newBuilder()
-          .setSize(31415)
-      )
-      .addResponseParameters(
-        ResponseParameters.newBuilder()
-          .setSize(9)
-      )
-      .addResponseParameters(
-        ResponseParameters.newBuilder()
-          .setSize(2653)
-      )
-      .addResponseParameters(
-        ResponseParameters.newBuilder()
-          .setSize(58979)
-      )
-      .build()
-    val goldenResponses = Arrays.asList(
-      StreamingOutputCallResponse.newBuilder()
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(31415)))
-        )
-        .build(),
-      StreamingOutputCallResponse.newBuilder()
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(9)))
-        )
-        .build(),
-      StreamingOutputCallResponse.newBuilder()
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(2653)))
-        )
-        .build(),
-      StreamingOutputCallResponse.newBuilder()
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(58979)))
-        )
+    val request =
+      StreamingOutputCallRequest.newBuilder()
+        .addResponseParameters(ResponseParameters.newBuilder().setSize(31415))
+        .addResponseParameters(ResponseParameters.newBuilder().setSize(9))
+        .addResponseParameters(ResponseParameters.newBuilder().setSize(2653))
+        .addResponseParameters(ResponseParameters.newBuilder().setSize(58979))
         .build()
-    )
-    runBlocking {
-      assertResponses(goldenResponses, stub.streamingOutputCall(request).toList())
-    }
+    val goldenResponses =
+      Arrays.asList(
+        StreamingOutputCallResponse.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(31415))))
+          .build(),
+        StreamingOutputCallResponse.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(9))))
+          .build(),
+        StreamingOutputCallResponse.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(2653))))
+          .build(),
+        StreamingOutputCallResponse.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(58979))))
+          .build()
+      )
+    runBlocking { assertResponses(goldenResponses, stub.streamingOutputCall(request).toList()) }
   }
 
   @Test
   fun clientStreaming() {
-    val requests = Arrays.asList(
-      StreamingInputCallRequest.newBuilder()
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(27182)))
-        )
-        .build(),
-      StreamingInputCallRequest.newBuilder()
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(8)))
-        )
-        .build(),
-      StreamingInputCallRequest.newBuilder()
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(1828)))
-        )
-        .build(),
-      StreamingInputCallRequest.newBuilder()
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(45904)))
-        )
-        .build()
-    )
-    val goldenResponse = StreamingInputCallResponse.newBuilder()
-      .setAggregatedPayloadSize(74922)
-      .build()
-    val response = runBlocking {
-      stub.streamingInputCall(requests.asFlow())
-    }
+    val requests =
+      Arrays.asList(
+        StreamingInputCallRequest.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(27182))))
+          .build(),
+        StreamingInputCallRequest.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(8))))
+          .build(),
+        StreamingInputCallRequest.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(1828))))
+          .build(),
+        StreamingInputCallRequest.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(45904))))
+          .build()
+      )
+    val goldenResponse =
+      StreamingInputCallResponse.newBuilder().setAggregatedPayloadSize(74922).build()
+    val response = runBlocking { stub.streamingInputCall(requests.asFlow()) }
     assertEquals(goldenResponse, response)
   }
 
-  /**
-   * Unsupported.
-   */
+  /** Unsupported. */
   open fun clientCompressedStreaming(probe: Boolean) {
-    val expectCompressedRequest = StreamingInputCallRequest.newBuilder()
-      .setExpectCompressed(BoolValue.newBuilder().setValue(true))
-      .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(27182))))
-      .build()
+    val expectCompressedRequest =
+      StreamingInputCallRequest.newBuilder()
+        .setExpectCompressed(BoolValue.newBuilder().setValue(true))
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(27182))))
+        .build()
 
     if (probe) {
       runBlocking {
-        val ex = assertFailsWith<StatusException> {
-          // Send a non-compressed message with expectCompress=true. Servers supporting this test
-          // case should return INVALID_ARGUMENT.
-          stub.streamingInputCall(flowOf(expectCompressedRequest))
-        }
+        val ex =
+          assertFailsWith<StatusException> {
+            // Send a non-compressed message with expectCompress=true. Servers supporting this test
+            // case should return INVALID_ARGUMENT.
+            stub.streamingInputCall(flowOf(expectCompressedRequest))
+          }
         assertEquals(Status.INVALID_ARGUMENT.code, ex.status.code)
       }
     }
@@ -538,101 +493,67 @@ abstract class AbstractInteropTest {
    * cannot itself verify that the response was compressed.
    */
   fun serverCompressedStreaming() {
-    val request = StreamingOutputCallRequest.newBuilder()
-      .addResponseParameters(
-        ResponseParameters.newBuilder()
-          .setCompressed(BoolValue.newBuilder().setValue(true))
-          .setSize(31415)
-      )
-      .addResponseParameters(
-        ResponseParameters.newBuilder()
-          .setCompressed(BoolValue.newBuilder().setValue(false))
-          .setSize(92653)
-      )
-      .build()
-    val goldenResponses = Arrays.asList(
-      StreamingOutputCallResponse.newBuilder()
-        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(31415))))
-        .build(),
-      StreamingOutputCallResponse.newBuilder()
-        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(92653))))
+    val request =
+      StreamingOutputCallRequest.newBuilder()
+        .addResponseParameters(
+          ResponseParameters.newBuilder()
+            .setCompressed(BoolValue.newBuilder().setValue(true))
+            .setSize(31415)
+        )
+        .addResponseParameters(
+          ResponseParameters.newBuilder()
+            .setCompressed(BoolValue.newBuilder().setValue(false))
+            .setSize(92653)
+        )
         .build()
-    )
-    runBlocking {
-      assertResponses(goldenResponses, stub.streamingOutputCall(request).toList())
-    }
+    val goldenResponses =
+      Arrays.asList(
+        StreamingOutputCallResponse.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(31415))))
+          .build(),
+        StreamingOutputCallResponse.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(92653))))
+          .build()
+      )
+    runBlocking { assertResponses(goldenResponses, stub.streamingOutputCall(request).toList()) }
   }
 
   @Test
   fun pingPong() {
-    val requests = Arrays.asList(
-      StreamingOutputCallRequest.newBuilder()
-        .addResponseParameters(
-          ResponseParameters.newBuilder()
-            .setSize(31415)
-        )
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(27182)))
-        )
-        .build(),
-      StreamingOutputCallRequest.newBuilder()
-        .addResponseParameters(
-          ResponseParameters.newBuilder()
-            .setSize(9)
-        )
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(8)))
-        )
-        .build(),
-      StreamingOutputCallRequest.newBuilder()
-        .addResponseParameters(
-          ResponseParameters.newBuilder()
-            .setSize(2653)
-        )
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(1828)))
-        )
-        .build(),
-      StreamingOutputCallRequest.newBuilder()
-        .addResponseParameters(
-          ResponseParameters.newBuilder()
-            .setSize(58979)
-        )
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(45904)))
-        )
-        .build()
-    )
-    val goldenResponses = listOf(
-      StreamingOutputCallResponse.newBuilder()
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(31415)))
-        )
-        .build(),
-      StreamingOutputCallResponse.newBuilder()
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(9)))
-        )
-        .build(),
-      StreamingOutputCallResponse.newBuilder()
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(2653)))
-        )
-        .build(),
-      StreamingOutputCallResponse.newBuilder()
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(58979)))
-        )
-        .build()
-    )
+    val requests =
+      Arrays.asList(
+        StreamingOutputCallRequest.newBuilder()
+          .addResponseParameters(ResponseParameters.newBuilder().setSize(31415))
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(27182))))
+          .build(),
+        StreamingOutputCallRequest.newBuilder()
+          .addResponseParameters(ResponseParameters.newBuilder().setSize(9))
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(8))))
+          .build(),
+        StreamingOutputCallRequest.newBuilder()
+          .addResponseParameters(ResponseParameters.newBuilder().setSize(2653))
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(1828))))
+          .build(),
+        StreamingOutputCallRequest.newBuilder()
+          .addResponseParameters(ResponseParameters.newBuilder().setSize(58979))
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(45904))))
+          .build()
+      )
+    val goldenResponses =
+      listOf(
+        StreamingOutputCallResponse.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(31415))))
+          .build(),
+        StreamingOutputCallResponse.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(9))))
+          .build(),
+        StreamingOutputCallResponse.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(2653))))
+          .build(),
+        StreamingOutputCallResponse.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(58979))))
+          .build()
+      )
     runBlocking {
       // TODO: per-element timeout
       assertResponses(goldenResponses, stub.fullDuplexCall(requests.asFlow()).toList())
@@ -641,23 +562,13 @@ abstract class AbstractInteropTest {
 
   @Test
   fun emptyStream() {
-    runBlocking {
-      assertResponses(listOf(), stub.fullDuplexCall(flowOf()).toList())
-    }
+    runBlocking { assertResponses(listOf(), stub.fullDuplexCall(flowOf()).toList()) }
   }
 
   @Test
   fun cancelAfterBegin() {
     class MyEx : Exception()
-    runBlocking {
-      assertFailsWith<MyEx> {
-        stub.streamingInputCall(
-          flow {
-            throw MyEx()
-          }
-        )
-      }
-    }
+    runBlocking { assertFailsWith<MyEx> { stub.streamingInputCall(flow { throw MyEx() }) } }
   }
 
   @Test
@@ -677,9 +588,7 @@ abstract class AbstractInteropTest {
     val request = streamingOutputBuilder.build()
     val numRequests = 10
     val responses = runBlocking {
-      stub.fullDuplexCall(
-        (1..numRequests).asFlow().map { request }
-      ).toList()
+      stub.fullDuplexCall((1..numRequests).asFlow().map { request }).toList()
     }
     assertEquals(responseSizes.size * numRequests, responses.size)
     for ((ix, response) in responses.withIndex()) {
@@ -720,22 +629,20 @@ abstract class AbstractInteropTest {
 
   @Test
   fun serverStreamingShouldBeFlowControlled() {
-    val request = StreamingOutputCallRequest.newBuilder()
-      .addResponseParameters(ResponseParameters.newBuilder().setSize(100000))
-      .addResponseParameters(ResponseParameters.newBuilder().setSize(100001))
-      .build()
-    val goldenResponses = Arrays.asList(
-      StreamingOutputCallResponse.newBuilder()
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(100000)))
-        ).build(),
-      StreamingOutputCallResponse.newBuilder()
-        .setPayload(
-          Payload.newBuilder()
-            .setBody(ByteString.copyFrom(ByteArray(100001)))
-        ).build()
-    )
+    val request =
+      StreamingOutputCallRequest.newBuilder()
+        .addResponseParameters(ResponseParameters.newBuilder().setSize(100000))
+        .addResponseParameters(ResponseParameters.newBuilder().setSize(100001))
+        .build()
+    val goldenResponses =
+      Arrays.asList(
+        StreamingOutputCallResponse.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(100000))))
+          .build(),
+        StreamingOutputCallResponse.newBuilder()
+          .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(100001))))
+          .build()
+      )
     val start = System.nanoTime()
 
     // TODO(lowasser): change this to a Channel
@@ -744,6 +651,7 @@ abstract class AbstractInteropTest {
     call.start(
       object : ClientCall.Listener<StreamingOutputCallResponse>() {
         override fun onHeaders(headers: Metadata) {}
+
         override fun onMessage(message: StreamingOutputCallResponse) {
           queue.add(message)
         }
@@ -781,39 +689,31 @@ abstract class AbstractInteropTest {
   @Test
   fun veryLargeRequest() {
     assumeEnoughMemory()
-    val request = SimpleRequest.newBuilder()
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(unaryPayloadLength())))
-      )
-      .setResponseSize(10)
-      .build()
-    val goldenResponse = SimpleResponse.newBuilder()
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(10)))
-      )
-      .build()
-    runBlocking {
-      assertResponse(goldenResponse, stub.unaryCall(request))
-    }
+    val request =
+      SimpleRequest.newBuilder()
+        .setPayload(
+          Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(unaryPayloadLength())))
+        )
+        .setResponseSize(10)
+        .build()
+    val goldenResponse =
+      SimpleResponse.newBuilder()
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(10))))
+        .build()
+    runBlocking { assertResponse(goldenResponse, stub.unaryCall(request)) }
   }
 
   @Test
   fun veryLargeResponse() {
     assumeEnoughMemory()
-    val request = SimpleRequest.newBuilder()
-      .setResponseSize(unaryPayloadLength())
-      .build()
-    val goldenResponse = SimpleResponse.newBuilder()
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(unaryPayloadLength())))
-      )
-      .build()
-    runBlocking {
-      assertResponse(goldenResponse, stub.unaryCall(request))
-    }
+    val request = SimpleRequest.newBuilder().setResponseSize(unaryPayloadLength()).build()
+    val goldenResponse =
+      SimpleResponse.newBuilder()
+        .setPayload(
+          Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(unaryPayloadLength())))
+        )
+        .build()
+    runBlocking { assertResponse(goldenResponse, stub.unaryCall(request)) }
   }
 
   @Test
@@ -827,10 +727,11 @@ abstract class AbstractInteropTest {
     // .. and expect it to be echoed back in trailers
     val trailersCapture = AtomicReference<Metadata>()
     val headersCapture = AtomicReference<Metadata>()
-    stub = stub.withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture))
-    runBlocking {
-      assertNotNull(stub.emptyCall(EMPTY))
-    }
+    stub =
+      stub.withInterceptors(
+        MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture)
+      )
+    runBlocking { assertNotNull(stub.emptyCall(EMPTY)) }
     // Assert that our side channel object is echoed back in both headers and trailers
     assertEquals(contextValue, headersCapture.get().get(Util.METADATA_KEY))
     assertEquals(contextValue, trailersCapture.get().get(Util.METADATA_KEY))
@@ -847,7 +748,10 @@ abstract class AbstractInteropTest {
     // .. and expect it to be echoed back in trailers
     val trailersCapture = AtomicReference<Metadata>()
     val headersCapture = AtomicReference<Metadata>()
-    stub = stub.withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture))
+    stub =
+      stub.withInterceptors(
+        MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture)
+      )
     val responseSizes = listOf(50, 100, 150, 200)
     val streamingOutputBuilder = StreamingOutputCallRequest.newBuilder()
     for (size in responseSizes) {
@@ -876,10 +780,7 @@ abstract class AbstractInteropTest {
         .withDeadlineAfter(10, TimeUnit.SECONDS)
         .streamingOutputCall(
           StreamingOutputCallRequest.newBuilder()
-            .addResponseParameters(
-              ResponseParameters.newBuilder()
-                .setIntervalUs(0)
-            )
+            .addResponseParameters(ResponseParameters.newBuilder().setIntervalUs(0))
             .build()
         )
         .first()
@@ -891,12 +792,12 @@ abstract class AbstractInteropTest {
     runBlocking {
       // warm up the channel and JVM
       stub.emptyCall(EmptyProtos.Empty.getDefaultInstance())
-      val request = StreamingOutputCallRequest.newBuilder()
-        .addResponseParameters(
-          ResponseParameters.newBuilder()
-            .setIntervalUs(TimeUnit.SECONDS.toMicros(20).toInt())
-        )
-        .build()
+      val request =
+        StreamingOutputCallRequest.newBuilder()
+          .addResponseParameters(
+            ResponseParameters.newBuilder().setIntervalUs(TimeUnit.SECONDS.toMicros(20).toInt())
+          )
+          .build()
       try {
         stub.withDeadlineAfter(100, TimeUnit.MILLISECONDS).streamingOutputCall(request).first()
         fail("Expected deadline to be exceeded")
@@ -921,21 +822,18 @@ abstract class AbstractInteropTest {
     runBlocking {
       // warm up the channel and JVM
       stub.emptyCall(EmptyProtos.Empty.getDefaultInstance())
-      val responseParameters = ResponseParameters.newBuilder()
-        .setSize(1)
-        .setIntervalUs(10000)
-      val request = StreamingOutputCallRequest.newBuilder()
-        .addResponseParameters(responseParameters)
-        .addResponseParameters(responseParameters)
-        .addResponseParameters(responseParameters)
-        .addResponseParameters(responseParameters)
-        .build()
-      val statusEx = assertFailsWith<StatusException> {
-        stub
-          .withDeadlineAfter(30, TimeUnit.MILLISECONDS)
-          .streamingOutputCall(request)
-          .collect()
-      }
+      val responseParameters = ResponseParameters.newBuilder().setSize(1).setIntervalUs(10000)
+      val request =
+        StreamingOutputCallRequest.newBuilder()
+          .addResponseParameters(responseParameters)
+          .addResponseParameters(responseParameters)
+          .addResponseParameters(responseParameters)
+          .addResponseParameters(responseParameters)
+          .build()
+      val statusEx =
+        assertFailsWith<StatusException> {
+          stub.withDeadlineAfter(30, TimeUnit.MILLISECONDS).streamingOutputCall(request).collect()
+        }
       assertEquals(Status.DEADLINE_EXCEEDED.code, statusEx.status.code)
       assertStatsTrace("grpc.testing.TestService/EmptyCall", Status.Code.OK)
     }
@@ -978,58 +876,33 @@ abstract class AbstractInteropTest {
   @Test
   fun gracefulShutdown() {
     runBlocking {
-      val requests = listOf(
-        StreamingOutputCallRequest.newBuilder()
-          .addResponseParameters(
-            ResponseParameters.newBuilder()
-              .setSize(3)
-          )
-          .setPayload(
-            Payload.newBuilder()
-              .setBody(ByteString.copyFrom(ByteArray(2)))
-          )
-          .build(),
-        StreamingOutputCallRequest.newBuilder()
-          .addResponseParameters(
-            ResponseParameters.newBuilder()
-              .setSize(1)
-          )
-          .setPayload(
-            Payload.newBuilder()
-              .setBody(ByteString.copyFrom(ByteArray(7)))
-          )
-          .build(),
-        StreamingOutputCallRequest.newBuilder()
-          .addResponseParameters(
-            ResponseParameters.newBuilder()
-              .setSize(4)
-          )
-          .setPayload(
-            Payload.newBuilder()
-              .setBody(ByteString.copyFrom(ByteArray(1)))
-          )
-          .build()
-      )
-      val goldenResponses = listOf(
-        StreamingOutputCallResponse.newBuilder()
-          .setPayload(
-            Payload.newBuilder()
-              .setBody(ByteString.copyFrom(ByteArray(3)))
-          )
-          .build(),
-        StreamingOutputCallResponse.newBuilder()
-          .setPayload(
-            Payload.newBuilder()
-              .setBody(ByteString.copyFrom(ByteArray(1)))
-          )
-          .build(),
-        StreamingOutputCallResponse.newBuilder()
-          .setPayload(
-            Payload.newBuilder()
-              .setBody(ByteString.copyFrom(ByteArray(4)))
-          )
-          .build()
-      )
+      val requests =
+        listOf(
+          StreamingOutputCallRequest.newBuilder()
+            .addResponseParameters(ResponseParameters.newBuilder().setSize(3))
+            .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(2))))
+            .build(),
+          StreamingOutputCallRequest.newBuilder()
+            .addResponseParameters(ResponseParameters.newBuilder().setSize(1))
+            .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(7))))
+            .build(),
+          StreamingOutputCallRequest.newBuilder()
+            .addResponseParameters(ResponseParameters.newBuilder().setSize(4))
+            .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(1))))
+            .build()
+        )
+      val goldenResponses =
+        listOf(
+          StreamingOutputCallResponse.newBuilder()
+            .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(3))))
+            .build(),
+          StreamingOutputCallResponse.newBuilder()
+            .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(1))))
+            .build(),
+          StreamingOutputCallResponse.newBuilder()
+            .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(4))))
+            .build()
+        )
 
       val requestChannel = kotlinx.coroutines.channels.Channel<StreamingOutputCallRequest>()
 
@@ -1041,7 +914,8 @@ abstract class AbstractInteropTest {
       channel.shutdown()
       requestChannel.send(requests[1])
       assertResponse(goldenResponses[1], responses.receive())
-      // The previous ping-pong could have raced with the shutdown, but this one certainly shouldn't.
+      // The previous ping-pong could have raced with the shutdown, but this one certainly
+      // shouldn't.
       requestChannel.send(requests[2])
       assertResponse(goldenResponses[2], responses.receive())
       assertFalse(responses.isClosedForReceive)
@@ -1054,32 +928,32 @@ abstract class AbstractInteropTest {
   fun customMetadata() {
     val responseSize = 314159
     val requestSize = 271828
-    val request = SimpleRequest.newBuilder()
-      .setResponseSize(responseSize)
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(requestSize)))
-      )
-      .build()
-    val streamingRequest = StreamingOutputCallRequest.newBuilder()
-      .addResponseParameters(ResponseParameters.newBuilder().setSize(responseSize))
-      .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(requestSize))))
-      .build()
-    val goldenResponse = SimpleResponse.newBuilder()
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(responseSize)))
-      )
-      .build()
-    val goldenStreamingResponse = StreamingOutputCallResponse.newBuilder()
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(responseSize)))
-      )
-      .build()
+    val request =
+      SimpleRequest.newBuilder()
+        .setResponseSize(responseSize)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(requestSize))))
+        .build()
+    val streamingRequest =
+      StreamingOutputCallRequest.newBuilder()
+        .addResponseParameters(ResponseParameters.newBuilder().setSize(responseSize))
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(requestSize))))
+        .build()
+    val goldenResponse =
+      SimpleResponse.newBuilder()
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(responseSize))))
+        .build()
+    val goldenStreamingResponse =
+      StreamingOutputCallResponse.newBuilder()
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(responseSize))))
+        .build()
     val trailingBytes =
       byteArrayOf(
-        0xa.toByte(), 0xb.toByte(), 0xa.toByte(), 0xb.toByte(), 0xa.toByte(), 0xb.toByte()
+        0xa.toByte(),
+        0xb.toByte(),
+        0xa.toByte(),
+        0xb.toByte(),
+        0xa.toByte(),
+        0xb.toByte()
       )
     // Test UnaryCall
     var metadata = Metadata()
@@ -1089,7 +963,10 @@ abstract class AbstractInteropTest {
     theStub = theStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
     var headersCapture = AtomicReference<Metadata>()
     var trailersCapture = AtomicReference<Metadata>()
-    theStub = theStub.withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture))
+    theStub =
+      theStub.withInterceptors(
+        MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture)
+      )
     val response = runBlocking { theStub.unaryCall(request) }
     assertResponse(goldenResponse, response)
     assertEquals(
@@ -1100,7 +977,10 @@ abstract class AbstractInteropTest {
       Arrays.equals(trailingBytes, trailersCapture.get().get(Util.ECHO_TRAILING_METADATA_KEY))
     )
     assertStatsTrace(
-      "grpc.testing.TestService/UnaryCall", Status.Code.OK, setOf(request), setOf(goldenResponse)
+      "grpc.testing.TestService/UnaryCall",
+      Status.Code.OK,
+      setOf(request),
+      setOf(goldenResponse)
     )
     // Test FullDuplexCall
     metadata = Metadata()
@@ -1108,12 +988,19 @@ abstract class AbstractInteropTest {
     metadata.put(Util.ECHO_TRAILING_METADATA_KEY, trailingBytes)
 
     var theStreamingStub = stub
-    theStreamingStub = theStreamingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
+    theStreamingStub =
+      theStreamingStub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata))
     headersCapture = AtomicReference()
     trailersCapture = AtomicReference()
-    theStreamingStub = theStreamingStub.withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture))
+    theStreamingStub =
+      theStreamingStub.withInterceptors(
+        MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture)
+      )
     runBlocking {
-      assertResponse(goldenStreamingResponse, theStreamingStub.fullDuplexCall(flowOf(streamingRequest)).single())
+      assertResponse(
+        goldenStreamingResponse,
+        theStreamingStub.fullDuplexCall(flowOf(streamingRequest)).single()
+      )
     }
     assertEquals(
       "test_initial_metadata_value",
@@ -1135,16 +1022,11 @@ abstract class AbstractInteropTest {
     runBlocking {
       val errorCode = 2
       val errorMessage = "test status message"
-      val responseStatus = EchoStatus.newBuilder()
-        .setCode(errorCode)
-        .setMessage(errorMessage)
-        .build()
-      val simpleRequest = SimpleRequest.newBuilder()
-        .setResponseStatus(responseStatus)
-        .build()
-      val streamingRequest = StreamingOutputCallRequest.newBuilder()
-        .setResponseStatus(responseStatus)
-        .build()
+      val responseStatus =
+        EchoStatus.newBuilder().setCode(errorCode).setMessage(errorMessage).build()
+      val simpleRequest = SimpleRequest.newBuilder().setResponseStatus(responseStatus).build()
+      val streamingRequest =
+        StreamingOutputCallRequest.newBuilder().setResponseStatus(responseStatus).build()
       // Test UnaryCall
       try {
         stub.unaryCall(simpleRequest)
@@ -1155,9 +1037,9 @@ abstract class AbstractInteropTest {
       }
       assertStatsTrace("grpc.testing.TestService/UnaryCall", Status.Code.UNKNOWN)
       // Test FullDuplexCall
-      val status = assertFailsWith<StatusException> {
-        stub.fullDuplexCall(flowOf(streamingRequest)).collect()
-      }.status
+      val status =
+        assertFailsWith<StatusException> { stub.fullDuplexCall(flowOf(streamingRequest)).collect() }
+          .status
       assertEquals(Status.UNKNOWN.code, status.code)
       assertEquals(errorMessage, status.description)
       assertStatsTrace("grpc.testing.TestService/FullDuplexCall", Status.Code.UNKNOWN)
@@ -1168,14 +1050,12 @@ abstract class AbstractInteropTest {
   fun specialStatusMessage() {
     val errorCode = 2
     val errorMessage = "\t\ntest with whitespace\r\nand Unicode BMP ☺ and non-BMP 😈\t\n"
-    val simpleRequest = SimpleRequest.newBuilder()
-      .setResponseStatus(
-        EchoStatus.newBuilder()
-          .setCode(errorCode)
-          .setMessage(errorMessage)
-          .build()
-      )
-      .build()
+    val simpleRequest =
+      SimpleRequest.newBuilder()
+        .setResponseStatus(
+          EchoStatus.newBuilder().setCode(errorCode).setMessage(errorMessage).build()
+        )
+        .build()
     runBlocking {
       try {
         stub.unaryCall(simpleRequest)
@@ -1188,13 +1068,14 @@ abstract class AbstractInteropTest {
     assertStatsTrace("grpc.testing.TestService/UnaryCall", Status.Code.UNKNOWN)
   }
 
-  /** Sends an rpc to an unimplemented method within TestService.  */
+  /** Sends an rpc to an unimplemented method within TestService. */
   @Test
   fun unimplementedMethod() {
     runBlocking {
-      val ex = assertFailsWith<StatusException> {
-        stub.unimplementedCall(EmptyProtos.Empty.getDefaultInstance())
-      }
+      val ex =
+        assertFailsWith<StatusException> {
+          stub.unimplementedCall(EmptyProtos.Empty.getDefaultInstance())
+        }
       assertEquals(Status.UNIMPLEMENTED.code, ex.status.code)
       assertClientStatsTrace(
         "grpc.testing.TestService/UnimplementedCall",
@@ -1203,16 +1084,17 @@ abstract class AbstractInteropTest {
     }
   }
 
-  /** Sends an rpc to an unimplemented service on the server.  */
+  /** Sends an rpc to an unimplemented service on the server. */
   @Test
   fun unimplementedService() {
     val stub =
       UnimplementedServiceGrpcKt.UnimplementedServiceCoroutineStub(channel)
         .withInterceptors(tracerSetupInterceptor)
     runBlocking {
-      val ex = assertFailsWith<StatusException> {
-        stub.unimplementedCall(EmptyProtos.Empty.getDefaultInstance())
-      }
+      val ex =
+        assertFailsWith<StatusException> {
+          stub.unimplementedCall(EmptyProtos.Empty.getDefaultInstance())
+        }
       assertEquals(Status.UNIMPLEMENTED.code, ex.status.code)
     }
     assertStatsTrace(
@@ -1221,21 +1103,22 @@ abstract class AbstractInteropTest {
     )
   }
 
-  /** Start a fullDuplexCall which the server will not respond, and verify the deadline expires.  */
+  /** Start a fullDuplexCall which the server will not respond, and verify the deadline expires. */
   @Test
   fun timeoutOnSleepingServer() {
     val stub = stub.withDeadlineAfter(1, TimeUnit.MILLISECONDS)
-    val request = StreamingOutputCallRequest.newBuilder()
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(27182)))
-      )
-      .build()
+    val request =
+      StreamingOutputCallRequest.newBuilder()
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(27182))))
+        .build()
     runBlocking {
       val caught = CompletableDeferred<Throwable>()
       val responses = stub.fullDuplexCall(flowOf(request)).catch { caught.complete(it) }.toList()
       assertThat(responses).isEmpty()
-      assertEquals(Status.DEADLINE_EXCEEDED.code, (caught.getCompleted() as StatusException).status.code)
+      assertEquals(
+        Status.DEADLINE_EXCEEDED.code,
+        (caught.getCompleted() as StatusException).status.code
+      )
     }
   }
 
@@ -1249,57 +1132,48 @@ abstract class AbstractInteropTest {
     assertNotNull(obtainLocalClientAddr())
   }
 
-  /** Sends a large unary rpc with service account credentials.  */
+  /** Sends a large unary rpc with service account credentials. */
   fun serviceAccountCreds(jsonKey: String, credentialsStream: InputStream?, authScope: String) {
     // cast to ServiceAccountCredentials to double-check the right type of object was created.
     var credentials: GoogleCredentials =
       GoogleCredentials.fromStream(credentialsStream) as ServiceAccountCredentials
     credentials = credentials.createScoped(listOf(authScope))
     val stub = this.stub.withCallCredentials(MoreCallCredentials.from(credentials))
-    val request = SimpleRequest.newBuilder()
-      .setFillUsername(true)
-      .setFillOauthScope(true)
-      .setResponseSize(314159)
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(271828)))
-      )
-      .build()
+    val request =
+      SimpleRequest.newBuilder()
+        .setFillUsername(true)
+        .setFillOauthScope(true)
+        .setResponseSize(314159)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(271828))))
+        .build()
     val response = runBlocking { stub.unaryCall(request) }
     assertFalse(response.username.isEmpty())
-    assertTrue(
-      "Received username: " + response.username,
-      jsonKey.contains(response.username)
-    )
+    assertTrue("Received username: " + response.username, jsonKey.contains(response.username))
     assertFalse(response.oauthScope.isEmpty())
     assertTrue(
       "Received oauth scope: " + response.oauthScope,
       authScope.contains(response.oauthScope)
     )
-    val goldenResponse = SimpleResponse.newBuilder()
-      .setOauthScope(response.oauthScope)
-      .setUsername(response.username)
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(314159)))
-      )
-      .build()
+    val goldenResponse =
+      SimpleResponse.newBuilder()
+        .setOauthScope(response.oauthScope)
+        .setUsername(response.username)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(314159))))
+        .build()
     assertResponse(goldenResponse, response)
   }
 
-  /** Sends a large unary rpc with compute engine credentials.  */
+  /** Sends a large unary rpc with compute engine credentials. */
   fun computeEngineCreds(serviceAccount: String?, oauthScope: String) {
     val credentials = ComputeEngineCredentials.create()
     val stub = stub.withCallCredentials(MoreCallCredentials.from(credentials))
-    val request = SimpleRequest.newBuilder()
-      .setFillUsername(true)
-      .setFillOauthScope(true)
-      .setResponseSize(314159)
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(271828)))
-      )
-      .build()
+    val request =
+      SimpleRequest.newBuilder()
+        .setFillUsername(true)
+        .setFillOauthScope(true)
+        .setResponseSize(314159)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(271828))))
+        .build()
     val response = runBlocking { stub.unaryCall(request) }
     assertEquals(serviceAccount, response.username)
     assertFalse(response.oauthScope.isEmpty())
@@ -1307,52 +1181,44 @@ abstract class AbstractInteropTest {
       "Received oauth scope: " + response.oauthScope,
       oauthScope.contains(response.oauthScope)
     )
-    val goldenResponse = SimpleResponse.newBuilder()
-      .setOauthScope(response.oauthScope)
-      .setUsername(response.username)
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(314159)))
-      )
-      .build()
+    val goldenResponse =
+      SimpleResponse.newBuilder()
+        .setOauthScope(response.oauthScope)
+        .setUsername(response.username)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(314159))))
+        .build()
     assertResponse(goldenResponse, response)
   }
 
-  /** Sends an unary rpc with ComputeEngineChannelBuilder.  */
+  /** Sends an unary rpc with ComputeEngineChannelBuilder. */
   fun computeEngineChannelCredentials(
     defaultServiceAccount: String,
     computeEngineStub: TestServiceGrpcKt.TestServiceCoroutineStub
   ) = runBlocking {
-    val request = SimpleRequest.newBuilder()
-      .setFillUsername(true)
-      .setResponseSize(314159)
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(271828)))
-      )
-      .build()
+    val request =
+      SimpleRequest.newBuilder()
+        .setFillUsername(true)
+        .setResponseSize(314159)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(271828))))
+        .build()
     val response = computeEngineStub.unaryCall(request)
     assertEquals(defaultServiceAccount, response.username)
-    val goldenResponse = SimpleResponse.newBuilder()
-      .setUsername(defaultServiceAccount)
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(314159)))
-      )
-      .build()
+    val goldenResponse =
+      SimpleResponse.newBuilder()
+        .setUsername(defaultServiceAccount)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(314159))))
+        .build()
     assertResponse(goldenResponse, response)
   }
 
-  /** Test JWT-based auth.  */
+  /** Test JWT-based auth. */
   fun jwtTokenCreds(serviceAccountJson: InputStream?) {
-    val request = SimpleRequest.newBuilder()
-      .setResponseSize(314159)
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(271828)))
-      )
-      .setFillUsername(true)
-      .build()
+    val request =
+      SimpleRequest.newBuilder()
+        .setResponseSize(314159)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(271828))))
+        .setFillUsername(true)
+        .build()
     val credentials = GoogleCredentials.fromStream(serviceAccountJson) as ServiceAccountCredentials
     val response = runBlocking {
       stub.withCallCredentials(MoreCallCredentials.from(credentials)).unaryCall(request)
@@ -1361,24 +1227,18 @@ abstract class AbstractInteropTest {
     assertEquals(314159, response.payload.body.size().toLong())
   }
 
-  /** Sends a unary rpc with raw oauth2 access token credentials.  */
+  /** Sends a unary rpc with raw oauth2 access token credentials. */
   fun oauth2AuthToken(jsonKey: String, credentialsStream: InputStream, authScope: String) {
     var utilCredentials = GoogleCredentials.fromStream(credentialsStream)
     utilCredentials = utilCredentials.createScoped(listOf(authScope))
     val accessToken = utilCredentials.refreshAccessToken()
     val credentials = OAuth2Credentials.create(accessToken)
-    val request = SimpleRequest.newBuilder()
-      .setFillUsername(true)
-      .setFillOauthScope(true)
-      .build()
+    val request = SimpleRequest.newBuilder().setFillUsername(true).setFillOauthScope(true).build()
     val response = runBlocking {
       stub.withCallCredentials(MoreCallCredentials.from(credentials)).unaryCall(request)
     }
     assertFalse(response.username.isEmpty())
-    assertTrue(
-      "Received username: " + response.username,
-      jsonKey.contains(response.username)
-    )
+    assertTrue("Received username: " + response.username, jsonKey.contains(response.username))
     assertFalse(response.oauthScope.isEmpty())
     assertTrue(
       "Received oauth scope: " + response.oauthScope,
@@ -1386,7 +1246,7 @@ abstract class AbstractInteropTest {
     )
   }
 
-  /** Sends a unary rpc with "per rpc" raw oauth2 access token credentials.  */
+  /** Sends a unary rpc with "per rpc" raw oauth2 access token credentials. */
   fun perRpcCreds(jsonKey: String, credentialsStream: InputStream, oauthScope: String) {
     // In gRpc Java, we don't have per Rpc credentials, user can use an intercepted stub only once
     // for that purpose.
@@ -1394,32 +1254,28 @@ abstract class AbstractInteropTest {
     oauth2AuthToken(jsonKey, credentialsStream, oauthScope)
   }
 
-  /** Sends an unary rpc with "google default credentials".  */
+  /** Sends an unary rpc with "google default credentials". */
   fun googleDefaultCredentials(
     defaultServiceAccount: String,
     googleDefaultStub: TestServiceGrpcKt.TestServiceCoroutineStub
   ) = runBlocking {
-    val request = SimpleRequest.newBuilder()
-      .setFillUsername(true)
-      .setResponseSize(314159)
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(271828)))
-      )
-      .build()
+    val request =
+      SimpleRequest.newBuilder()
+        .setFillUsername(true)
+        .setResponseSize(314159)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(271828))))
+        .build()
     val response = googleDefaultStub.unaryCall(request)
     assertEquals(defaultServiceAccount, response.username)
-    val goldenResponse = SimpleResponse.newBuilder()
-      .setUsername(defaultServiceAccount)
-      .setPayload(
-        Payload.newBuilder()
-          .setBody(ByteString.copyFrom(ByteArray(314159)))
-      )
-      .build()
+    val goldenResponse =
+      SimpleResponse.newBuilder()
+        .setUsername(defaultServiceAccount)
+        .setPayload(Payload.newBuilder().setBody(ByteString.copyFrom(ByteArray(314159))))
+        .build()
     assertResponse(goldenResponse, response)
   }
 
-  /** Helper for getting remote address from [io.grpc.ClientCall.getAttributes]  */
+  /** Helper for getting remote address from [io.grpc.ClientCall.getAttributes] */
   private fun obtainRemoteServerAddr(): SocketAddress? {
     return runBlocking {
       stub
@@ -1430,7 +1286,7 @@ abstract class AbstractInteropTest {
     }
   }
 
-  /** Helper for getting local address from [io.grpc.ClientCall.getAttributes]  */
+  /** Helper for getting local address from [io.grpc.ClientCall.getAttributes] */
   private fun obtainLocalClientAddr(): SocketAddress? {
     return runBlocking {
       stub
@@ -1502,7 +1358,7 @@ abstract class AbstractInteropTest {
     assertEquals(method, tracerInfo!!.fullMethodName)
     assertNotNull(tracerInfo.tracer.contextCapture)
     // On the server, streamClosed() may be called after the client receives the final status.
-// So we use a timeout.
+    // So we use a timeout.
     try {
       assertTrue(tracerInfo.tracer.await(1, TimeUnit.SECONDS))
     } catch (e: InterruptedException) {
@@ -1514,9 +1370,7 @@ abstract class AbstractInteropTest {
     }
   }
 
-  /**
-   * Check information recorded by tracers.
-   */
+  /** Check information recorded by tracers. */
   private fun checkTracers(
     tracer: TestStreamTracer,
     sentMessages: Collection<MessageLite>,
@@ -1526,9 +1380,8 @@ abstract class AbstractInteropTest {
     var seqNo = 0
     for (msg in sentMessages) {
       assertThat(tracer.nextOutboundEvent()).isEqualTo(String.format("outboundMessage(%d)", seqNo))
-      assertThat(tracer.nextOutboundEvent()).matches(
-        String.format("outboundMessageSent\\(%d, -?[0-9]+, -?[0-9]+\\)", seqNo)
-      )
+      assertThat(tracer.nextOutboundEvent())
+        .matches(String.format("outboundMessageSent\\(%d, -?[0-9]+, -?[0-9]+\\)", seqNo))
       seqNo++
       uncompressedSentSize += msg.serializedSize.toLong()
     }
@@ -1537,9 +1390,8 @@ abstract class AbstractInteropTest {
     seqNo = 0
     for (msg in receivedMessages) {
       assertThat(tracer.nextInboundEvent()).isEqualTo(String.format("inboundMessage(%d)", seqNo))
-      assertThat(tracer.nextInboundEvent()).matches(
-        String.format("inboundMessageRead\\(%d, -?[0-9]+, -?[0-9]+\\)", seqNo)
-      )
+      assertThat(tracer.nextInboundEvent())
+        .matches(String.format("inboundMessageRead\\(%d, -?[0-9]+, -?[0-9]+\\)", seqNo))
       uncompressedReceivedSize += msg.serializedSize.toLong()
       seqNo++
     }
@@ -1588,13 +1440,12 @@ abstract class AbstractInteropTest {
 
   companion object {
     private val logger = Logger.getLogger(AbstractInteropTest::class.java.name)
-    /** Must be at least [.unaryPayloadLength], plus some to account for encoding overhead.  */
+    /** Must be at least [.unaryPayloadLength], plus some to account for encoding overhead. */
     const val MAX_MESSAGE_SIZE = 16 * 1024 * 1024
-    @JvmField
-    protected val EMPTY = EmptyProtos.Empty.getDefaultInstance()
+    @JvmField protected val EMPTY = EmptyProtos.Empty.getDefaultInstance()
 
     /**
-     * Some tests run on memory constrained environments.  Rather than OOM, just give up.  64 is
+     * Some tests run on memory constrained environments. Rather than OOM, just give up. 64 is
      * chosen as a maximum amount of memory a large test would need.
      */
     private fun assumeEnoughMemory() {
@@ -1608,8 +1459,7 @@ abstract class AbstractInteropTest {
     }
 
     /**
-     * Captures the request attributes. Useful for testing ServerCalls.
-     * [ServerCall.getAttributes]
+     * Captures the request attributes. Useful for testing ServerCalls. [ServerCall.getAttributes]
      */
     private fun recordServerCallInterceptor(
       serverCallCapture: AtomicReference<ServerCall<*, *>>
@@ -1627,8 +1477,7 @@ abstract class AbstractInteropTest {
     }
 
     /**
-     * Captures the request attributes. Useful for testing ClientCalls.
-     * [ClientCall.getAttributes]
+     * Captures the request attributes. Useful for testing ClientCalls. [ClientCall.getAttributes]
      */
     private fun recordClientCallInterceptor(
       clientCallCapture: AtomicReference<ClientCall<*, *>>
@@ -1659,9 +1508,7 @@ abstract class AbstractInteropTest {
     }
   }
 
-  /**
-   * Constructor for tests.
-   */
+  /** Constructor for tests. */
   init {
     var timeout: TestRule = Timeout.seconds(60)
     try {

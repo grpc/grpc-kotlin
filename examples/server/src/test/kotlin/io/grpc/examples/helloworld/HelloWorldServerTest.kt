@@ -17,26 +17,24 @@
 package io.grpc.examples.helloworld
 
 import io.grpc.testing.GrpcServerRule
-import kotlinx.coroutines.runBlocking
-import org.junit.Rule
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.coroutines.runBlocking
+import org.junit.Rule
 
 class HelloWorldServerTest {
-    @get:Rule
-    val grpcServerRule: GrpcServerRule = GrpcServerRule().directExecutor()
+  @get:Rule val grpcServerRule: GrpcServerRule = GrpcServerRule().directExecutor()
 
-    @Test
-    fun sayHello() =
-        runBlocking {
-            val service = HelloWorldServer.HelloWorldService()
-            grpcServerRule.serviceRegistry.addService(service)
+  @Test
+  fun sayHello() = runBlocking {
+    val service = HelloWorldServer.HelloWorldService()
+    grpcServerRule.serviceRegistry.addService(service)
 
-            val stub = GreeterGrpcKt.GreeterCoroutineStub(grpcServerRule.channel)
-            val testName = "test name"
+    val stub = GreeterGrpcKt.GreeterCoroutineStub(grpcServerRule.channel)
+    val testName = "test name"
 
-            val reply = stub.sayHello(helloRequest { name = testName })
+    val reply = stub.sayHello(helloRequest { name = testName })
 
-            assertEquals("Hello $testName", reply.message)
-        }
+    assertEquals("Hello $testName", reply.message)
+  }
 }

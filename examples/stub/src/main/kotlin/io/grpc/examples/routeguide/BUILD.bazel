@@ -8,11 +8,11 @@ kt_jvm_library(
     name = "route_guide_stub",
     srcs = [
         "Database.kt",
-        "Points.kt"
+        "Points.kt",
     ],
     deps = [
         "//examples/protos/src/main/proto/io/grpc/examples/routeguide:route_guide_java_proto",
         "//examples/protos/src/main/proto/io/grpc/examples/routeguide:route_guide_kt_grpc",
-        "@protobuf//:protobuf_java_util"
+        "@protobuf//:protobuf_java_util",
     ],
 )

@@ -17,7 +17,6 @@
 package io.grpc.kotlin.generator.protoc.testing
 
 import com.google.common.truth.ExpectFailure
-import com.google.common.truth.ExpectFailure.SimpleSubjectBuilderCallback
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.INT
 import com.squareup.kotlinpoet.ParameterSpec
@@ -30,29 +29,23 @@ import org.junit.runners.JUnit4
 @RunWith(JUnit4::class)
 class FunSpecSubjectTest {
   private val funSpec =
-    FunSpec
-      .builder("foo")
+    FunSpec.builder("foo")
       .addParameter(ParameterSpec.builder("bar", INT).build())
       .returns(String::class.asTypeName())
       .build()
 
   @Test
   fun generates() {
-    assertThat(funSpec).generates(
-      """
+    assertThat(funSpec)
+      .generates("""
       public fun foo(bar: kotlin.Int): kotlin.String {
       }
-    """
-    )
+    """)
   }
 
   @Test
   fun generatesFailure() {
-    ExpectFailure.expectFailureAbout(
-      funSpecs
-    ) { it.that(funSpec).generates("") }
-    ExpectFailure.expectFailureAbout(
-      funSpecs
-    ) { it.that(funSpec).generates("fun bar") }
+    ExpectFailure.expectFailureAbout(funSpecs) { it.that(funSpec).generates("") }
+    ExpectFailure.expectFailureAbout(funSpecs) { it.that(funSpec).generates("fun bar") }
   }
 }

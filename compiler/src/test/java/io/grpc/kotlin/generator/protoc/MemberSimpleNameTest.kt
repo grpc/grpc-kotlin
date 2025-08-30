@@ -28,8 +28,7 @@ class MemberSimpleNameTest {
   fun withPrefix() {
     assertThat(MemberSimpleName("myField").withPrefix("get"))
       .isEqualTo(MemberSimpleName("getMyField"))
-    assertThat(MemberSimpleName("field").withPrefix("get"))
-      .isEqualTo(MemberSimpleName("getField"))
+    assertThat(MemberSimpleName("field").withPrefix("get")).isEqualTo(MemberSimpleName("getField"))
   }
 
   @Test

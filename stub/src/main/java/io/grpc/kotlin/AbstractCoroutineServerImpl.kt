@@ -21,7 +21,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 /**
- * Skeleton implementation of a coroutine-based gRPC server implementation.  Intended to be
+ * Skeleton implementation of a coroutine-based gRPC server implementation. Intended to be
  * subclassed by generated code.
  */
 abstract class AbstractCoroutineServerImpl(

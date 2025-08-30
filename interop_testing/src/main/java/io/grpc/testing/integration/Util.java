@@ -24,23 +24,19 @@ import java.net.URISyntaxException;
 import java.util.List;
 import org.junit.Assert;
 
-/**
- * Utility methods to support integration testing.
- */
+/** Utility methods to support integration testing. */
 public class Util {
 
   public static final Metadata.Key<Messages.SimpleContext> METADATA_KEY =
       Metadata.Key.of(
           "grpc.testing.SimpleContext" + Metadata.BINARY_HEADER_SUFFIX,
           ProtoLiteUtils.metadataMarshaller(Messages.SimpleContext.getDefaultInstance()));
-  public static final Metadata.Key<String> ECHO_INITIAL_METADATA_KEY
-      = Metadata.Key.of("x-grpc-test-echo-initial", Metadata.ASCII_STRING_MARSHALLER);
-  public static final Metadata.Key<byte[]> ECHO_TRAILING_METADATA_KEY
-      = Metadata.Key.of("x-grpc-test-echo-trailing-bin", Metadata.BINARY_BYTE_MARSHALLER);
+  public static final Metadata.Key<String> ECHO_INITIAL_METADATA_KEY =
+      Metadata.Key.of("x-grpc-test-echo-initial", Metadata.ASCII_STRING_MARSHALLER);
+  public static final Metadata.Key<byte[]> ECHO_TRAILING_METADATA_KEY =
+      Metadata.Key.of("x-grpc-test-echo-trailing-bin", Metadata.BINARY_BYTE_MARSHALLER);
 
-  /**
-   * Combine a host and port into an authority string.
-   */
+  /** Combine a host and port into an authority string. */
   public static String authorityFromHostAndPort(String host, int port) {
     try {
       return new URI(null, null, host, port, null, null, null).getAuthority();
@@ -66,8 +62,8 @@ public class Util {
   }
 
   /** Assert that two lists of messages are equal, producing a useful message if not. */
-  public static void assertEquals(List<? extends MessageLite> expected,
-      List<? extends MessageLite> actual) {
+  public static void assertEquals(
+      List<? extends MessageLite> expected, List<? extends MessageLite> actual) {
     if (expected == null || actual == null) {
       Assert.assertEquals(expected, actual);
     } else if (expected.size() != actual.size()) {

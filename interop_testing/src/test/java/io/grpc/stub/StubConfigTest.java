@@ -36,25 +36,19 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-/**
- * Tests for stub reconfiguration.
- */
+/** Tests for stub reconfiguration. */
 @RunWith(JUnit4.class)
 public class StubConfigTest {
 
-  @Mock
-  private Channel channel;
+  @Mock private Channel channel;
 
-  @Mock
-  private StreamObserver<SimpleResponse> responseObserver;
+  @Mock private StreamObserver<SimpleResponse> responseObserver;
 
-  @Mock
-  private ClientCall<SimpleRequest, SimpleResponse> call;
+  @Mock private ClientCall<SimpleRequest, SimpleResponse> call;
 
-  /**
-   * Sets up mocks.
-   */
-  @Before public void setUp() {
+  /** Sets up mocks. */
+  @Before
+  public void setUp() {
     MockitoAnnotations.openMocks(this);
 
     when(channel.newCall(

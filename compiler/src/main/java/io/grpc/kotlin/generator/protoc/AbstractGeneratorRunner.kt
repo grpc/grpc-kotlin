@@ -35,26 +35,27 @@ abstract class AbstractGeneratorRunner {
 
   @VisibleForTesting
   fun mainAsProtocPlugin(input: InputStream, output: OutputStream) {
-    val generatorRequest = try {
-      input.buffered().use {
-        PluginProtos.CodeGeneratorRequest.parseFrom(it)
-      }
-    } catch (failure: Exception) {
-      throw IOException(
-        """
+    val generatorRequest =
+      try {
+        input.buffered().use { PluginProtos.CodeGeneratorRequest.parseFrom(it) }
+      } catch (failure: Exception) {
+        throw IOException(
+          """
         Attempted to run proto extension generator as protoc plugin, but could not read
         CodeGeneratorRequest.
-        """.trimIndent(),
-        failure
-      )
-    }
+        """
+            .trimIndent(),
+          failure
+        )
+      }
     output.buffered().use {
       CodeGenerators.codeGeneratorResponse {
-        val descriptorMap = CodeGenerators.descriptorMap(generatorRequest.protoFileList)
-        generatorRequest.filesToGenerate
-          .map(descriptorMap::getValue) // compiled descriptors to generate code for
-          .flatMap(::generateCodeForFile) // generated extensions
-      }.writeTo(it)
+          val descriptorMap = CodeGenerators.descriptorMap(generatorRequest.protoFileList)
+          generatorRequest.filesToGenerate
+            .map(descriptorMap::getValue) // compiled descriptors to generate code for
+            .flatMap(::generateCodeForFile) // generated extensions
+        }
+        .writeTo(it)
     }
   }
 
@@ -68,9 +69,10 @@ abstract class AbstractGeneratorRunner {
     val fileNameToDescriptorSet =
       inTransitiveClosure.associateWith { readFileDescriptorSet(fs.getPath(it)) }
 
-    val descriptorMap = CodeGenerators.descriptorMapFromUnsorted(
-      fileNameToDescriptorSet.values.flatMap { it.fileList }
-    )
+    val descriptorMap =
+      CodeGenerators.descriptorMapFromUnsorted(
+        fileNameToDescriptorSet.values.flatMap { it.fileList }
+      )
 
     toGenerateExtensionsFor
       .asSequence()

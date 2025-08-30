@@ -21,8 +21,8 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeSpec
 
 /**
- * Represents a simple (unqualified, unnested) name of a Kotlin/Java class, interface, or enum,
- * in UpperCamelCase.
+ * Represents a simple (unqualified, unnested) name of a Kotlin/Java class, interface, or enum, in
+ * UpperCamelCase.
  */
 data class ClassSimpleName(val name: String) : CharSequence by name {
   /** Returns this class name with a suffix. */
@@ -46,14 +46,12 @@ data class ClassSimpleName(val name: String) : CharSequence by name {
 }
 
 /** Create a builder for a class with the specified simple name. */
-fun TypeSpec.Companion.classBuilder(
-  simpleName: ClassSimpleName
-): TypeSpec.Builder = classBuilder(simpleName.name)
+fun TypeSpec.Companion.classBuilder(simpleName: ClassSimpleName): TypeSpec.Builder =
+  classBuilder(simpleName.name)
 
 /** Create a builder for an object with the specified simple name. */
-fun TypeSpec.Companion.objectBuilder(
-  simpleName: ClassSimpleName
-): TypeSpec.Builder = objectBuilder(simpleName.name)
+fun TypeSpec.Companion.objectBuilder(simpleName: ClassSimpleName): TypeSpec.Builder =
+  objectBuilder(simpleName.name)
 
 /** Given a fully qualified class name, get the fully qualified name of a nested class inside it. */
 fun ClassName.nestedClass(classSimpleName: ClassSimpleName): ClassName =

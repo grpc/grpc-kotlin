@@ -44,28 +44,28 @@ class FlowControlTest : AbstractCallsTest() {
   val context = CoroutineName("server context")
 
   private fun <T> Flow<T>.produceUnbuffered(scope: CoroutineScope): ReceiveChannel<T> {
-    return scope.produce<T> {
-      collect { send(it) }
-    }
+    return scope.produce<T> { collect { send(it) } }
   }
 
   @FlowPreview
   @Test
   fun bidiPingPongFlowControl() = runBlocking {
-    val channel = makeChannel(
-      ServerCalls.bidiStreamingServerMethodDefinition(
-        context = context,
-        descriptor = bidiStreamingSayHelloMethod,
-        implementation = { requests -> requests.map { helloReply("Hello, ${it.name}") } }
+    val channel =
+      makeChannel(
+        ServerCalls.bidiStreamingServerMethodDefinition(
+          context = context,
+          descriptor = bidiStreamingSayHelloMethod,
+          implementation = { requests -> requests.map { helloReply("Hello, ${it.name}") } }
+        )
       )
-    )
     val requests = Channel<HelloRequest>()
     val responses =
       ClientCalls.bidiStreamingRpc(
-        channel = channel,
-        requests = requests.consumeAsFlow(),
-        method = bidiStreamingSayHelloMethod
-      ).produceUnbuffered(this)
+          channel = channel,
+          requests = requests.consumeAsFlow(),
+          method = bidiStreamingSayHelloMethod
+        )
+        .produceUnbuffered(this)
     requests.send(helloRequest("Garnet"))
     requests.send(helloRequest("Amethyst"))
     val third = launch { requests.send(helloRequest("Steven")) }
@@ -80,21 +80,24 @@ class FlowControlTest : AbstractCallsTest() {
   @FlowPreview
   @Test
   fun bidiPingPongFlowControlExpandedServerBuffer() = runBlocking {
-    val channel = makeChannel(
-      ServerCalls.bidiStreamingServerMethodDefinition(
-        context = context,
-        descriptor = bidiStreamingSayHelloMethod,
-        implementation = {
-          requests -> requests.buffer(Channel.RENDEZVOUS).map { helloReply("Hello, ${it.name}") }
-        }
+    val channel =
+      makeChannel(
+        ServerCalls.bidiStreamingServerMethodDefinition(
+          context = context,
+          descriptor = bidiStreamingSayHelloMethod,
+          implementation = { requests ->
+            requests.buffer(Channel.RENDEZVOUS).map { helloReply("Hello, ${it.name}") }
+          }
+        )
       )
-    )
     val requests = Channel<HelloRequest>()
-    val responses = ClientCalls.bidiStreamingRpc(
-      channel = channel,
-      requests = requests.consumeAsFlow(),
-      method = bidiStreamingSayHelloMethod
-    ).produceUnbuffered(this)
+    val responses =
+      ClientCalls.bidiStreamingRpc(
+          channel = channel,
+          requests = requests.consumeAsFlow(),
+          method = bidiStreamingSayHelloMethod
+        )
+        .produceUnbuffered(this)
     requests.send(helloRequest("Garnet"))
     requests.send(helloRequest("Amethyst"))
     requests.send(helloRequest("Pearl"))
@@ -109,7 +112,7 @@ class FlowControlTest : AbstractCallsTest() {
   @FlowPreview
   @Test
   fun bidiPingPongFlowControlServerDrawsMultipleRequests() = runBlocking {
-    fun <T: Any> Flow<T>.pairOff(): Flow<Pair<T, T>> = flow {
+    fun <T : Any> Flow<T>.pairOff(): Flow<Pair<T, T>> = flow {
       var odd: T? = null
       collect {
         val o = odd
@@ -122,21 +125,24 @@ class FlowControlTest : AbstractCallsTest() {
       }
     }
 
-    val channel = makeChannel(
-      ServerCalls.bidiStreamingServerMethodDefinition(
-        context = context,
-        descriptor = bidiStreamingSayHelloMethod,
-        implementation = { requests ->
-          requests.pairOff().map { (a, b) -> helloReply("Hello, ${a.name} and ${b.name}") }
-        }
+    val channel =
+      makeChannel(
+        ServerCalls.bidiStreamingServerMethodDefinition(
+          context = context,
+          descriptor = bidiStreamingSayHelloMethod,
+          implementation = { requests ->
+            requests.pairOff().map { (a, b) -> helloReply("Hello, ${a.name} and ${b.name}") }
+          }
+        )
       )
-    )
     val requests = Channel<HelloRequest>()
-    val responses = ClientCalls.bidiStreamingRpc(
-      channel = channel,
-      requests = requests.consumeAsFlow(),
-      method = bidiStreamingSayHelloMethod
-    ).produceUnbuffered(this)
+    val responses =
+      ClientCalls.bidiStreamingRpc(
+          channel = channel,
+          requests = requests.consumeAsFlow(),
+          method = bidiStreamingSayHelloMethod
+        )
+        .produceUnbuffered(this)
     requests.send(helloRequest("Garnet"))
     requests.send(helloRequest("Amethyst"))
     requests.send(helloRequest("Pearl"))
@@ -148,33 +154,38 @@ class FlowControlTest : AbstractCallsTest() {
     fourth.join() // pulling one element allows the cycle to advance
     requests.send(helloRequest("Rainbow 2.0"))
     requests.close()
-    assertThat(responses.toList()).containsExactly(
-      helloReply("Hello, Pearl and Steven"), helloReply("Hello, Onion and Rainbow 2.0")
-    )
+    assertThat(responses.toList())
+      .containsExactly(
+        helloReply("Hello, Pearl and Steven"),
+        helloReply("Hello, Onion and Rainbow 2.0")
+      )
   }
 
   @ExperimentalCoroutinesApi // transform
   @FlowPreview
   @Test
   fun bidiPingPongFlowControlServerSendsMultipleResponses() = runBlocking {
-    val channel = makeChannel(
-      ServerCalls.bidiStreamingServerMethodDefinition(
-        context = context,
-        descriptor = bidiStreamingSayHelloMethod,
-        implementation = { requests ->
-          requests.transform {
-            emit(helloReply("Hello, ${it.name}"))
-            emit(helloReply("Goodbye, ${it.name}"))
+    val channel =
+      makeChannel(
+        ServerCalls.bidiStreamingServerMethodDefinition(
+          context = context,
+          descriptor = bidiStreamingSayHelloMethod,
+          implementation = { requests ->
+            requests.transform {
+              emit(helloReply("Hello, ${it.name}"))
+              emit(helloReply("Goodbye, ${it.name}"))
+            }
           }
-        }
+        )
       )
-    )
     val requests = Channel<HelloRequest>()
-    val responses = ClientCalls.bidiStreamingRpc(
-      channel = channel,
-      requests = requests.consumeAsFlow(),
-      method = bidiStreamingSayHelloMethod
-    ).produceUnbuffered(this)
+    val responses =
+      ClientCalls.bidiStreamingRpc(
+          channel = channel,
+          requests = requests.consumeAsFlow(),
+          method = bidiStreamingSayHelloMethod
+        )
+        .produceUnbuffered(this)
     requests.send(helloRequest("Garnet"))
     val second = launch { requests.send(helloRequest("Pearl")) }
     delay(200) // wait for everything to work its way through the system

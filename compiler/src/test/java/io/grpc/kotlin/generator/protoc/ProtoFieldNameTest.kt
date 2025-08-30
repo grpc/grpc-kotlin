@@ -59,19 +59,14 @@ class ProtoFieldNameTest {
   fun fieldDescriptorName() {
     val fieldDescriptor =
       Example3.ExampleMessage.getDescriptor().findFieldByName("string_oneof_option")
-    assertThat(fieldDescriptor.fieldName)
-      .isEqualTo(ProtoFieldName("string_oneof_option"))
+    assertThat(fieldDescriptor.fieldName).isEqualTo(ProtoFieldName("string_oneof_option"))
   }
 
   @Test
   fun oneofName() {
     val oneofDescriptor =
-      Example3.ExampleMessage
-        .getDescriptor()
-        .oneofs
-        .find { it.name == "my_oneof" }!!
-    assertThat(oneofDescriptor.oneofName)
-      .isEqualTo(ProtoFieldName("my_oneof"))
+      Example3.ExampleMessage.getDescriptor().oneofs.find { it.name == "my_oneof" }!!
+    assertThat(oneofDescriptor.oneofName).isEqualTo(ProtoFieldName("my_oneof"))
   }
 
   @Test

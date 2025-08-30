@@ -16,13 +16,13 @@
 
 package io.grpc.kotlin
 
-import kotlinx.coroutines.ThreadContextElement
-import kotlin.coroutines.CoroutineContext
 import io.grpc.Context as GrpcContext
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.ThreadContextElement
 
 /**
- * A [CoroutineContext] that propagates an associated [io.grpc.Context] to coroutines run using
- * that context, regardless of thread.
+ * A [CoroutineContext] that propagates an associated [io.grpc.Context] to coroutines run using that
+ * context, regardless of thread.
  */
 class GrpcContextElement(private val grpcContext: GrpcContext) : ThreadContextElement<GrpcContext> {
   companion object Key : CoroutineContext.Key<GrpcContextElement> {
