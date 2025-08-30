@@ -11,6 +11,19 @@ bazel_dep(name = "rules_java", version = "8.15.1")
 bazel_dep(name = "rules_jvm_external", version = "6.8")
 bazel_dep(name = "grpc-java", version = "1.71.0")
 
+# Formatter.
+bazel_dep(name = "aspect_rules_lint", version = "1.6.0", dev_dependency = True)
+bazel_dep(name = "buildifier_prebuilt", version = "8.2.0.2", dev_dependency = True)
+bazel_dep(name = "rules_buf", version = "0.5.2", dev_dependency = True)
+
+http_jar = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_jar")
+
+http_jar(
+    name = "google-java-format",
+    sha256 = "33068bbbdce1099982ec1171f5e202898eb35f2919cf486141e439fc6e3a4203",
+    url = "https://github.com/google/google-java-format/releases/download/v1.17.0/google-java-format-1.17.0-all-deps.jar",
+)
+
 grpc_kotlin_maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
 grpc_kotlin_maven.install(
     name = "grpc_kotlin_maven",
@@ -34,3 +47,9 @@ grpc_kotlin_maven.install(
     strict_visibility = True,
 )
 use_repo(grpc_kotlin_maven, "grpc_kotlin_maven")
+
+install_ktfmt = use_extension("//:extensions.bzl", "install_ktfmt", dev_dependency = True)
+use_repo(install_ktfmt, "ktfmt")
+
+buf = use_extension("@rules_buf//buf:extensions.bzl", "buf", dev_dependency = True)
+use_repo(buf, "rules_buf_toolchains")

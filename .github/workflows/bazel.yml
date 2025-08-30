@@ -26,6 +26,10 @@ jobs:
         mkdir -p "${GITHUB_WORKSPACE}/bin/"
         mv bazelisk-linux-amd64 "${GITHUB_WORKSPACE}/bin/bazel"
         chmod +x "${GITHUB_WORKSPACE}/bin/bazel"
+    - name: Lint - Please run `bazelisk run //:format`
+      run: |
+        cd "${GITHUB_WORKSPACE}"
+        "${GITHUB_WORKSPACE}/bin/bazel" run //:format.check
     - name: Build
       uses: nick-invision/retry@v3
       with:

@@ -1,1 +1,1 @@
-ignore_directories(["bzl-examples", "formatter", "**/bin"])
+ignore_directories(["bzl-examples", "**/bin"])
