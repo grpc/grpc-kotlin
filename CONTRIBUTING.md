@@ -34,9 +34,8 @@ How to get your contributions merged smoothly and quickly.
 - Provide a good **PR description** as a record of **what** change is being made
   and **why** it was made.  Link to a GitHub issue if it exists.
 
-- Don't fix code style and formatting unless you are already changing that line
-  to address an issue.  PRs with irrelevant changes won't be merged.  If you do
-  want to fix formatting or style, do that in a separate PR.
+- Run `bazelisk run //:format` to fix code style and formatting before committing.
+  PRs with invalid format won't be merged. If you do want to support formatting for a new language, do that in a separate commit before adding another commit that reformats all relevant files.
 
 - If you are adding a new file, make sure it has the copyright message template
   at the top as a comment. You can copy over the message from an existing file
