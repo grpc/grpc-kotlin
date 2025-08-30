@@ -1,0 +1,32 @@
+# See https://github.com/bazel-contrib/publish-to-bcr.
+name: Publish to BCR
+on:
+  # Run the publish workflow after a successful release
+  # Can be triggered from the release.yaml workflow
+  workflow_call:
+    inputs:
+      tag_name:
+        required: true
+        type: string
+    secrets:
+      BCR_PUBLISH_TOKEN:
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        required: true
+        type: string
+jobs:
+  publish:
+    uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v0.2.3
+    with:
+      draft: false
+      tag_name: ${{ inputs.tag_name }}
+      # TODO: https://github.com/grpc/grpc-kotlin/pull/641 - Create a fork within grpc org.
+      registry_fork: duckladydinh/bazel-central-registry
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+    secrets:
+      publish_token: ${{ secrets.BCR_PUBLISH_TOKEN }}
