@@ -24,6 +24,9 @@ jobs:
       tag_name: ${{ inputs.tag_name }}
       # TODO: https://github.com/grpc/grpc-kotlin/pull/641 - Create a fork within grpc org.
       registry_fork: duckladydinh/bazel-central-registry
+      # Attestation needs bazel-contrib/.github/blob/master/.github/workflows/release_ruleset.yaml
+      # with a custom release_prep.sh (see rules_buf for example), which is too hard.
+      attest: false
     permissions:
       attestations: write
       contents: write
