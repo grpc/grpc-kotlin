@@ -1,0 +1,33 @@
+matrix:
+  platform:
+    - ubuntu2204
+    - macos
+  bazel:
+    - 8.x
+tasks:
+  verify_targets:
+    name: Verify build targets
+    platform: ${{ platform }}
+    bazel: ${{ bazel }}
+    build_flags:
+      - '--cxxopt=-std=c++17'
+      - '--host_cxxopt=-std=c++17'
+    build_targets:
+      - '@grpc_kotlin//...'
+bcr_test_module:
+  module_path: bzl-examples/bzlmod
+  matrix:
+    platform:
+      - ubuntu2204
+      - macos
+    bazel:
+      - 8.x
+  tasks:
+    run_test_module:
+      name: Run test module
+      platform: ${{ platform }}
+      bazel: ${{ bazel }}
+      build_targets:
+        - java/...
+      test_targets:
+        - javatests/...

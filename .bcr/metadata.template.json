@@ -1,0 +1,34 @@
+{
+    "homepage": "https://github.com/grpc/grpc-kotlin",
+    "maintainers": [
+        {
+            "email": "",
+            "github": "bshaffer",
+            "github_user_id": 103941,
+            "name": "Brent Shaffer"
+        },
+        {
+            "email": "",
+            "github": "jamesward",
+            "github_user_id": 65043,
+            "name": "James Ward"
+        },
+        {
+            "email": "",
+            "github": "lowasser",
+            "github_user_id": 544569,
+            "name": "Louis Wasserman"
+        },
+        {
+            "email": "",
+            "github": "duckladydinh",
+            "github_user_id": 22922064,
+            "name": "Lam Gia Thuan"
+        }
+    ],
+    "repository": [
+        "github:grpc/grpc-kotlin"
+    ],
+    "versions": [],
+    "yanked_versions": {}
+}
