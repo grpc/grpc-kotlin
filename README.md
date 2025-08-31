@@ -1,5 +1,7 @@
 # gRPC-Kotlin/JVM - An RPC library and framework
 
+## Overview
+
 [![Gradle Build Status][]](https://github.com/grpc/grpc-kotlin/actions?query=workflow%3A%22Gradle+Build%22)
 [![Bazel Build Status][]](https://github.com/grpc/grpc-kotlin/actions?query=workflow%3A%22Bazel+Build%22)
 
@@ -52,3 +54,73 @@ Note that [official releases][] are [published to Maven Central][].
 [published to Maven Central]: https://search.maven.org/search?q=g:io.grpc%20AND%20grpc-kotlin
 [Quick start]: https://grpc.io/docs/languages/kotlin/quickstart/
 [Maven / Gradle Plugin instructions]: compiler/README.md
+
+## Developer
+
+### Bazel 8+
+
+Add the following to your `MODULE.bazel` with a suitable [version](https://registry.bazel.build/modules/grpc_kotlin).
+
+```starlark
+bazel_dep(name = "grpc_kotlin", version = "VERSION")
+```
+
+### Bazel 7
+
+In addition to `bazel_dep`, create a patch to remove `ignore_directories` from `REPO.bazel` (**check content of the correct version**) and apply it using:
+
+```starlark
+bazel_dep(name = "grpc_kotlin", version = "VERSION")
+
+single_version_override(
+    module_name = "grpc_kotlin",
+    version = "VERSION",
+    patches = [":remove_ignore_directories.patch"],
+    patch_strip = 1,
+)
+```
+
+An example of `remove_ignore_directories.patch`:
+
+```patch
+--- a/REPO.bazel
++++ b/REPO.bazel
+@@ -1 +0,0 @@
+-ignore_directories(["bzl-examples", "formatter", "**/bin"])
+```
+
+### Legacy WORKSPACE
+
+No longer supported.
+
+## Maintainer
+
+### Test
+
+Please note that the max version of JAVA supported is 22. If you use a newer version, first set your `PATH`:
+
+```bash
+$ PATH="$YOUR_JDK_PATH/bin:$PATH"
+```
+
+Then run the following command to test your local changes before committing:
+
+```bash
+$ bazelisk clean && ./gradlew clean build --parallel && ./gradlew publishToMavenLocal && bazelisk test ... && cd bzl-examples/bzlmod && bazelisk clean && bazelisk test ... && cd -
+```
+
+### Release: Sonatype
+
+Make sure that [Release Github Action](/.github/workflows/release.yaml) succeeds and artifacts are uploaded to Maven.
+
+If not, contact @bshaffer.
+
+### Publish to BCR
+
+Publishing to BCR requires manual operation on the PR and hence can't be fully automated in [release.yaml](/.github/workflows/release.yaml):
+
+1. Run the Publish to BCR Github Action: [publish.yaml](/.github/workflows/publish.yaml).
+2. Check logs for link to the PR.
+3. Manually comment `@bazel-io skip_check unstable_url` on the generated PR.
+
+After the PR is merged, make sure the new version is visible in [BCR](https://registry.bazel.build/modules/grpc_kotlin).
