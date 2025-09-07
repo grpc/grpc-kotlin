@@ -139,7 +139,14 @@ subprojects {
   tasks.withType<Sign> { onlyIf { System.getenv("GPG_PRIVATE_KEY") != null } }
 }
 
-nexusPublishing.repositories.sonatype {
-  username.set(System.getenv("SONATYPE_USERNAME"))
-  password.set(System.getenv("SONATYPE_PASSWORD"))
+// See https://github.com/gradle-nexus/publish-plugin.
+nexusPublishing {
+  repositories {
+    sonatype {
+      nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+      snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+      username = System.getenv("CENTRAL_SONATYPE_USERNAME")
+      password = System.getenv("CENTRAL_SONATYPE_PASSWORD")
+    }
+  }
 }
