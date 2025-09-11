@@ -26,10 +26,10 @@ jobs:
           mkdir -p "${GITHUB_WORKSPACE}/bin/"
           mv bazelisk-linux-amd64 "${GITHUB_WORKSPACE}/bin/bazel"
           chmod +x "${GITHUB_WORKSPACE}/bin/bazel"
-      - name: Lint - Please run `bazelisk run //:format`
+      - name: Lint - Please run `bazelisk run @format//:format`
         run: |
           cd "${GITHUB_WORKSPACE}"
-          "${GITHUB_WORKSPACE}/bin/bazel" run //:format.check
+          "${GITHUB_WORKSPACE}/bin/bazel" run @format//:format.check
       - name: Build
         uses: nick-invision/retry@v3
         with:
@@ -38,6 +38,14 @@ jobs:
           command: |
             cd "${GITHUB_WORKSPACE}"
             "${GITHUB_WORKSPACE}/bin/bazel" build //...
+      - name: Build --ignore_dev_dependency
+        uses: nick-invision/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: |
+            cd "${GITHUB_WORKSPACE}"
+            "${GITHUB_WORKSPACE}/bin/bazel" build //... --ignore_dev_dependency
       - name: Test
         uses: nick-invision/retry@v3
         with:

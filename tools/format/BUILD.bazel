@@ -1,0 +1,43 @@
+load("@aspect_rules_lint//format:defs.bzl", "format_multirun")
+load("@rules_java//java:defs.bzl", "java_binary")
+load("@rules_multirun//:defs.bzl", "command")
+
+package(default_visibility = ["//visibility:private"])
+
+java_binary(
+    name = "ktfmt",
+    main_class = "com.facebook.ktfmt.cli.Main",
+    tags = ["manual"],
+    runtime_deps = ["@ktfmt//jar"],
+)
+
+command(
+    name = "ktfmt_wrapper",
+    arguments = ["--google-style"],
+    command = ":ktfmt",
+    tags = ["manual"],
+)
+
+java_binary(
+    name = "java-format",
+    jvm_flags = [
+        "--add-exports jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        "--add-exports jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+    ],
+    main_class = "com.google.googlejavaformat.java.Main",
+    tags = ["manual"],
+    runtime_deps = ["@google-java-format//jar"],
+)
+
+format_multirun(
+    name = "format",
+    java = ":java-format",
+    kotlin = ":ktfmt_wrapper",
+    protocol_buffer = "@rules_buf_toolchains//:buf",
+    starlark = "@buildifier_prebuilt//:buildifier",
+    tags = ["manual"],
+    yaml = "@aspect_rules_lint//format:yamlfmt",
+)
