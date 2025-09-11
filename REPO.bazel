@@ -1,1 +1,1 @@
-ignore_directories(["bzl-examples", "**/bin"])
+ignore_directories(["**/bin"])
