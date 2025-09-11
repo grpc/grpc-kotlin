@@ -134,6 +134,6 @@ Publishing to BCR requires manual operation on the PR and hence can't be fully a
 
 1. Run the Publish to BCR Github Action: [publish.yaml](/.github/workflows/publish.yaml).
 2. Check logs for link to the PR.
-3. Manually comment `@bazel-io skip_check unstable_url` on the generated PR.
+3. Manually comment `@bazel-io skip_check unstable_url` and `@bazel-io skip_check incompatible_flags` on the generated PR.
 
 After the PR is merged, make sure the new version is visible in [BCR](https://registry.bazel.build/modules/grpc_kotlin).
