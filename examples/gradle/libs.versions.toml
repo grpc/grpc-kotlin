@@ -1,6 +1,7 @@
 [plugins]
-android-application = { id = "com.android.application", version = "8.3.0" }
-android-library = { id = "com.android.library", version = "8.3.0" }
+android-application = { id = "com.android.application", version = "8.13.0" }
+android-library = { id = "com.android.library", version = "8.13.0" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version = "2.2.20" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version = "2.2.20" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.2.20" }
 protobuf = { id = "com.google.protobuf", version = "0.9.5" }
