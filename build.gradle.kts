@@ -1,5 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -37,10 +38,10 @@ subprojects {
     targetCompatibility = JavaVersion.VERSION_17.toString()
   }
 
-  tasks.withType<KotlinCompile> {
-    kotlinOptions {
-      freeCompilerArgs = listOf("-Xjsr305=strict")
-      jvmTarget = JavaVersion.VERSION_17.toString()
+  tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+      freeCompilerArgs.add("-Xjsr305=strict")
+      jvmTarget.set(JvmTarget.JVM_17)
     }
   }
 

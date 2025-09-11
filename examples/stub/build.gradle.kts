@@ -17,8 +17,8 @@ dependencies {
 
 kotlin { jvmToolchain(17) }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
-  kotlinOptions { freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn") }
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+  compilerOptions { freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn") }
 }
 
 protobuf {
