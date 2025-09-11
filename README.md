@@ -86,7 +86,20 @@ An example of `remove_ignore_directories.patch`:
 --- a/REPO.bazel
 +++ b/REPO.bazel
 @@ -1 +0,0 @@
--ignore_directories(["bzl-examples", "formatter", "**/bin"])
+-ignore_directories(["**/bin"])
+```
+
+### Breaking changes
+
+```starlark
+bazel_dep(name = "grpc_kotlin", version = "0.0.0")
+
+git_override(
+    module_name = "grpc_kotlin",
+    # For example: COMMIT=d37ed39b813107c54a0a9dbfdbfda81ccb8e4efb
+    commit = "COMMIT",
+    remote = "https://github.com/grpc/grpc-kotlin.git",
+)
 ```
 
 ### Legacy WORKSPACE
@@ -113,7 +126,7 @@ $ bazelisk clean && ./gradlew clean build --parallel && ./gradlew publishToMaven
 
 Make sure that [Release Github Action](/.github/workflows/release.yaml) succeeds and artifacts are uploaded to Maven.
 
-If not, contact @bshaffer.
+If not, contact lowasser@.
 
 ### Publish to BCR
 
