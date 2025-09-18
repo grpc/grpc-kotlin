@@ -11,12 +11,13 @@ import io.grpc.examples.helloworld.HelloRequest
 import io.grpc.inprocess.InProcessChannelBuilder
 import io.grpc.inprocess.InProcessServerBuilder
 import io.grpc.testing.GrpcCleanupRule
+import kotlin.test.assertFailsWith
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
-import org.junit.jupiter.api.Assertions
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import com.google.common.truth.Truth.assertThat
 
 @RunWith(JUnit4::class)
 class MetadataCoroutineContextInterceptorTest {
@@ -41,7 +42,7 @@ class MetadataCoroutineContextInterceptorTest {
 
         val response = runBlocking { clientStub.sayHello(HelloRequest.getDefaultInstance(), metadata) }
 
-        Assertions.assertEquals("Test message", response.message)
+        assertThat(response.message).isEqualTo("Test message")
     }
 
     @Test
@@ -59,14 +60,13 @@ class MetadataCoroutineContextInterceptorTest {
         val metadata = Metadata()
         metadata.put(key, "Test message")
 
-        val exception = Assertions.assertThrows(StatusException::class.java) {
-            runBlocking { clientStub.sayHello(HelloRequest.getDefaultInstance(), metadata) }
+        val exception = assertFailsWith<StatusException> {
+            runBlocking {
+                clientStub.sayHello(HelloRequest.getDefaultInstance(), metadata)
+            }
         }
-        Assertions.assertEquals(Status.INTERNAL.code, exception.status.code)
-        Assertions.assertEquals(
-            "gRPC Metadata not found in coroutineContext. Ensure that MetadataCoroutineContextInterceptor is used in gRPC server.",
-            exception.status.description
-        )
+        assertThat(exception.status.code).isEqualTo(Status.INTERNAL.code)
+        assertThat("gRPC Metadata not found in coroutineContext. Ensure that MetadataCoroutineContextInterceptor is used in gRPC server.").isEqualTo(exception.status.description)
     }
 
     private fun testChannel(service: BindableService, attachInterceptor: Boolean = true): Channel {

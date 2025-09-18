@@ -5,8 +5,8 @@ import io.grpc.ServerCall
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Propagates gRPC Metadata (HTTP Headers) to coroutineContext.
- * Attach the interceptor to gRPC Server and then access the Metadata using grpcMetadata() function.
+ * A server interceptor which propagates gRPC Metadata (HTTP Headers) to coroutineContext.
+ * To use it attach the interceptor to gRPC Server and then access the Metadata using grpcMetadata() function.
  *
  * Example usage:
  *
@@ -23,7 +23,8 @@ class MetadataCoroutineContextInterceptor : CoroutineContextServerInterceptor() 
 }
 
 /**
- * Used for accessing the gRPC Metadata from coroutineContext.
+ * A metadata element for coroutine context.
+ * It is used for accessing the gRPC Metadata from coroutineContext.
  * Example usage:
  *   coroutineContext[MetadataElement]?.value
  */
