@@ -22,6 +22,7 @@ dependencies {
   api(libs.javax.annotation.api)
 
   // Testing
+  testImplementation(kotlin("test"))
   testImplementation(libs.junit)
   testImplementation(libs.junit.jupiter.engine)
   testImplementation(libs.truth.proto.extension)
