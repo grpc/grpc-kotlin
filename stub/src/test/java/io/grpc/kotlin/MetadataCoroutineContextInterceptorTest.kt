@@ -70,10 +70,10 @@ class MetadataCoroutineContextInterceptorTest {
         runBlocking { clientStub.sayHello(helloRequest {}, metadata) }
       }
     assertThat(exception.status.code).isEqualTo(Status.INTERNAL.code)
-    assertThat(
+    assertThat(exception.status.description)
+      .isEqualTo(
         "gRPC Metadata not found in coroutineContext. Ensure that MetadataCoroutineContextInterceptor is used in gRPC server."
       )
-      .isEqualTo(exception.status.description)
   }
 
   private fun testChannel(service: BindableService, attachInterceptor: Boolean = true): Channel {
