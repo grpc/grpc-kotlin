@@ -29,6 +29,7 @@ dependencies {
   testImplementation(libs.grpc.protobuf)
   testImplementation(libs.grpc.testing)
   testImplementation(libs.grpc.inprocess)
+  testImplementation(libs.protobuf.kotlin)
 }
 
 java {
@@ -53,6 +54,10 @@ protobuf {
       it.plugins {
         id("grpc")
         id("grpckt")
+      }
+
+      it.builtins {
+        id("kotlin")
       }
     }
   }

@@ -9,6 +9,8 @@ import io.grpc.StatusException
 import io.grpc.examples.helloworld.GreeterGrpcKt
 import io.grpc.examples.helloworld.HelloReply
 import io.grpc.examples.helloworld.HelloRequest
+import io.grpc.examples.helloworld.helloReply
+import io.grpc.examples.helloworld.helloRequest
 import io.grpc.inprocess.InProcessChannelBuilder
 import io.grpc.inprocess.InProcessServerBuilder
 import io.grpc.testing.GrpcCleanupRule
@@ -32,7 +34,7 @@ class MetadataCoroutineContextInterceptorTest {
           object : GreeterGrpcKt.GreeterCoroutineImplBase() {
             override suspend fun sayHello(request: HelloRequest): HelloReply {
               val metadata = grpcMetadata()
-              return HelloReply.newBuilder().setMessage(metadata.get(key).toString()).build()
+              return helloReply { message = metadata.get(key).toString() }
             }
           }
         )
@@ -40,7 +42,7 @@ class MetadataCoroutineContextInterceptorTest {
     val metadata = Metadata()
     metadata.put(key, "Test message")
 
-    val response = runBlocking { clientStub.sayHello(HelloRequest.getDefaultInstance(), metadata) }
+    val response = runBlocking { clientStub.sayHello(helloRequest {}, metadata) }
 
     assertThat(response.message).isEqualTo("Test message")
   }
@@ -54,7 +56,7 @@ class MetadataCoroutineContextInterceptorTest {
           object : GreeterGrpcKt.GreeterCoroutineImplBase() {
             override suspend fun sayHello(request: HelloRequest): HelloReply {
               val metadata = grpcMetadata()
-              return HelloReply.newBuilder().setMessage(metadata.get(key).toString()).build()
+              return helloReply { message = metadata.get(key).toString() }
             }
           },
           false
@@ -65,7 +67,7 @@ class MetadataCoroutineContextInterceptorTest {
 
     val exception =
       assertFailsWith<StatusException> {
-        runBlocking { clientStub.sayHello(HelloRequest.getDefaultInstance(), metadata) }
+        runBlocking { clientStub.sayHello(helloRequest {}, metadata) }
       }
     assertThat(exception.status.code).isEqualTo(Status.INTERNAL.code)
     assertThat(
