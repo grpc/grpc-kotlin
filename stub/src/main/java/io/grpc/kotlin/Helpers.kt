@@ -78,7 +78,10 @@ internal fun <T> Flow<T>.singleOrStatusFlow(expected: String, descriptor: Any): 
 internal suspend fun <T> Flow<T>.singleOrStatus(expected: String, descriptor: Any): T =
   singleOrStatusFlow(expected, descriptor).single()
 
-/** Returns gRPC Metadata. */
+/**
+ * Returns gRPC Metadata. Throws [StatusException] if [MetadataCoroutineContextInterceptor] is not
+ * injected to gRPC server.
+ */
 suspend fun grpcMetadata(): Metadata {
   val metadataElement =
     coroutineContext[MetadataElement]
