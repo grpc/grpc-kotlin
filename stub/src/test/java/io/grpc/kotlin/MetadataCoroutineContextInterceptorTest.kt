@@ -26,44 +26,48 @@ class MetadataCoroutineContextInterceptorTest {
   @Rule @JvmField val grpcCleanup = GrpcCleanupRule()
 
   @Test
-  fun `interceptor provides gRPC Metadata to coroutineContext`() {
-    val key = Metadata.Key.of("test-header", Metadata.ASCII_STRING_MARSHALLER)
+  fun interceptCall_providesMetadataToCoroutineContext() {
+    val keyA = Metadata.Key.of("test-header-a", Metadata.ASCII_STRING_MARSHALLER)
+    val keyB = Metadata.Key.of("test-header-b", Metadata.ASCII_STRING_MARSHALLER)
     val clientStub =
       GreeterGrpcKt.GreeterCoroutineStub(
         testChannel(
           object : GreeterGrpcKt.GreeterCoroutineImplBase() {
             override suspend fun sayHello(request: HelloRequest): HelloReply {
               val metadata = grpcMetadata()
-              return helloReply { message = metadata.get(key).toString() }
+              return helloReply { message = listOf(metadata.get(keyA).toString(), metadata.get(keyB).toString()).joinToString() }
             }
           }
         )
       )
     val metadata = Metadata()
-    metadata.put(key, "Test message")
+    metadata.put(keyA, "Test message A")
+    metadata.put(keyB, "Test message B")
 
     val response = runBlocking { clientStub.sayHello(helloRequest {}, metadata) }
 
-    assertThat(response.message).isEqualTo("Test message")
+    assertThat(response.message).isEqualTo("Test message A, Test message B")
   }
 
   @Test
-  fun `fails to extract gRPC Metadata if interceptor is not injected`() {
-    val key = Metadata.Key.of("test-header", Metadata.ASCII_STRING_MARSHALLER)
+  fun grpcMetadata_interceptorNotInjected_throwsStatusExceptionInternal() {
+    val keyA = Metadata.Key.of("test-header-a", Metadata.ASCII_STRING_MARSHALLER)
+    val keyB = Metadata.Key.of("test-header-b", Metadata.ASCII_STRING_MARSHALLER)
     val clientStub =
       GreeterGrpcKt.GreeterCoroutineStub(
         testChannel(
           object : GreeterGrpcKt.GreeterCoroutineImplBase() {
             override suspend fun sayHello(request: HelloRequest): HelloReply {
               val metadata = grpcMetadata()
-              return helloReply { message = metadata.get(key).toString() }
+              return helloReply { message = listOf(metadata.get(keyA).toString(), metadata.get(keyB).toString()).joinToString() }
             }
           },
           false
         )
       )
     val metadata = Metadata()
-    metadata.put(key, "Test message")
+    metadata.put(keyA, "Test message A")
+    metadata.put(keyB, "Test message B")
 
     val exception =
       assertFailsWith<StatusException> {

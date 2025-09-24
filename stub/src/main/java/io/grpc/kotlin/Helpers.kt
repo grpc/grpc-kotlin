@@ -85,10 +85,8 @@ internal suspend fun <T> Flow<T>.singleOrStatus(expected: String, descriptor: An
 suspend fun grpcMetadata(): Metadata {
   val metadataElement =
     coroutineContext[MetadataElement]
-      ?: throw StatusException(
-        Status.INTERNAL.withDescription(
-          "gRPC Metadata not found in coroutineContext. Ensure that MetadataCoroutineContextInterceptor is used in gRPC server."
-        )
-      )
+      ?: throw Status.INTERNAL.withDescription(
+        "gRPC Metadata not found in coroutineContext. Ensure that MetadataCoroutineContextInterceptor is used in gRPC server."
+      ).asException()
   return metadataElement.value
 }
