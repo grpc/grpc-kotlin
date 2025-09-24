@@ -35,7 +35,9 @@ class MetadataCoroutineContextInterceptorTest {
           object : GreeterGrpcKt.GreeterCoroutineImplBase() {
             override suspend fun sayHello(request: HelloRequest): HelloReply {
               val metadata = grpcMetadata()
-              return helloReply { message = listOf(metadata.get(keyA).toString(), metadata.get(keyB).toString()).joinToString() }
+              return helloReply {
+                message = listOf(metadata.get(keyA), metadata.get(keyB)).joinToString()
+              }
             }
           }
         )
@@ -59,7 +61,9 @@ class MetadataCoroutineContextInterceptorTest {
           object : GreeterGrpcKt.GreeterCoroutineImplBase() {
             override suspend fun sayHello(request: HelloRequest): HelloReply {
               val metadata = grpcMetadata()
-              return helloReply { message = listOf(metadata.get(keyA).toString(), metadata.get(keyB).toString()).joinToString() }
+              return helloReply {
+                message = listOf(metadata.get(keyA), metadata.get(keyB)).joinToString()
+              }
             }
           },
           false

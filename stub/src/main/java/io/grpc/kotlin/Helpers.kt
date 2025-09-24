@@ -86,7 +86,8 @@ suspend fun grpcMetadata(): Metadata {
   val metadataElement =
     coroutineContext[MetadataElement]
       ?: throw Status.INTERNAL.withDescription(
-        "gRPC Metadata not found in coroutineContext. Ensure that MetadataCoroutineContextInterceptor is used in gRPC server."
-      ).asException()
+          "gRPC Metadata not found in coroutineContext. Ensure that MetadataCoroutineContextInterceptor is used in gRPC server."
+        )
+        .asException()
   return metadataElement.value
 }

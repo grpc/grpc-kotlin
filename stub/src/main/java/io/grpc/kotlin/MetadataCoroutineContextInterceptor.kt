@@ -18,7 +18,8 @@ import kotlin.coroutines.coroutineContext
  * Then in RPC implementation code call grpcMetadata()
  */
 class MetadataCoroutineContextInterceptor : CoroutineContextServerInterceptor() {
-  final override fun coroutineContext(call: ServerCall<*, *>, headers: Metadata): CoroutineContext = MetadataElement(value = headers)
+  final override fun coroutineContext(call: ServerCall<*, *>, headers: Metadata): CoroutineContext =
+    MetadataElement(value = headers)
 }
 
 /**
