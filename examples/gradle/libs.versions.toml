@@ -32,4 +32,4 @@ androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui", version = "1.9.1" }
 androidx-compose-compiler = { group = "androidx.compose.compiler", name = "compiler", version = "1.5.15" }
 
-kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version = "2.2.10" }
+kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version = "2.2.21" }
