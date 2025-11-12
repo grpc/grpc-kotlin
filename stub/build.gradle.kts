@@ -19,7 +19,7 @@ dependencies {
   api(libs.grpc.stub)
 
   // Java
-  api(libs.javax.annotation.api)
+  api(libs.protobuf.java)
 
   // Testing
   testImplementation(libs.junit)
