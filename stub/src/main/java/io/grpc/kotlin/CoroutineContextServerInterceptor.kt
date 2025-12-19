@@ -42,6 +42,13 @@ abstract class CoroutineContextServerInterceptor : ServerInterceptor {
    */
   abstract fun coroutineContext(call: ServerCall<*, *>, headers: Metadata): CoroutineContext
 
+  /**
+   * Override this function to insert a forwarding server call.
+   */
+  open fun <ReqT, RespT> forward(call: ServerCall<ReqT, RespT>) :ServerCall<ReqT, RespT> {
+    return call
+  }
+
   private inline fun <R> withGrpcContext(context: GrpcContext, action: () -> R): R {
     val oldContext: GrpcContext = context.attach()
     return try {
@@ -64,7 +71,7 @@ abstract class CoroutineContextServerInterceptor : ServerInterceptor {
         throw e
       }
     return withGrpcContext(GrpcContext.current().extendCoroutineContext(coroutineContext)) {
-      next.startCall(call, headers)
+      next.startCall(forward(call), headers)
     }
   }
 }
