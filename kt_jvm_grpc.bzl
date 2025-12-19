@@ -24,11 +24,14 @@ def _invoke_generator(ctx, proto_dep, output_dir):
         progress_message = "Generating Kotlin gRPC extensions for %s" % proto_dep.label,
     )
 
+def _map_relative_path(file):
+    return "{dest}={src}".format(dest = file.tree_relative_path, src = file.path)
+
 def _build_srcjar(ctx, proto_dep, input_dir, source_jar):
     args = ctx.actions.args()
     args.add("c")
     args.add(source_jar.path)
-    args.add_all(depset([input_dir]))
+    args.add_all(depset([input_dir]), map_each = _map_relative_path)
     ctx.actions.run(
         outputs = [source_jar],
         inputs = [input_dir],
@@ -283,7 +286,7 @@ def _kt_jvm_proto_library_helper_impl(ctx):
     args = ctx.actions.args()
     args.add("c")
     args.add(ctx.outputs.srcjar)
-    args.add_all([gen_src_dir])
+    args.add_all([gen_src_dir], map_each = _map_relative_path)
     ctx.actions.run(
         arguments = [args],
         executable = ctx.executable._zip,
