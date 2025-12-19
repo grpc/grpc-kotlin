@@ -31,6 +31,7 @@ junit-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engi
 mockito-core = { group = "org.mockito", name = "mockito-core", version = "5.17.0" }
 protoc = { group = "com.google.protobuf", name = "protoc", version = "3.25.3" }
 protobuf-java = { group = "com.google.protobuf", name = "protobuf-java", version = "3.25.3" }
+protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version = "3.25.3" }
 truth = { group = "com.google.truth", name = "truth", version = "1.4.4" }
 truth-proto-extension = { group = "com.google.truth.extensions", name = "truth-proto-extension", version = "1.4.4" }
 okhttp = { group = "com.squareup.okhttp", name = "okhttp", version = "2.7.5" }

@@ -22,12 +22,14 @@ dependencies {
   api(libs.javax.annotation.api)
 
   // Testing
+  testImplementation(kotlin("test"))
   testImplementation(libs.junit)
   testImplementation(libs.junit.jupiter.engine)
   testImplementation(libs.truth.proto.extension)
   testImplementation(libs.grpc.protobuf)
   testImplementation(libs.grpc.testing)
   testImplementation(libs.grpc.inprocess)
+  testImplementation(libs.protobuf.kotlin)
 }
 
 java {
@@ -52,6 +54,10 @@ protobuf {
       it.plugins {
         id("grpc")
         id("grpckt")
+      }
+
+      it.builtins {
+        id("kotlin")
       }
     }
   }
