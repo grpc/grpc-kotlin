@@ -331,7 +331,8 @@ def kt_jvm_proto_library(
         visibility = None,
         flavor = None,
         deprecation = None,
-        features = []):
+        features = [],
+        runtime_deps = []):
     """
     This rule accepts any number of proto_library targets in "deps", translates them to Kotlin and
     returns the compiled Kotlin.
@@ -359,6 +360,7 @@ def kt_jvm_proto_library(
         (for Android usage)
       deprecation: Standard attribute
       features: Standard attribute
+      runtime_deps: Standard attribute
     """
     if (java_deps != None and len(java_deps) > 0):
         java_protos = java_deps
@@ -420,4 +422,5 @@ def kt_jvm_proto_library(
         tags = tags,
         deprecation = deprecation,
         features = features,
+        runtime_deps = runtime_deps,
     )
